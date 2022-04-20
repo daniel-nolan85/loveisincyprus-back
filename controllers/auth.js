@@ -666,3 +666,31 @@ exports.fetchWhitelist = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.addUserToAdmin = async (req, res) => {
+  // console.log('addUserToAdmin controller response => ', req.body);
+  try {
+    const makeAdmin = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { role: 'admin' },
+      { new: true }
+    );
+    res.json(makeAdmin);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.removeUserFromAdmin = async (req, res) => {
+  // console.log('removeUserFromAdmin controller response => ', req.body);
+  try {
+    const makeSubscriber = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { role: 'subscriber' },
+      { new: true }
+    );
+    res.json(makeSubscriber);
+  } catch (err) {
+    console.log(err);
+  }
+};

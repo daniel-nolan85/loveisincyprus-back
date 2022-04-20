@@ -223,7 +223,7 @@ exports.addComment = async (req, res) => {
 exports.removeComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    // console.log('removeComment controller response', postId, comment);
+    console.log('removeComment controller response', postId, comment);
 
     const post = await Post.findByIdAndUpdate(
       postId,
@@ -233,6 +233,49 @@ exports.removeComment = async (req, res) => {
       { new: true }
     );
     res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.updateComment = async (req, res) => {
+  // console.log('updateComment controller response => ', req.body);
+
+  let text;
+  if (req.body.text) {
+    text = req.body.text;
+  } else {
+    text = req.body.comment.text;
+  }
+
+  let image;
+  if (Object.keys(req.body.image).length !== 0) {
+    image = req.body.image;
+  } else if (req.body.comment.image) {
+    image = req.body.comment.image;
+  } else {
+    image = '';
+  }
+
+  console.log('image => ', image);
+
+  const query = { _id: req.body.postId, 'comments._id': req.body.comment._id };
+  const updateComment = !image
+    ? {
+        $set: {
+          'comments.$.text': text,
+        },
+      }
+    : {
+        $set: {
+          'comments.$.text': text,
+          'comments.$.image': image,
+        },
+      };
+
+  try {
+    const comment = await Post.updateOne(query, updateComment);
+    res.json({ ok: true });
   } catch (err) {
     console.log(err);
   }
@@ -318,6 +361,20 @@ exports.adminRemoveComment = async (req, res) => {
       { new: true }
     );
     res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.followersPosts = async (req, res) => {
+  // console.log('followersPosts controller response => ', req.body);
+  try {
+    const { user } = req.body;
+    const following = user.following;
+    following.push(user._id);
+    const posts = await Post.find({ postedBy: { $in: following } });
+    const total = posts.length;
+    res.json(total);
   } catch (err) {
     console.log(err);
   }

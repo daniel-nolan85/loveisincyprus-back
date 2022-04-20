@@ -15,3 +15,35 @@ exports.canEditDeletePost = async (req, res, next) => {
     console.log(err);
   }
 };
+
+exports.canDeleteComment = async (req, res, next) => {
+  // console.log('canDeleteComment middleware response = > ', req.body);
+  try {
+    const { user } = req.body;
+    const post = await Post.findById(req.body.postId);
+    // console.log('post => ', post.postedBy);
+    if (
+      user._id != post.postedBy &&
+      user._id != req.body.comment.postedBy._id
+    ) {
+      return res.status(400).send('Unauthorized');
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.canEditComment = async (req, res, next) => {
+  // console.log('canEditComment middleware response = > ', req.body);
+  try {
+    if (req.body.user._id != req.body.comment.postedBy._id) {
+      return res.status(400).send('Unauthorized');
+    } else {
+      next();
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};

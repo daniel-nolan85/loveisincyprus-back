@@ -43,6 +43,8 @@ const {
   fetchLocations,
   handleWhitelist,
   searchLocations,
+  addUserToAdmin,
+  removeUserFromAdmin,
 } = require('../controllers/auth');
 
 // routes
@@ -80,5 +82,12 @@ router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
 router.post('/admin/fetch-locations', authCheck, adminCheck, fetchLocations);
 router.post('/admin/handle-whitelist', authCheck, adminCheck, handleWhitelist);
+router.put('/admin/add-user-to-admin', authCheck, adminCheck, addUserToAdmin);
+router.put(
+  '/admin/remove-user-from-admin',
+  authCheck,
+  adminCheck,
+  removeUserFromAdmin
+);
 
 module.exports = router;
