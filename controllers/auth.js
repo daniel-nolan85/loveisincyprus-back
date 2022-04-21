@@ -63,7 +63,7 @@ exports.profileUpdate = async (req, res) => {
     if (req.body.profileImage) {
       data.profileImage = req.body.profileImage;
     }
-    if (req.body.c) {
+    if (req.body.coverImage) {
       data.coverImage = req.body.coverImage;
     }
     if (req.body.gender) {
