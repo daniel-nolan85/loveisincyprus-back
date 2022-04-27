@@ -37,7 +37,7 @@ exports.update = async (req, res) => {
     );
   } catch (err) {
     console.log(err);
-    res.status(400).send('Update category failed');
+    return res.status(400).send('Update category failed');
   }
 };
 
@@ -59,7 +59,7 @@ exports.remove = async (req, res) => {
 
     res.json(await Category.findOneAndDelete({ slug: req.params.slug }));
   } catch (err) {
-    res.status(400).send('Category delete failed');
+    return res.status(400).send('Delete category failed');
   }
 };
 
