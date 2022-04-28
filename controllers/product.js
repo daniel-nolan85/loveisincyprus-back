@@ -16,6 +16,11 @@ exports.create = async (req, res) => {
   }
 };
 
+exports.productsCount = async (req, res) => {
+  const total = await Product.find({}).estimatedDocumentCount().exec();
+  res.json(total);
+};
+
 exports.listAll = async (req, res) => {
   const products = await Product.find({})
     .limit(parseInt(req.params.count))
@@ -60,5 +65,38 @@ exports.update = async (req, res) => {
   } catch (err) {
     console.log(err);
     return res.status(400).send('Update product failed');
+  }
+};
+
+// exports.list = async (req, res) => {
+//   try {
+//     const { sort, order, limit } = req.body;
+//     const products = await Product.find({})
+//       .populate('category')
+//       .populate('subs')
+//       .sort([[sort, order]])
+//       .limit(limit)
+//       .exec();
+//     res.json(products);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+exports.list = async (req, res) => {
+  try {
+    const { sort, order, page } = req.body;
+    const currentPage = page || 1;
+    const perPage = 3;
+    const products = await Product.find({})
+      .skip((currentPage - 1) * perPage)
+      .populate('category')
+      .populate('subs')
+      .sort([[sort, order]])
+      .limit(perPage)
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log(err);
   }
 };
