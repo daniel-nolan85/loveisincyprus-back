@@ -145,3 +145,106 @@ exports.listRelated = async (req, res) => {
     .exec();
   res.json(related);
 };
+
+const handleQuery = async (req, res, query) => {
+  const products = await Product.find({ $text: { $search: query } })
+    .populate('category', '_id name')
+    .populate('subs', '_id name')
+    .populate('postedBy', '_id name')
+    .exec();
+  res.json(products);
+};
+
+const handlePrice = async (req, res, price) => {
+  try {
+    const products = await Product.find({
+      price: { $gte: price[0], $lte: price[1] },
+    })
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const handleStar = async (req, res, stars) => {
+  Product.aggregate([
+    {
+      $project: {
+        document: '$$ROOT',
+        floorAverage: {
+          $floor: { $avg: '$ratings.star' },
+        },
+      },
+    },
+    { $match: { floorAverage: stars } },
+  ]).exec((err, aggregates) => {
+    if (err) console.log('aggregate error => ', err);
+    Product.find({ _id: aggregates })
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
+      .exec((err, products) => {
+        if (err) console.log('aggregate error => ', err);
+        res.json(products);
+      });
+  });
+};
+
+const handleCategory = async (req, res, category) => {
+  try {
+    const products = await Product.find({
+      category,
+    })
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const handleSub = async (req, res, sub) => {
+  try {
+    const products = await Product.find({
+      subs: sub,
+    })
+      .populate('category', '_id name')
+      .populate('subs', '_id name')
+      .populate('postedBy', '_id name')
+      .exec();
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.searchFilters = async (req, res) => {
+  const { query, price, stars, category, sub } = req.body;
+
+  if (query) {
+    console.log('query', query);
+    await handleQuery(req, res, query);
+  }
+  if (price !== undefined) {
+    console.log('price => ', price);
+    await handlePrice(req, res, price);
+  }
+  if (stars) {
+    console.log('stars => ', stars);
+    await handleStar(req, res, stars);
+  }
+  if (category) {
+    console.log('category => ', category);
+    await handleCategory(req, res, category);
+  }
+  if (sub) {
+    console.log('sub => ', sub);
+    await handleSub(req, res, sub);
+  }
+};
