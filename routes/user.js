@@ -10,6 +10,11 @@ const {
   contactFormEmail,
   usersPhotos,
   visitorPhotos,
+  userCart,
+  getUserCart,
+  emptyCart,
+  saveAddress,
+  applyCouponToUserCart,
 } = require('../controllers/user');
 
 // routes
@@ -17,5 +22,10 @@ router.post('/recaptcha', recaptcha);
 router.post('/contact-form-email', contactFormEmail);
 router.post('/users-photos', authCheck, usersPhotos);
 router.post('/visitor-photos', authCheck, visitorPhotos);
+router.post('/cart', authCheck, userCart);
+router.get('/cart', authCheck, getUserCart);
+router.delete('/cart', authCheck, emptyCart);
+router.post('/address', authCheck, saveAddress);
+router.post('/cart/coupon', authCheck, applyCouponToUserCart);
 
 module.exports = router;
