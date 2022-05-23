@@ -160,6 +160,7 @@ exports.emptyCart = async (req, res) => {
 };
 
 exports.saveAddress = async (req, res) => {
+  // console.log('saveAddress controller response => ', req.body);
   const userAddress = await User.findOneAndUpdate(
     { email: req.user.email },
     { address: req.body.address }
