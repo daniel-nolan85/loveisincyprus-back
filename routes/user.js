@@ -20,6 +20,12 @@ const {
   addToWishlist,
   wishlist,
   removeFromWishlist,
+  getUserPointsTotal,
+  addPoints,
+  removePoints,
+  getUserPointsGainedData,
+  getUserPointsLostData,
+  // searchMatches,
 } = require('../controllers/user');
 
 // routes
@@ -37,5 +43,11 @@ router.get('/user-orders', authCheck, orders);
 router.post('/user-wishlist', authCheck, addToWishlist);
 router.get('/user-wishlist', authCheck, wishlist);
 router.put('/user-wishlist/:productId', authCheck, removeFromWishlist);
+router.get('/user-points-total', authCheck, getUserPointsTotal);
+router.put('/add-points', authCheck, addPoints);
+router.put('/remove-points', authCheck, removePoints);
+router.get('/user-points-gained-data', authCheck, getUserPointsGainedData);
+router.get('/user-points-lost-data', authCheck, getUserPointsLostData);
+// router.get('/search-matches', authCheck, searchMatches);
 
 module.exports = router;

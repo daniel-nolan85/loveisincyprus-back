@@ -97,7 +97,7 @@ exports.visitorPhotos = async (req, res) => {
     }
     let merged = [].concat.apply([], photos);
     let total = merged.length;
-    console.log('visitorPhotos controller response => ', merged);
+    // console.log('visitorPhotos controller response => ', merged);
 
     res.json(total);
   } catch (err) {
@@ -257,3 +257,115 @@ exports.removeFromWishlist = async (req, res) => {
   ).exec();
   res.json({ ok: true });
 };
+
+exports.getUserPointsTotal = async (req, res) => {
+  const numberToAdd = await User.findOne({ email: req.user.email }).select(
+    'pointsGained'
+  );
+  const numberToRemove = await User.findOne({ email: req.user.email }).select(
+    'pointsLost'
+  );
+  // numberToAdd.pointsGained.reduce((accumulator, object) => {
+  //   return accumulator + object.amount;
+  // }, 0);
+  // numberToRemove.pointsLost.reduce((accumulator, object) => {
+  //   return accumulator + object.amount;
+  // }, 0);
+  const total =
+    numberToAdd.pointsGained.reduce((accumulator, object) => {
+      return accumulator + object.amount;
+    }, 0) -
+    numberToRemove.pointsLost.reduce((accumulator, object) => {
+      return accumulator + object.amount;
+    }, 0);
+  // console.log('getUserPoints controller response => ', numberToAdd);
+  // console.log('getUserPoints controller response => ', numberToRemove);
+  // console.log('getUserPoints controller response => ', total);
+  res.json(total);
+};
+
+exports.addPoints = async (req, res) => {
+  // console.log('addPoints controller response => ', req.body);
+  // console.log('addPoints controller response => ', req.user);
+  try {
+    const { number, reason } = req.body;
+    const recentLogIn = await User.find({
+      $and: [
+        {
+          email: req.user.email,
+          'pointsGained.reason': 'login',
+          'pointsGained.awarded': {
+            $gt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          },
+        },
+      ],
+    });
+    if (reason === 'login' && recentLogIn.length > 0) return;
+
+    const awardPoints = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsGained: { amount: number, reason } },
+      },
+      { new: true }
+    ).exec();
+    res.json(awardPoints);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.removePoints = async (req, res) => {
+  // console.log('addPoints controller response => ', req.body);
+  // console.log('addPoints controller response => ', req.user);
+  try {
+    const { number, reason } = req.body;
+    const removePoints = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsLost: { amount: number, reason } },
+      },
+      { new: true }
+    ).exec();
+    res.json(removePoints);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.getUserPointsGainedData = async (req, res) => {
+  const data = await User.findOne({ email: req.user.email })
+    .select('pointsGained')
+    .populate('pointsGained')
+    .exec();
+  // console.log('getUserPointsData total controller response => ', data);
+  res.json(data);
+};
+
+exports.getUserPointsLostData = async (req, res) => {
+  const data = await User.findOne({ email: req.user.email })
+    .select('pointsLost')
+    .populate('pointsLost')
+    .exec();
+  // console.log('getUserPointsData total controller response => ', data);
+  res.json(data);
+};
+
+// exports.searchMatches = async (req, res) => {
+//   console.log('searchMatches controller response => ', req.body);
+//   const search = req.query.search
+//     ? {
+//         $or: [
+//           { name: { $regex: req.query.search, $options: 'i' } },
+//           { username: { $regex: req.query.search, $options: 'i' } },
+//           { email: { $regex: req.query.search, $options: 'i' } },
+//         ],
+//       }
+//     : {};
+//   console.log(search);
+
+//   const matches = await User.find(search).find({
+//     _id: { $ne: req.body.user._id },
+//   });
+//   res.send(matches);
+// };

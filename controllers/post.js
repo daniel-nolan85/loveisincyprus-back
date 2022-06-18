@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 exports.createPost = async (req, res) => {
-  console.log('createPost controller response => ', req.body);
+  // console.log('createPost controller response => ', req.body);
   const { content, image, user } = req.body;
 
   try {

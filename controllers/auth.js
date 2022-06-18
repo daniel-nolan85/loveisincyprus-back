@@ -292,9 +292,16 @@ exports.userFollowers = async (req, res) => {
 };
 
 exports.userMatches = async (req, res) => {
+  // console.log('userMatches controller response => ', req.body);
   try {
     const user = await User.findById(req.body.user._id);
     const matches = await User.find({ _id: user.matches });
+    // if (req.body.chats && req.body.chats.length > 0) {
+    //   const { chats } = req.body;
+    //   matches.sort(
+    //     (a, b) => b.chats.updatedAt - a.chats.updatedAt
+    //   );
+    // }
     res.json(matches);
   } catch (err) {
     console.log('userMatches => ', err);
