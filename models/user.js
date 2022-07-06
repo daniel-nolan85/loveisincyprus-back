@@ -61,6 +61,15 @@ const userSchema = new mongoose.Schema(
         removed: { type: Date, default: Date.now },
       },
     ],
+    notifications: [
+      {
+        // notif: { type: ObjectId, ref: 'Post' },
+        notif: {},
+        action: String,
+        occurred: { type: Date, default: Date.now },
+        new: { type: Boolean, default: true },
+      },
+    ],
   },
   { timestamps: true }
 );

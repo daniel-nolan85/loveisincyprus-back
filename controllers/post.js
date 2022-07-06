@@ -82,7 +82,10 @@ exports.postsByUser = async (req, res) => {
 exports.userPost = async (req, res) => {
   try {
     // const post = await Post.findById(req.params._id);
-    const post = await Post.findById(req.params.postId);
+    const post = await Post.findById(req.params.postId).populate(
+      'comments.postedBy',
+      '_id name email profileImage'
+    );
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -178,7 +181,27 @@ exports.likePost = async (req, res) => {
         $addToSet: { likes: req.body.user._id },
       },
       { new: true }
-    );
+    )
+      .populate('likes', '_id name email profileImage')
+      .populate('comments.postedBy', '_id name email profileImage');
+
+    if (post.postedBy != req.body.user._id) {
+      const notify = await User.findByIdAndUpdate(
+        post.postedBy,
+        {
+          $push: {
+            notifications: {
+              notif: post._id,
+              action: 'liked post',
+            },
+          },
+        },
+        { new: true }
+      )
+        .populate('notif')
+        .populate('notif.likes', '_id name email profileImage')
+        .populate('notif.comments.postedBy', '_id name email profileImage');
+    }
     res.json(post);
   } catch (err) {
     err;
@@ -214,7 +237,24 @@ exports.addComment = async (req, res) => {
     )
       .populate('postedBy', '_id name email profileImage')
       .populate('comments.postedBy', '_id name email profileImage');
+
+    if (post.postedBy._id != user._id) {
+      const notify = await User.findByIdAndUpdate(
+        post.postedBy,
+        {
+          $push: {
+            notifications: {
+              notif: post._id,
+              action: 'commented post',
+            },
+          },
+        },
+        { new: true }
+      ).populate('notif');
+    }
     res.json(post);
+    console.log('post ==> ', post);
+    console.log('user ==> ', user);
   } catch (err) {
     console.log(err);
   }

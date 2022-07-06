@@ -25,6 +25,10 @@ const {
   removePoints,
   getUserPointsGainedData,
   getUserPointsLostData,
+  fetchNotifications,
+  populateNotifications,
+  markNotifAsRead,
+  deleteNotification,
   // searchMatches,
 } = require('../controllers/user');
 
@@ -48,6 +52,10 @@ router.put('/add-points', authCheck, addPoints);
 router.put('/remove-points', authCheck, removePoints);
 router.get('/user-points-gained-data', authCheck, getUserPointsGainedData);
 router.get('/user-points-lost-data', authCheck, getUserPointsLostData);
+router.post('/fetch-notifications', authCheck, fetchNotifications);
+router.post('/populate-notifications', authCheck, populateNotifications);
+router.post('/mark-notif-as-read', authCheck, markNotifAsRead);
+router.put('/delete-notification', authCheck, deleteNotification);
 // router.get('/search-matches', authCheck, searchMatches);
 
 module.exports = router;

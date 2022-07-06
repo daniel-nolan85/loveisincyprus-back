@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const User = require('../models/user');
+const Post = require('../models/post');
 const Product = require('../models/product');
 const Cart = require('../models/cart');
 const Coupon = require('../models/coupon');
@@ -288,7 +289,7 @@ exports.addPoints = async (req, res) => {
   // console.log('addPoints controller response => ', req.body);
   // console.log('addPoints controller response => ', req.user);
   try {
-    const { number, reason } = req.body;
+    const { number, reason, otherUser } = req.body;
     const recentLogIn = await User.find({
       $and: [
         {
@@ -301,6 +302,18 @@ exports.addPoints = async (req, res) => {
       ],
     });
     if (reason === 'login' && recentLogIn.length > 0) return;
+
+    if (reason === 'new visitor') {
+      const awardOtherUserPoints = await User.findOneAndUpdate(
+        { email: otherUser.email },
+        {
+          $push: { pointsGained: { amount: number, reason } },
+        },
+        { new: true }
+      ).exec();
+      res.json(awardOtherUserPoints);
+      return;
+    }
 
     const awardPoints = await User.findOneAndUpdate(
       { email: req.user.email },
@@ -349,6 +362,70 @@ exports.getUserPointsLostData = async (req, res) => {
     .exec();
   // console.log('getUserPointsData total controller response => ', data);
   res.json(data);
+};
+
+exports.fetchNotifications = async (req, res) => {
+  // console.log('fetchNotifications controller response => ', req.body);
+  try {
+    const notifications = await User.findOne({ _id: req.body.user._id }).select(
+      'notifications'
+    );
+
+    res.json(notifications);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.populateNotifications = async (req, res) => {
+  try {
+    const user = await User.findOne({ _id: req.body.user._id }).select(
+      'notifications'
+    );
+    let postIds = [];
+    user.notifications.map((n) => {
+      n.action === 'liked post' && postIds.push(n.notif);
+      n.action === 'commented post' && postIds.push(n.notif);
+    });
+
+    var obj_ids = postIds.map(function (id) {
+      return id;
+    });
+    const posts = await Post.find({ _id: { $in: obj_ids } })
+      .populate('likes', '_id name email profileImage')
+      .populate('comments.postedBy', '_id name email profileImage');
+
+    res.json(posts);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.markNotifAsRead = async (req, res) => {
+  // console.log('markNotifAsRead controller response => ', req.body);
+  const notif = await User.findOneAndUpdate(
+    { email: req.user.email, 'notifications._id': req.body.n._id },
+    { $set: { 'notifications.$.new': 'false' } }
+  );
+  res.json({ ok: true });
+};
+
+exports.deleteNotification = async (req, res) => {
+  const n = req.body.n.notif;
+  console.log('deleteNotification controller response => ', n);
+  try {
+    const notification = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $pull: {
+          notifications: { notif: n._id },
+        },
+      }
+    ).exec();
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 // exports.searchMatches = async (req, res) => {

@@ -63,6 +63,18 @@ io.on('connection', (socket) => {
       socket.in(user._id).emit('message received', newMessageReceived);
     });
   });
+  socket.on('like post', (post) =>
+    socket.in(post.postedBy).emit('post liked', post)
+  );
+  socket.on('new comment', (p) =>
+    socket.in(p.postedBy._id).emit('comment added', p)
+  );
+  socket.on('new follower', (f) =>
+    socket.in(f.following[f.following.length - 1]._id).emit('follower added', f)
+  );
+  socket.on('new visitor', (v, u) =>
+    socket.in(v._id).emit('visitor added', v, u)
+  );
 
   socket.off('setup', () => {
     console.log('USER DISCONNECTED');

@@ -186,7 +186,9 @@ exports.userFollow = async (req, res) => {
           },
         },
         { new: true }
-      );
+      )
+        .populate('following', '_id name email profileImage')
+        .populate('followers', '_id name email profileImage');
       const otherUser = await User.findByIdAndUpdate(
         req.body.u._id,
         {
@@ -206,7 +208,9 @@ exports.userFollow = async (req, res) => {
           },
         },
         { new: true }
-      );
+      )
+        .populate('following', '_id name email profileImage')
+        .populate('followers', '_id name email profileImage');
       res.json(user);
     }
   } catch (err) {
