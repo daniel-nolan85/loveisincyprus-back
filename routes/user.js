@@ -28,7 +28,10 @@ const {
   fetchNotifications,
   populateNotifications,
   markNotifAsRead,
-  deleteNotification,
+  acceptInvite,
+  maybe,
+  declineInvite,
+  // deleteNotification,
   // searchMatches,
 } = require('../controllers/user');
 
@@ -55,7 +58,10 @@ router.get('/user-points-lost-data', authCheck, getUserPointsLostData);
 router.post('/fetch-notifications', authCheck, fetchNotifications);
 router.post('/populate-notifications', authCheck, populateNotifications);
 router.post('/mark-notif-as-read', authCheck, markNotifAsRead);
-router.put('/delete-notification', authCheck, deleteNotification);
+router.post('/accept-invite', authCheck, acceptInvite);
+router.post('/maybe', authCheck, maybe);
+router.post('/decline-invite', authCheck, declineInvite);
+// router.put('/delete-notification', authCheck, deleteNotification);
 // router.get('/search-matches', authCheck, searchMatches);
 
 module.exports = router;

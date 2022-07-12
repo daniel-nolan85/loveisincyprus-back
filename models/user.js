@@ -70,6 +70,21 @@ const userSchema = new mongoose.Schema(
         new: { type: Boolean, default: true },
       },
     ],
+    featuredMember: {
+      type: Boolean,
+      default: false,
+    },
+    events: [
+      {
+        name: String,
+        location: Object,
+        when: Date,
+        notes: String,
+        invitees: [],
+        cancelled: Boolean,
+        going: String,
+      },
+    ],
   },
   { timestamps: true }
 );

@@ -47,7 +47,7 @@ exports.currentUser = async (req, res) => {
 };
 
 exports.profileUpdate = async (req, res) => {
-  // console.log('profileUpdate controller response', req.body);
+  console.log('profileUpdate controller response', req.body);
   try {
     const data = {};
 
@@ -80,6 +80,24 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.relWanted) {
       data.relWanted = req.body.relWanted;
+    }
+    if (req.body.language) {
+      data.language = req.body.language;
+    }
+    if (req.body.maritalStatus) {
+      data.maritalStatus = req.body.maritalStatus;
+    }
+    if (req.body.numOfChildren) {
+      data.numOfChildren = req.body.numOfChildren;
+    }
+    if (req.body.drinks) {
+      data.drinks = req.body.drinks;
+    }
+    if (req.body.smokes) {
+      data.smokes = req.body.smokes;
+    }
+    if (req.body.nationality) {
+      data.nationality = req.body.nationality;
     }
 
     let user = await User.findByIdAndUpdate(req.body.user._id, data, {
@@ -701,6 +719,34 @@ exports.removeUserFromAdmin = async (req, res) => {
       { new: true }
     );
     res.json(makeSubscriber);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.addUserToFeaturedMembers = async (req, res) => {
+  // console.log('addUserToFeaturedMembers controller response => ', req.body);
+  try {
+    const makeFeaturedMember = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { featuredMember: true },
+      { new: true }
+    );
+    res.json(makeFeaturedMember);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.removeUserFromFeaturedMembers = async (req, res) => {
+  // console.log('removeUserFromFeaturedMembers controller response => ', req.body);
+  try {
+    const unMakeFeaturedMember = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { featuredMember: false },
+      { new: true }
+    );
+    res.json(unMakeFeaturedMember);
   } catch (err) {
     console.log(err);
   }

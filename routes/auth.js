@@ -45,6 +45,8 @@ const {
   searchLocations,
   addUserToAdmin,
   removeUserFromAdmin,
+  addUserToFeaturedMembers,
+  removeUserFromFeaturedMembers,
 } = require('../controllers/auth');
 
 // routes
@@ -88,6 +90,18 @@ router.put(
   authCheck,
   adminCheck,
   removeUserFromAdmin
+);
+router.put(
+  '/admin/add-user-to-featured-members',
+  authCheck,
+  adminCheck,
+  addUserToFeaturedMembers
+);
+router.put(
+  '/admin/remove-user-from-featured-members',
+  authCheck,
+  adminCheck,
+  removeUserFromFeaturedMembers
 );
 
 module.exports = router;
