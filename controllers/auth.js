@@ -99,6 +99,105 @@ exports.profileUpdate = async (req, res) => {
     if (req.body.nationality) {
       data.nationality = req.body.nationality;
     }
+    if (req.body.height) {
+      data.height = req.body.height;
+    }
+    if (req.body.build) {
+      data.build = req.body.build;
+    }
+    if (req.body.hairStyle) {
+      data.hairStyle = req.body.hairStyle;
+    }
+    if (req.body.hairLength) {
+      data.hairLength = req.body.hairLength;
+    }
+    if (req.body.eyeColor) {
+      data.eyeColor = req.body.eyeColor;
+    }
+    if (req.body.ethnicity) {
+      data.ethnicity = req.body.ethnicity;
+    }
+    if (req.body.feetType) {
+      data.feetType = req.body.feetType;
+    }
+    if (req.body.loves) {
+      data.loves = req.body.loves;
+    }
+    if (req.body.hates) {
+      data.hates = req.body.hates;
+    }
+    if (req.body.education) {
+      data.education = req.body.education;
+    }
+    if (req.body.occupation) {
+      data.occupation = req.body.occupation;
+    }
+    if (req.body.politics) {
+      data.politics = req.body.politics;
+    }
+    if (req.body.religion) {
+      data.religion = req.body.religion;
+    }
+    if (req.body.pets) {
+      data.pets = req.body.pets;
+    }
+    if (req.body.interests) {
+      data.interests = req.body.interests;
+    }
+    if (req.body.music) {
+      data.music = req.body.music;
+    }
+    if (req.body.foods) {
+      data.foods = req.body.foods;
+    }
+    if (req.body.books) {
+      data.books = req.body.books;
+    }
+    if (req.body.films) {
+      data.films = req.body.films;
+    }
+    if (req.body.sports) {
+      data.sports = req.body.sports;
+    }
+    if (req.body.livesWith) {
+      data.livesWith = req.body.livesWith;
+    }
+    if (req.body.roleInLife) {
+      data.roleInLife = req.body.roleInLife;
+    }
+    if (req.body.managesEdu) {
+      data.managesEdu = req.body.managesEdu;
+    }
+    if (req.body.hobbies) {
+      data.hobbies = req.body.hobbies;
+    }
+    if (req.body.marriage) {
+      data.marriage = req.body.marriage;
+    }
+    if (req.body.income) {
+      data.income = req.body.income;
+    }
+    if (req.body.ageOfPartner) {
+      data.ageOfPartner = req.body.ageOfPartner;
+    }
+    if (req.body.traits) {
+      data.traits = req.body.traits;
+    }
+    if (req.body.changes) {
+      data.changes = req.body.changes;
+    }
+    if (req.body.relocate) {
+      data.relocate = req.body.relocate;
+    }
+    if (req.body.treatSelf) {
+      data.treatSelf = req.body.treatSelf;
+    }
+    if (req.body.sexLikes) {
+      data.sexLikes = req.body.sexLikes;
+    }
+    if (req.body.sexFrequency) {
+      data.sexFrequency = req.body.sexFrequency;
+    }
 
     let user = await User.findByIdAndUpdate(req.body.user._id, data, {
       new: true,
