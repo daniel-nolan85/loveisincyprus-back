@@ -33,6 +33,8 @@ const {
   declineInvite,
   // deleteNotification,
   // searchMatches,
+  listAll,
+  searchFilters,
 } = require('../controllers/user');
 
 // routes
@@ -63,5 +65,7 @@ router.post('/maybe', authCheck, maybe);
 router.post('/decline-invite', authCheck, declineInvite);
 // router.put('/delete-notification', authCheck, deleteNotification);
 // router.get('/search-matches', authCheck, searchMatches);
+router.get('/fetch-users/:count', authCheck, listAll);
+router.post('/fetch-users/filters', authCheck, searchFilters);
 
 module.exports = router;

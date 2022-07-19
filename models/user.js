@@ -3,16 +3,18 @@ const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
-    name: String,
+    name: { type: String, text: true },
     email: {
       type: String,
       required: true,
       index: true,
+      text: true,
     },
     username: {
       type: String,
       unique: true,
       required: true,
+      text: true,
     },
     role: {
       type: String,
@@ -32,6 +34,7 @@ const userSchema = new mongoose.Schema(
     genderWanted: String,
     relWanted: String,
     birthday: Date,
+    age: Number,
     following: [{ type: ObjectId, ref: 'User' }],
     followers: [{ type: ObjectId, ref: 'User' }],
     matches: [{ type: ObjectId, ref: 'User' }],
@@ -93,6 +96,7 @@ const userSchema = new mongoose.Schema(
     nationality: String,
     height: String,
     build: String,
+    hairColor: String,
     hairStyle: String,
     hairLength: String,
     eyeColor: String,
@@ -116,7 +120,7 @@ const userSchema = new mongoose.Schema(
     managesEdu: String,
     hobbies: Array,
     marriage: String,
-    income: String,
+    income: Number,
     ageOfPartner: String,
     traits: Array,
     changes: String,

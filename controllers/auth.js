@@ -71,6 +71,12 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.birthday) {
       data.birthday = req.body.birthday;
+      function calculate_age(dob) {
+        var diff_ms = Date.now() - dob.getTime();
+        var age_dt = new Date(diff_ms);
+        return Math.abs(age_dt.getUTCFullYear() - 1970);
+      }
+      data.age = calculate_age(new Date(req.body.birthday));
     }
     if (req.body.location) {
       data.location = req.body.location;
@@ -104,6 +110,9 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.build) {
       data.build = req.body.build;
+    }
+    if (req.body.hairColor) {
+      data.hairColor = req.body.hairColor;
     }
     if (req.body.hairStyle) {
       data.hairStyle = req.body.hairStyle;

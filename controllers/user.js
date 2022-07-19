@@ -579,3 +579,94 @@ exports.declineInvite = async (req, res) => {
 //   });
 //   res.send(matches);
 // };
+
+exports.listAll = async (req, res) => {
+  const users = await User.find({}).limit(parseInt(req.params.count)).exec();
+  res.json(users);
+};
+
+const handleQuery = async (req, res, query) => {
+  const users = await User.find({ $text: { $search: query } }).exec();
+  res.json(users);
+};
+
+const handleRadioSearch = async (req, res, field, lookUp) => {
+  var query = {};
+  query[field] = lookUp;
+  const users = await User.find(query).exec();
+  res.json(users);
+};
+
+const handleRange = async (req, res, field, range) => {
+  var query = {};
+  query[field] = { $gte: range[0], $lte: range[1] };
+  try {
+    const users = await User.find(query).exec();
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const handleDropdown = async (req, res, field, key) => {
+  console.log('handleDropdown controller response => ', field);
+  console.log('handleDropdown controller response => ', key);
+  var query = {};
+  query[field] = key;
+  try {
+    const users = await User.find(query).exec();
+    res.json(users);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const handleNumberInput = async (req, res, field, entry) => {
+  var query = {};
+  query[field] = entry;
+  const users = await User.find(query).exec();
+  res.json(users);
+};
+
+const handleStringInput = async (req, res, field, entry) => {
+  var query = {};
+  query[field] = { $regex: entry };
+  const users = await User.find(query).exec();
+  res.json(users);
+};
+
+const handleArrayInput = async (req, res, field, entry) => {
+  var query = {};
+  query[field] = { $all: entry };
+  console.log(query);
+  const users = await User.find(query).exec();
+  res.json(users);
+};
+
+exports.searchFilters = async (req, res) => {
+  console.log('searchFilters controller response => ', req.body);
+  const { query, type, field, lookUp, range, key, entry } = req.body;
+
+  if (query) {
+    console.log('query', query);
+    await handleQuery(req, res, query);
+  }
+  if (type == 'radio') {
+    await handleRadioSearch(req, res, field, lookUp);
+  }
+  if (range) {
+    await handleRange(req, res, field, range);
+  }
+  if (key) {
+    await handleDropdown(req, res, field, key);
+  }
+  if (type == 'number') {
+    await handleNumberInput(req, res, field, entry);
+  }
+  if (type == 'string') {
+    await handleStringInput(req, res, field, entry);
+  }
+  if (type == 'array') {
+    await handleArrayInput(req, res, field, entry);
+  }
+};
