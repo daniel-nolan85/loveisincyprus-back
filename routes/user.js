@@ -35,6 +35,7 @@ const {
   // searchMatches,
   listAll,
   searchFilters,
+  analyseUsers,
 } = require('../controllers/user');
 
 // routes
@@ -67,5 +68,6 @@ router.post('/decline-invite', authCheck, declineInvite);
 // router.get('/search-matches', authCheck, searchMatches);
 router.get('/fetch-users/:count', authCheck, listAll);
 router.post('/fetch-users/filters', authCheck, searchFilters);
+router.post('/analyse-users', authCheck, analyseUsers);
 
 module.exports = router;
