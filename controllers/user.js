@@ -900,3 +900,261 @@ exports.analyseUsers = async (req, res) => {
 
   res.json(compatibility);
 };
+
+exports.progressCompletion = async (req, res) => {
+  console.log('progressCompletion => ', req.body);
+  const { user } = req.body;
+  let completion = {
+    percentage: 0,
+  };
+
+  if (Object.keys(user).includes('coverImage')) {
+    completion.percentage = completion.percentage + 3;
+  } else {
+    completion.coverImage = true;
+  }
+  if (Object.keys(user).includes('profileImage')) {
+    completion.percentage = completion.percentage + 3;
+  } else {
+    completion.profileImage = true;
+  }
+  if (Object.keys(user).includes('name')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.name = true;
+  }
+  if (Object.keys(user).includes('gender')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.gender = true;
+  }
+  if (Object.keys(user).includes('about')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.about = true;
+  }
+  if (Object.keys(user).includes('birthday')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.birthday = true;
+  }
+  if (Object.keys(user).includes('location')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.location = true;
+  }
+  if (Object.keys(user).includes('genderWanted')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.genderWanted = true;
+  }
+  if (Object.keys(user).includes('relWanted')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.relWanted = true;
+  }
+  if (Object.keys(user).includes('language')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.language = true;
+  }
+  if (Object.keys(user).includes('maritalStatus')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.maritalStatus = true;
+  }
+  if (Object.keys(user).includes('numOfChildren')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.numOfChildren = true;
+  }
+  if (Object.keys(user).includes('drinks')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.drinks = true;
+  }
+  if (Object.keys(user).includes('smokes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.smokes = true;
+  }
+  if (Object.keys(user).includes('nationality')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.nationality = true;
+  }
+  if (Object.keys(user).includes('height')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.height = true;
+  }
+  if (Object.keys(user).includes('build')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.build = true;
+  }
+  if (Object.keys(user).includes('hairColor')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairColor = true;
+  }
+  if (Object.keys(user).includes('hairStyle')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairStyle = true;
+  }
+  if (Object.keys(user).includes('hairLength')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairLength = true;
+  }
+  if (Object.keys(user).includes('eyeColor')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.eyeColor = true;
+  }
+  if (Object.keys(user).includes('ethnicity')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.ethnicity = true;
+  }
+  if (Object.keys(user).includes('feetType')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.feetType = true;
+  }
+  if (Object.keys(user).includes('education')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.education = true;
+  }
+  if (Object.keys(user).includes('occupation')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.occupation = true;
+  }
+  if (Object.keys(user).includes('politics')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.politics = true;
+  }
+  if (Object.keys(user).includes('religion')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.religion = true;
+  }
+  if (Object.keys(user).includes('foods')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.foods = true;
+  }
+  if (Object.keys(user).includes('livesWith')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.livesWith = true;
+  }
+  if (Object.keys(user).includes('roleInLife')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.roleInLife = true;
+  }
+  if (Object.keys(user).includes('managesEdu')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.managesEdu = true;
+  }
+  if (Object.keys(user).includes('marriage')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.marriage = true;
+  }
+  if (Object.keys(user).includes('income')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.income = true;
+  }
+  if (Object.keys(user).includes('ageOfPartner')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.ageOfPartner = true;
+  }
+  if (Object.keys(user).includes('changes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.changes = true;
+  }
+  if (Object.keys(user).includes('relocate')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.relocate = true;
+  }
+  if (Object.keys(user).includes('sexLikes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sexLikes = true;
+  }
+  if (Object.keys(user).includes('sexFrequency')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sexFrequency = true;
+  }
+  if (user.loves.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.loves = true;
+  }
+  if (user.hates.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hates = true;
+  }
+  if (user.pets.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.pets = true;
+  }
+  if (user.interests.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.interests = true;
+  }
+  if (user.music.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.music = true;
+  }
+  if (user.books.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.books = true;
+  }
+  if (user.films.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.films = true;
+  }
+  if (user.sports.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sports = true;
+  }
+  if (user.hobbies.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hobbies = true;
+  }
+  if (user.traits.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.traits = true;
+  }
+  if (user.treatSelf.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.treatSelf = true;
+  }
+
+  res.json(completion);
+
+  console.log('completion => ', completion);
+};
