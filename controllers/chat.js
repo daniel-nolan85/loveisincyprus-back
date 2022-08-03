@@ -117,3 +117,49 @@ exports.allMessages = async (req, res) => {
     throw new Error(err.message);
   }
 };
+
+exports.massMail = async (req, res) => {
+  console.log('massMail controller response => ', req.body);
+  const { content, selected } = req.body;
+
+  if (!content || selected.length < 1) {
+    console.log('Invalid data passed into this request');
+    return res.sendStatus(400);
+  }
+
+  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+  const userIds = [];
+  const chatIds = [];
+
+  for (var i = 0; i < selected.length; i++) {
+    userIds.push(selected[i]._id);
+  }
+
+  for (var i = 0; i < userIds.length; i++) {
+    const chat = await Chat.findOne({ users: [sender._id, userIds[i]] });
+    chatIds.push(chat._id);
+  }
+
+  for (var i = 0; i < chatIds.length; i++) {
+    var newMessage = {
+      sender,
+      content,
+      chat: chatIds[i],
+    };
+    var message = await Message.create(newMessage);
+    message = await message.populate(
+      'sender',
+      'name username email profileImage'
+    );
+    message = await message.populate('chat');
+    message = await User.populate(message, {
+      path: 'chat.users',
+      select: 'name username email profileImage',
+    });
+
+    await Chat.findByIdAndUpdate(chatIds[i], {
+      latestMessage: message,
+    });
+  }
+  res.json({ ok: true });
+};

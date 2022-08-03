@@ -47,6 +47,8 @@ const {
   removeUserFromAdmin,
   addUserToFeaturedMembers,
   removeUserFromFeaturedMembers,
+  fetchFeaturedMembers,
+  removeExpiredFeatures,
 } = require('../controllers/auth');
 
 // routes
@@ -103,5 +105,7 @@ router.put(
   adminCheck,
   removeUserFromFeaturedMembers
 );
+router.get('/fetch-featured-members', fetchFeaturedMembers);
+router.put('/remove-expired-features', removeExpiredFeatures);
 
 module.exports = router;

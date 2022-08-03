@@ -6,6 +6,8 @@ const Cart = require('../models/cart');
 const Coupon = require('../models/coupon');
 const Order = require('../models/order');
 const Event = require('../models/event');
+const Chat = require('../models/chat');
+const Message = require('../models/message');
 const axios = require('axios');
 
 exports.recaptcha = async (req, res) => {
@@ -267,6 +269,9 @@ exports.getUserPointsTotal = async (req, res) => {
   const numberToRemove = await User.findOne({ email: req.user.email }).select(
     'pointsLost'
   );
+  const numberSpent = await User.findOne({ email: req.user.email }).select(
+    'pointsSpent'
+  );
   // numberToAdd.pointsGained.reduce((accumulator, object) => {
   //   return accumulator + object.amount;
   // }, 0);
@@ -278,6 +283,9 @@ exports.getUserPointsTotal = async (req, res) => {
       return accumulator + object.amount;
     }, 0) -
     numberToRemove.pointsLost.reduce((accumulator, object) => {
+      return accumulator + object.amount;
+    }, 0) -
+    numberSpent.pointsSpent.reduce((accumulator, object) => {
       return accumulator + object.amount;
     }, 0);
   // console.log('getUserPoints controller response => ', numberToAdd);
@@ -347,6 +355,126 @@ exports.removePoints = async (req, res) => {
   }
 };
 
+exports.spentPoints = async (req, res) => {
+  console.log('spentPoints controller response => ', req.body);
+  const { number, reason, user, couponName } = req.body;
+  if (reason === 'featured') {
+    const addToFeatured = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsSpent: { amount: number, reason } },
+        featuredMember: true,
+      },
+      { new: true }
+    ).exec();
+    res.json(addToFeatured);
+  }
+
+  if (reason === 'events') {
+    const addToEvents = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsSpent: { amount: number, reason } },
+        eventsEligible: true,
+      },
+      { new: true }
+    ).exec();
+    res.json(addToEvents);
+  }
+
+  if (reason === 'five') {
+    const fivePercent = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsSpent: { amount: number, reason } },
+      },
+      { new: true }
+    ).exec();
+    res.json(fivePercent);
+
+    const content = `Thanks for purchasing a 5% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
+    const createCoupon = await new Coupon({
+      name: couponName,
+      expiry: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      discount: 5,
+    }).save();
+
+    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+    const chat = await Chat.findOne({ users: [sender._id, user._id] });
+    var newMessage = {
+      sender,
+      content,
+      chat: chat._id,
+    };
+
+    try {
+      var message = await Message.create(newMessage);
+      message = await message.populate(
+        'sender',
+        'name username email profileImage'
+      );
+      message = await message.populate('chat');
+      message = await User.populate(message, {
+        path: 'chat.users',
+        select: 'name username email profileImage',
+      });
+
+      await Chat.findByIdAndUpdate(chat._id, {
+        latestMessage: message,
+      });
+    } catch (err) {
+      res.status(400);
+      throw new Error(err.message);
+    }
+  }
+
+  if (reason === 'ten') {
+    const tenPercent = await User.findOneAndUpdate(
+      { email: req.user.email },
+      {
+        $push: { pointsSpent: { amount: number, reason } },
+      },
+      { new: true }
+    ).exec();
+    res.json(tenPercent);
+
+    const content = `Thanks for purchasing a 10% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
+    const createCoupon = await new Coupon({
+      name: couponName,
+      expiry: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      discount: 10,
+    }).save();
+
+    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+    const chat = await Chat.findOne({ users: [sender._id, user._id] });
+    var newMessage = {
+      sender,
+      content,
+      chat: chat._id,
+    };
+
+    try {
+      var message = await Message.create(newMessage);
+      message = await message.populate(
+        'sender',
+        'name username email profileImage'
+      );
+      message = await message.populate('chat');
+      message = await User.populate(message, {
+        path: 'chat.users',
+        select: 'name username email profileImage',
+      });
+
+      await Chat.findByIdAndUpdate(chat._id, {
+        latestMessage: message,
+      });
+    } catch (err) {
+      res.status(400);
+      throw new Error(err.message);
+    }
+  }
+};
+
 exports.getUserPointsGainedData = async (req, res) => {
   const data = await User.findOne({ email: req.user.email })
     .select('pointsGained')
@@ -360,6 +488,15 @@ exports.getUserPointsLostData = async (req, res) => {
   const data = await User.findOne({ email: req.user.email })
     .select('pointsLost')
     .populate('pointsLost')
+    .exec();
+  // console.log('getUserPointsData total controller response => ', data);
+  res.json(data);
+};
+
+exports.getUserPointsSpentData = async (req, res) => {
+  const data = await User.findOne({ email: req.user.email })
+    .select('pointsSpent')
+    .populate('pointsSpent')
     .exec();
   // console.log('getUserPointsData total controller response => ', data);
   res.json(data);
@@ -1156,5 +1293,30 @@ exports.progressCompletion = async (req, res) => {
 
   res.json(completion);
 
-  console.log('completion => ', completion);
+  if (completion.percentage == 100) {
+    const complete = await User.findByIdAndUpdate(
+      user._id,
+      { profileComplete: true },
+      { new: true }
+    );
+  }
+};
+
+exports.optInOrOut = async (req, res) => {
+  console.log('optInOrOut controller response => ', req.body);
+  if (req.body.user.optIn) {
+    const optOut = await User.findByIdAndUpdate(
+      req.body.user._id,
+      { optIn: false },
+      { new: true }
+    );
+    res.json(optOut);
+  } else {
+    const optIn = await User.findByIdAndUpdate(
+      req.body.user._id,
+      { optIn: true },
+      { new: true }
+    );
+    res.json(optIn);
+  }
 };

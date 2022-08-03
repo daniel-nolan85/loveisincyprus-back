@@ -1,4 +1,5 @@
 const Order = require('../models/order');
+const User = require('../models/user');
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -17,4 +18,9 @@ exports.orderStatus = async (req, res) => {
     { new: true }
   ).exec();
   res.json(updated);
+};
+
+exports.fetchOptIns = async (req, res) => {
+  const optIns = await User.find({ optIn: true });
+  res.json(optIns);
 };

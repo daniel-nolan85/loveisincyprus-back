@@ -23,8 +23,10 @@ const {
   getUserPointsTotal,
   addPoints,
   removePoints,
+  spentPoints,
   getUserPointsGainedData,
   getUserPointsLostData,
+  getUserPointsSpentData,
   fetchNotifications,
   populateNotifications,
   markNotifAsRead,
@@ -37,6 +39,7 @@ const {
   searchFilters,
   analyseUsers,
   progressCompletion,
+  optInOrOut,
 } = require('../controllers/user');
 
 // routes
@@ -57,8 +60,10 @@ router.put('/user-wishlist/:productId', authCheck, removeFromWishlist);
 router.get('/user-points-total', authCheck, getUserPointsTotal);
 router.put('/add-points', authCheck, addPoints);
 router.put('/remove-points', authCheck, removePoints);
+router.put('/spent-points', authCheck, spentPoints);
 router.get('/user-points-gained-data', authCheck, getUserPointsGainedData);
 router.get('/user-points-lost-data', authCheck, getUserPointsLostData);
+router.get('/user-points-spent-data', authCheck, getUserPointsSpentData);
 router.post('/fetch-notifications', authCheck, fetchNotifications);
 router.post('/populate-notifications', authCheck, populateNotifications);
 router.post('/mark-notif-as-read', authCheck, markNotifAsRead);
@@ -71,5 +76,6 @@ router.get('/fetch-users/:count', authCheck, listAll);
 router.post('/fetch-users/filters', authCheck, searchFilters);
 router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
+router.put('/user-opt-in-or-out', authCheck, optInOrOut);
 
 module.exports = router;

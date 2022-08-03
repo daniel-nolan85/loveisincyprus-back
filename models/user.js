@@ -64,6 +64,13 @@ const userSchema = new mongoose.Schema(
         removed: { type: Date, default: Date.now },
       },
     ],
+    pointsSpent: [
+      {
+        amount: Number,
+        reason: String,
+        spent: { type: Date, default: Date.now },
+      },
+    ],
     notifications: [
       {
         // notif: { type: ObjectId, ref: 'Post' },
@@ -128,6 +135,18 @@ const userSchema = new mongoose.Schema(
     treatSelf: [{ type: String, trim: true, lowercase: true }],
     sexLikes: String,
     sexFrequency: String,
+    profileComplete: {
+      type: Boolean,
+      default: false,
+    },
+    eventsEligible: {
+      type: Boolean,
+      default: false,
+    },
+    optIn: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );

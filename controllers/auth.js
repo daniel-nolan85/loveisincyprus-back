@@ -1,9 +1,13 @@
 const User = require('../models/user');
 const Post = require('../models/post');
 const Location = require('../models/location');
+const Chat = require('../models/chat');
+const Message = require('../models/message');
+const Event = require('../models/event');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
+const user = require('../models/user');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -14,6 +18,7 @@ cloudinary.config({
 exports.createOrUpdateUser = async (req, res) => {
   // const { name, picture, email } = req.user;
   const { name, photo, email, username, followers, following } = req.user;
+  const content = 'Welcome to LoveIsInCyprus!';
   const user = await User.findOneAndUpdate(
     { email },
     // { name: email.split('@')[0], picture },
@@ -36,6 +41,35 @@ exports.createOrUpdateUser = async (req, res) => {
     }).save();
     // console.log('USER CREATED', newUser);
     res.json(newUser);
+
+    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+    const chat = await new Chat({
+      users: [sender._id, newUser._id],
+    }).save();
+
+    var newMessage = {
+      sender,
+      content,
+      chat,
+    };
+    try {
+      var message = await Message.create(newMessage);
+      message = await message.populate(
+        'sender',
+        'name username email profileImage'
+      );
+      message = await message.populate('chat');
+      message = await User.populate(message, {
+        path: 'chat.users',
+        select: 'name username email profileImage',
+      });
+      await Chat.findOneAndUpdate(chat, {
+        latestMessage: message,
+      });
+    } catch (err) {
+      res.status(400);
+      throw new Error(err.message);
+    }
   }
 };
 
@@ -565,6 +599,12 @@ exports.deleteUser = async (req, res) => {
     const following = await User.updateMany({ $pull: { following: u._id } });
     const matches = await User.updateMany({ $pull: { matches: u._id } });
     const visitors = await User.updateMany({ $pull: { visitors: u._id } });
+    const invitees = await Event.updateMany({
+      $pull: { 'invitees._id': u._id },
+    });
+    const accepted = await Event.updateMany({ $pull: { accepted: u._id } });
+    const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
+    const declined = await Event.updateMany({ $pull: { declined: u._id } });
     res.json({ ok: true });
   } catch (err) {
     console.log('deleteUser => ', err);
@@ -858,4 +898,40 @@ exports.removeUserFromFeaturedMembers = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.fetchFeaturedMembers = async (req, res) => {
+  const featuredMembers = await User.find({ featuredMember: true });
+  res.json(featuredMembers);
+};
+
+exports.removeExpiredFeatures = async (req, res) => {
+  const ids = [];
+  const expiredFeatures = await User.find({
+    $and: [
+      { 'pointsSpent.reason': 'featured' },
+      {
+        'pointsSpent.spent': {
+          $lt: new Date(Date.now() - 14 * 24 * 3600 * 1000),
+        },
+      },
+    ],
+  });
+  expiredFeatures.map((u) => {
+    ids.push(u._id);
+  });
+
+  const removeExpired = await User.updateMany(
+    {
+      _id: { $in: ids },
+      'pointsSpent.reason': 'featured',
+    },
+    {
+      $set: { 'pointsSpent.$.reason': 'expired' },
+      featuredMember: false,
+    },
+    { new: true }
+  ).exec();
+
+  res.json({ ok: true });
 };
