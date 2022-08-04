@@ -40,6 +40,8 @@ const {
   analyseUsers,
   progressCompletion,
   optInOrOut,
+  newMessageCount,
+  resetMessageCount,
 } = require('../controllers/user');
 
 // routes
@@ -77,5 +79,7 @@ router.post('/fetch-users/filters', authCheck, searchFilters);
 router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
+router.put('/new-message-count', newMessageCount);
+router.put('/reset-message-count', authCheck, resetMessageCount);
 
 module.exports = router;

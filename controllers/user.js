@@ -390,7 +390,6 @@ exports.spentPoints = async (req, res) => {
       },
       { new: true }
     ).exec();
-    res.json(fivePercent);
 
     const content = `Thanks for purchasing a 5% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
     const createCoupon = await new Coupon({
@@ -404,7 +403,7 @@ exports.spentPoints = async (req, res) => {
     var newMessage = {
       sender,
       content,
-      chat: chat._id,
+      chat,
     };
 
     try {
@@ -422,6 +421,7 @@ exports.spentPoints = async (req, res) => {
       await Chat.findByIdAndUpdate(chat._id, {
         latestMessage: message,
       });
+      res.json(message);
     } catch (err) {
       res.status(400);
       throw new Error(err.message);
@@ -436,7 +436,6 @@ exports.spentPoints = async (req, res) => {
       },
       { new: true }
     ).exec();
-    res.json(tenPercent);
 
     const content = `Thanks for purchasing a 10% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
     const createCoupon = await new Coupon({
@@ -450,7 +449,7 @@ exports.spentPoints = async (req, res) => {
     var newMessage = {
       sender,
       content,
-      chat: chat._id,
+      chat,
     };
 
     try {
@@ -468,6 +467,7 @@ exports.spentPoints = async (req, res) => {
       await Chat.findByIdAndUpdate(chat._id, {
         latestMessage: message,
       });
+      res.json(message);
     } catch (err) {
       res.status(400);
       throw new Error(err.message);
@@ -1319,4 +1319,23 @@ exports.optInOrOut = async (req, res) => {
     );
     res.json(optIn);
   }
+};
+
+exports.newMessageCount = async (req, res) => {
+  console.log('newMessageCount controller response => ', req.body);
+  const user = await User.findByIdAndUpdate(
+    req.body.user._id,
+    { $addToSet: { messages: req.body.message } },
+    { new: true }
+  );
+  res.json(user);
+};
+
+exports.resetMessageCount = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.body.user._id,
+    { $set: { messages: [] } },
+    { new: true }
+  );
+  res.json(user);
 };

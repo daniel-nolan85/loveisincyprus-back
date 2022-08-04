@@ -54,14 +54,13 @@ exports.fetchApprovedAds = async (req, res) => {
 };
 
 exports.disapproveAd = async (req, res) => {
-  console.log('disapproveAd controller response => ', req.body);
+  // console.log('disapproveAd controller response => ', req.body);
   const { ad, reason } = req.body;
   const rejectAd = await Ad.findByIdAndUpdate(
     ad._id,
     { status: 'rejected' },
     { new: true }
   ).exec();
-  res.json(rejectAd);
 
   const content = reason
     ? `Your recent advertisement submission has been rejected for the following reason: ${reason}`
@@ -72,7 +71,7 @@ exports.disapproveAd = async (req, res) => {
   var newMessage = {
     sender,
     content,
-    chat: chat._id,
+    chat,
   };
 
   try {
@@ -90,6 +89,7 @@ exports.disapproveAd = async (req, res) => {
     await Chat.findByIdAndUpdate(chat._id, {
       latestMessage: message,
     });
+    res.json(message);
   } catch (err) {
     res.status(400);
     throw new Error(err.message);
@@ -97,14 +97,13 @@ exports.disapproveAd = async (req, res) => {
 };
 
 exports.approveAd = async (req, res) => {
-  console.log('approveAd controller response => ', req.body);
+  // console.log('approveAd controller response => ', req.body);
   const { ad } = req.body;
   const approveAd = await Ad.findByIdAndUpdate(
     ad._id,
     { status: 'approved' },
     { new: true }
   ).exec();
-  res.json(approveAd);
 
   const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}`;
 
@@ -113,7 +112,7 @@ exports.approveAd = async (req, res) => {
   var newMessage = {
     sender,
     content,
-    chat: chat._id,
+    chat,
   };
 
   try {
@@ -131,6 +130,7 @@ exports.approveAd = async (req, res) => {
     await Chat.findByIdAndUpdate(chat._id, {
       latestMessage: message,
     });
+    res.json(message);
   } catch (err) {
     res.status(400);
     throw new Error(err.message);
@@ -154,7 +154,6 @@ exports.handleExpiredAds = async (req, res) => {
   expiredOneDay.map((u) => {
     ids.push(u._id);
   });
-  console.log('expiredOneDay => ', expiredOneDay);
   const expiredOneWeek = await Ad.find({
     $and: [
       { status: 'approved' },
@@ -197,8 +196,6 @@ exports.handleExpiredAds = async (req, res) => {
   expiredOneMonth.map((u) => {
     ids.push(u._id);
   });
-
-  console.log('ids => ', ids);
 
   const handleExpired = await Ad.updateMany(
     {

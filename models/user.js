@@ -147,6 +147,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    messages: [{ type: ObjectId, ref: 'Message' }],
   },
   { timestamps: true }
 );

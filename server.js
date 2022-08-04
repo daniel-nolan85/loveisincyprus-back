@@ -63,6 +63,7 @@ io.on('connection', (socket) => {
       if (user._id == newMessageReceived.sender._id) return;
       socket.in(user._id).emit('message received', newMessageReceived);
     });
+    // console.log('newMessageReceived => ', newMessageReceived);
   });
   socket.on('like post', (post) =>
     socket.in(post.postedBy).emit('post liked', post)
