@@ -41,6 +41,18 @@ exports.fetchAds = async (req, res) => {
   }
 };
 
+exports.fetchApprovedAds = async (req, res) => {
+  try {
+    const approved = await Ad.find({ status: 'approved' }).populate(
+      'postedBy',
+      '_id name profileImage email'
+    );
+    res.json(approved);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.disapproveAd = async (req, res) => {
   console.log('disapproveAd controller response => ', req.body);
   const { ad, reason } = req.body;
@@ -123,4 +135,80 @@ exports.approveAd = async (req, res) => {
     res.status(400);
     throw new Error(err.message);
   }
+};
+
+exports.handleExpiredAds = async (req, res) => {
+  console.log('handleExpiredAds');
+  const ids = [];
+  const expiredOneDay = await Ad.find({
+    $and: [
+      { status: 'approved' },
+      { duration: 'one day' },
+      {
+        updatedAt: {
+          $lt: new Date(Date.now() - 24 * 3600 * 1000),
+        },
+      },
+    ],
+  });
+  expiredOneDay.map((u) => {
+    ids.push(u._id);
+  });
+  console.log('expiredOneDay => ', expiredOneDay);
+  const expiredOneWeek = await Ad.find({
+    $and: [
+      { status: 'approved' },
+      { duration: 'one week' },
+      {
+        updatedAt: {
+          $lt: new Date(Date.now() - 7 * 24 * 3600 * 1000),
+        },
+      },
+    ],
+  });
+  expiredOneWeek.map((u) => {
+    ids.push(u._id);
+  });
+  const expiredTwoWeeks = await Ad.find({
+    $and: [
+      { status: 'approved' },
+      { duration: 'two weeks' },
+      {
+        updatedAt: {
+          $lt: new Date(Date.now() - 14 * 24 * 3600 * 1000),
+        },
+      },
+    ],
+  });
+  expiredTwoWeeks.map((u) => {
+    ids.push(u._id);
+  });
+  const expiredOneMonth = await Ad.find({
+    $and: [
+      { status: 'approved' },
+      { duration: 'one month' },
+      {
+        updatedAt: {
+          $lt: new Date(Date.now() - 31 * 24 * 3600 * 1000),
+        },
+      },
+    ],
+  });
+  expiredOneMonth.map((u) => {
+    ids.push(u._id);
+  });
+
+  console.log('ids => ', ids);
+
+  const handleExpired = await Ad.updateMany(
+    {
+      _id: { $in: ids },
+    },
+    {
+      $set: { status: 'expired' },
+    },
+    { new: true }
+  ).exec();
+
+  res.json({ ok: true });
 };
