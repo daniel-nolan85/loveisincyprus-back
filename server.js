@@ -24,7 +24,7 @@ mongoose
 // middleware
 app.use(morgan('dev'));
 app.use(express.json({ limit: '50mb' }));
-// app.use(express.json({ limit: '5mb' }));
+// app.use(express.urlencoded({ limit: '50mb' }));
 app.use(cors());
 
 // routes middleware
@@ -38,10 +38,12 @@ const server = app.listen(port, () =>
 );
 
 const io = require('socket.io')(server, {
+  // wsEngine: 'ws',
   pingTimeout: 60000,
   cors: {
     origin: 'http://localhost:3000',
   },
+  maxHttpBufferSize: 1e8,
 });
 
 io.on('connection', (socket) => {
@@ -77,6 +79,10 @@ io.on('connection', (socket) => {
   socket.on('new visitor', (v, u) =>
     socket.in(v._id).emit('visitor added', v, u)
   );
+  socket.on('new event', (event) => {
+    console.log(event);
+    socket.in(event.invitees.map((e) => e._id)).emit('event added', event);
+  });
 
   socket.off('setup', () => {
     console.log('USER DISCONNECTED');

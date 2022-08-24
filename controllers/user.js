@@ -202,7 +202,8 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  const { paymentIntent } = req.body.stripeResponse;
+  console.log('createOrder controller response => ', req.body);
+  const paymentIntent = req.body.cardinityResponse;
   const user = await User.findOne({ email: req.user.email }).exec();
   let { products } = await Cart.findOne({ orderedBy: user._id }).exec();
 
@@ -1335,6 +1336,61 @@ exports.resetMessageCount = async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.body.user._id,
     { $set: { messages: [] } },
+    { new: true }
+  );
+  res.json(user);
+};
+
+exports.newNotificationCount = async (req, res) => {
+  console.log('newNotificationCount controller response => ', req.body);
+  const { user, notif, reason, otherUser } = req.body;
+
+  if (reason === 'like') {
+    const notify = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { newNotifs: 'Someone liked your post' } },
+      { new: true }
+    );
+    res.json(notify);
+  }
+  if (reason === 'comment') {
+    const notify = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { newNotifs: 'Someone commented on your post' } },
+      { new: true }
+    );
+    res.json(notify);
+  }
+  if (reason === 'follower') {
+    const notify = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { newNotifs: 'Somebody likes you' } },
+      { new: true }
+    );
+    res.json(notify);
+  }
+  if (reason === 'visitor') {
+    const notify = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { newNotifs: 'Somebody visited your profile' } },
+      { new: true }
+    );
+    res.json(notify);
+  }
+  if (reason === 'event') {
+    const notify = await User.findByIdAndUpdate(
+      user._id,
+      { $addToSet: { newNotifs: 'You have been invited to an event' } },
+      { new: true }
+    );
+    res.json(notify);
+  }
+};
+
+exports.resetNotificationCount = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.body.user._id,
+    { $set: { newNotifs: [] } },
     { new: true }
   );
   res.json(user);

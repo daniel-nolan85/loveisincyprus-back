@@ -3,7 +3,7 @@ const User = require('../models/user');
 
 exports.create = async (req, res) => {
   try {
-    console.log('create event controller response => ', req.body);
+    // console.log('create event controller response => ', req.body);
     const newEvent = await new Event(req.body).save();
 
     const notify = await User.updateMany(
@@ -67,4 +67,13 @@ exports.cancel = async (req, res) => {
     console.log(err);
     res.status(400).send('Cancel event failed');
   }
+};
+
+exports.fetchUserEvents = async (req, res) => {
+  console.log('fetchUserEvents controller response => ', req.body);
+  res.json(
+    await Event.find({
+      invitees: { $elemMatch: { _id: req.body.user._id } },
+    }).exec()
+  );
 };

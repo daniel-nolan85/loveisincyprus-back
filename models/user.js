@@ -148,6 +148,7 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
     messages: [{ type: ObjectId, ref: 'Message' }],
+    newNotifs: [{ type: String }],
   },
   { timestamps: true }
 );

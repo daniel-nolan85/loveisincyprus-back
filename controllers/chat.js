@@ -129,7 +129,7 @@ exports.massMail = async (req, res) => {
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
   const userIds = [];
-  const chatIds = [];
+  const chats = [];
 
   for (var i = 0; i < selected.length; i++) {
     userIds.push(selected[i]._id);
@@ -137,14 +137,16 @@ exports.massMail = async (req, res) => {
 
   for (var i = 0; i < userIds.length; i++) {
     const chat = await Chat.findOne({ users: [sender._id, userIds[i]] });
-    chatIds.push(chat._id);
+    chats.push(chat);
   }
+  console.log('userIds => ', userIds);
+  console.log('chats => ', chats);
 
-  for (var i = 0; i < chatIds.length; i++) {
+  for (var i = 0; i < chats.length; i++) {
     var newMessage = {
       sender,
       content,
-      chat: chatIds[i],
+      chat: chats[i],
     };
     var message = await Message.create(newMessage);
     message = await message.populate(
@@ -157,9 +159,9 @@ exports.massMail = async (req, res) => {
       select: 'name username email profileImage',
     });
 
-    await Chat.findByIdAndUpdate(chatIds[i], {
+    await Chat.findByIdAndUpdate(chats[i]._id, {
       latestMessage: message,
     });
+    res.json(message);
   }
-  res.json({ ok: true });
 };

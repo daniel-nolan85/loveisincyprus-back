@@ -42,6 +42,8 @@ const {
   optInOrOut,
   newMessageCount,
   resetMessageCount,
+  newNotificationCount,
+  resetNotificationCount,
 } = require('../controllers/user');
 
 // routes
@@ -81,5 +83,7 @@ router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
 router.put('/new-message-count', newMessageCount);
 router.put('/reset-message-count', authCheck, resetMessageCount);
+router.put('/new-notification-count', newNotificationCount);
+router.put('/reset-notification-count', authCheck, resetNotificationCount);
 
 module.exports = router;

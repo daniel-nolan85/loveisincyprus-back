@@ -578,8 +578,10 @@ exports.cropProfile = async (req, res) => {
 
 exports.users = async (req, res) => {
   try {
-    const users = await User.find();
-    // console.log(users);
+    const users = await User.find({}).select(
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent'
+    );
+    console.log(users);
     res.json(users);
   } catch (err) {
     console.log('users => ', err);
