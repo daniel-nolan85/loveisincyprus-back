@@ -67,7 +67,9 @@ exports.disapproveAd = async (req, res) => {
     : 'Your recent advertisement submission has been rejected';
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-  const chat = await Chat.findOne({ users: [sender._id, ad.postedBy._id] });
+  const chat = await Chat.findOne({
+    users: { $size: 2, $all: [sender._id, ad.postedBy._id] },
+  });
   var newMessage = {
     sender,
     content,
@@ -108,7 +110,9 @@ exports.approveAd = async (req, res) => {
   const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}`;
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-  const chat = await Chat.findOne({ users: [sender._id, ad.postedBy._id] });
+  const chat = await Chat.findOne({
+    users: { $size: 2, $all: [sender._id, ad.postedBy._id] },
+  });
   var newMessage = {
     sender,
     content,

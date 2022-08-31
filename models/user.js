@@ -147,6 +147,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    verified: {
+      type: String,
+      default: 'false',
+    },
     messages: [{ type: ObjectId, ref: 'Message' }],
     newNotifs: [{ type: String }],
   },

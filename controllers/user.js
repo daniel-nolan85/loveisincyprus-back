@@ -400,7 +400,9 @@ exports.spentPoints = async (req, res) => {
     }).save();
 
     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-    const chat = await Chat.findOne({ users: [sender._id, user._id] });
+    const chat = await Chat.findOne({
+      users: { $size: 2, $all: [sender._id, user._id] },
+    });
     var newMessage = {
       sender,
       content,
@@ -446,7 +448,9 @@ exports.spentPoints = async (req, res) => {
     }).save();
 
     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-    const chat = await Chat.findOne({ users: [sender._id, user._id] });
+    const chat = await Chat.findOne({
+      users: { $size: 2, $all: [sender._id, user._id] },
+    });
     var newMessage = {
       sender,
       content,

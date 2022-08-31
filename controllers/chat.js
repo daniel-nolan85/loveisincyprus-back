@@ -136,7 +136,9 @@ exports.massMail = async (req, res) => {
   }
 
   for (var i = 0; i < userIds.length; i++) {
-    const chat = await Chat.findOne({ users: [sender._id, userIds[i]] });
+    const chat = await Chat.findOne({
+      users: { $size: 2, $all: [sender._id, userIds[i]] },
+    });
     chats.push(chat);
   }
   console.log('userIds => ', userIds);

@@ -39,9 +39,12 @@ const server = app.listen(port, () =>
 
 const io = require('socket.io')(server, {
   // wsEngine: 'ws',
+  path: '/socket.io',
   pingTimeout: 60000,
   cors: {
     origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-type'],
   },
   maxHttpBufferSize: 1e8,
 });
