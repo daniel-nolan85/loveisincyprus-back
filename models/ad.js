@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { ObjectId } = mongoose.Schema;
 
 const adSchema = new mongoose.Schema(
   {
@@ -7,16 +6,15 @@ const adSchema = new mongoose.Schema(
       type: {},
       required: true,
     },
-    postedBy: {
-      type: ObjectId,
-      ref: 'User',
-    },
     image: {
       url: String,
       pulic_id: String,
     },
     duration: String,
     status: String,
+    demographic: [{ type: String }],
+    contactInfo: Object,
+    accountInfo: Object,
   },
   { timestamps: true }
 );

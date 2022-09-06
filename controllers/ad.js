@@ -2,22 +2,36 @@ const Ad = require('../models/ad');
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
+const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
   console.log('submitAd controller response => ', req.body);
-  const { content, image, user, duration } = req.body;
+  const { content, image, duration, demographic, contactInfo, accountInfo } =
+    req.body;
 
   try {
     if (!content.length && !image.url) {
       res.json({
         error: 'Content is required',
       });
+    }
+    if (!contactInfo) {
+      res.json({
+        error: 'Contact info is required',
+      });
+    }
+    if (!accountInfo) {
+      res.json({
+        error: 'Account info is required',
+      });
     } else {
       const ad = new Ad({
         content,
         image,
-        postedBy: user,
         duration,
+        demographic,
+        contactInfo,
+        accountInfo,
         status: 'pending',
       });
       ad.save();
@@ -31,10 +45,7 @@ exports.submitAd = async (req, res) => {
 
 exports.fetchAds = async (req, res) => {
   try {
-    const ads = await Ad.find().populate(
-      'postedBy',
-      '_id name profileImage email'
-    );
+    const ads = await Ad.find();
     res.json(ads);
   } catch (err) {
     console.log(err);
@@ -43,10 +54,7 @@ exports.fetchAds = async (req, res) => {
 
 exports.fetchApprovedAds = async (req, res) => {
   try {
-    const approved = await Ad.find({ status: 'approved' }).populate(
-      'postedBy',
-      '_id name profileImage email'
-    );
+    const approved = await Ad.find({ status: 'approved' });
     res.json(approved);
   } catch (err) {
     console.log(err);
@@ -62,40 +70,44 @@ exports.disapproveAd = async (req, res) => {
     { new: true }
   ).exec();
 
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    port: 465,
+    auth: {
+      user: 'loveisincyprus@gmail.com',
+      pass: 'revamp22',
+    },
+    secure: true,
+  });
+
   const content = reason
     ? `Your recent advertisement submission has been rejected for the following reason: ${reason}`
     : 'Your recent advertisement submission has been rejected';
 
-  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-  const chat = await Chat.findOne({
-    users: { $size: 2, $all: [sender._id, ad.postedBy._id] },
-  });
-  var newMessage = {
-    sender,
-    content,
-    chat,
+  let mailOptions = {
+    from: 'loveisincyprus@gmail.com',
+    to: ad.contactInfo.email,
+    subject: 'Results of your recent ad submission to Love is in Cyprus',
+    html: `
+      <h3>Information</h3>
+      <ul>
+      <li>Name: ${ad.contactInfo.name}</li>
+      <li>Email: ${ad.contactInfo.email}</li>
+      </ul>
+
+      <h3>Message</h3>
+      <p>${content}</p>
+      `,
   };
 
-  try {
-    var message = await Message.create(newMessage);
-    message = await message.populate(
-      'sender',
-      'name username email profileImage'
-    );
-    message = await message.populate('chat');
-    message = await User.populate(message, {
-      path: 'chat.users',
-      select: 'name username email profileImage',
-    });
-
-    await Chat.findByIdAndUpdate(chat._id, {
-      latestMessage: message,
-    });
-    res.json(message);
-  } catch (err) {
-    res.status(400);
-    throw new Error(err.message);
-  }
+  transporter.sendMail(mailOptions, (err, response) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('Success');
+    }
+  });
+  transporter.close();
 };
 
 exports.approveAd = async (req, res) => {
@@ -107,38 +119,42 @@ exports.approveAd = async (req, res) => {
     { new: true }
   ).exec();
 
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    port: 465,
+    auth: {
+      user: 'loveisincyprus@gmail.com',
+      pass: 'revamp22',
+    },
+    secure: true,
+  });
+
   const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}`;
 
-  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-  const chat = await Chat.findOne({
-    users: { $size: 2, $all: [sender._id, ad.postedBy._id] },
-  });
-  var newMessage = {
-    sender,
-    content,
-    chat,
+  let mailOptions = {
+    from: 'loveisincyprus@gmail.com',
+    to: ad.contactInfo.email,
+    subject: 'Results of your recent ad submission to Love is in Cyprus',
+    html: `
+      <h3>Information</h3>
+      <ul>
+      <li>Name: ${ad.contactInfo.name}</li>
+      <li>Email: ${ad.contactInfo.email}</li>
+      </ul>
+
+      <h3>Message</h3>
+      <p>${content}</p>
+      `,
   };
 
-  try {
-    var message = await Message.create(newMessage);
-    message = await message.populate(
-      'sender',
-      'name username email profileImage'
-    );
-    message = await message.populate('chat');
-    message = await User.populate(message, {
-      path: 'chat.users',
-      select: 'name username email profileImage',
-    });
-
-    await Chat.findByIdAndUpdate(chat._id, {
-      latestMessage: message,
-    });
-    res.json(message);
-  } catch (err) {
-    res.status(400);
-    throw new Error(err.message);
-  }
+  transporter.sendMail(mailOptions, (err, response) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('Success');
+    }
+  });
+  transporter.close();
 };
 
 exports.handleExpiredAds = async (req, res) => {

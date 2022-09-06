@@ -1,4 +1,5 @@
 const express = require('express');
+const formidable = require('express-formidable');
 
 const router = express.Router();
 
@@ -15,12 +16,19 @@ const {
   handleExpiredAds,
 } = require('../controllers/ad');
 
+const { uploadImage } = require('../controllers/post');
+
 // routes
-router.post('/submit-ad', authCheck, submitAd);
-router.post('/fetch-ads', authCheck, fetchAds);
+router.post('/submit-ad', submitAd);
+router.post(
+  '/upload-ad-image',
+  formidable({ maxFileSize: 5 * 1024 * 1024 }),
+  uploadImage
+);
+router.post('/fetch-ads', fetchAds);
 router.post('/fetch-approved-ads', authCheck, fetchApprovedAds);
-router.put('/disapprove-ad', authCheck, disapproveAd);
-router.put('/approve-ad', authCheck, approveAd);
+router.put('/disapprove-ad', authCheck, adminCheck, disapproveAd);
+router.put('/approve-ad', authCheck, adminCheck, approveAd);
 router.put('/expired-ad', handleExpiredAds);
 
 module.exports = router;
