@@ -1432,3 +1432,25 @@ exports.fetchUserSearches = async (req, res) => {
 
   res.json(search);
 };
+
+exports.expiredMembership = async (req, res) => {
+  const user = await User.findById({ _id: req.body.user._id });
+  if (user.membership.paid && user.membership.expiry.getTime() < Date.now()) {
+    const expiredUser = await User.findByIdAndUpdate(
+      { _id: user._id },
+      {
+        'membership.paid': false,
+      },
+      { new: true }
+    ).exec();
+    res.json(expiredUser);
+    return;
+  }
+  if (
+    user.membership.paid &&
+    user.membership.expiry.getTime() < Date.now() + 7 * 24 * 3600 * 1000
+  ) {
+    res.json({ soon: true });
+    return;
+  }
+};

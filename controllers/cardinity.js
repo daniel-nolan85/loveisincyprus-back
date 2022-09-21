@@ -270,11 +270,50 @@ exports.createMembershipPayment = async (req, res) => {
   } else {
     client
       .call(purchase)
-      .then((response) => {
+      .then(async (response) => {
         if (response.status == 'approved') {
-          updateMembership(payable, user);
-          console.log(response.status);
-          res.send(response);
+          if (payable === '10.00') {
+            const amendMembership = await User.findByIdAndUpdate(
+              { _id: user._id },
+              {
+                'membership.paid': true,
+                'membership.expiry': new Date(
+                  Date.now() + 30 * 24 * 3600 * 1000
+                ),
+              },
+              { new: true }
+            ).exec();
+            res.json(amendMembership);
+          }
+          if (payable === '50.00') {
+            const amendMembership = await User.findByIdAndUpdate(
+              { _id: user._id },
+              {
+                'membership.paid': true,
+                'membership.expiry': new Date(
+                  Date.now() + 180 * 24 * 3600 * 1000
+                ),
+              },
+              { new: true }
+            ).exec();
+            res.json(amendMembership);
+          }
+          if (payable === '90.00') {
+            const amendMembership = await User.findByIdAndUpdate(
+              { _id: user._id },
+              {
+                'membership.paid': true,
+                'membership.expiry': new Date(
+                  Date.now() + 365 * 24 * 3600 * 1000
+                ),
+              },
+              { new: true }
+            ).exec();
+            res.json(amendMembership);
+          }
+          // updateMembership(req, res, payable, user);
+          // console.log(response.status);
+          // res.send(response);
         } else if (response.status == 'pending') {
           // handle 3D secure flow
           console.log('pending', response.status);
@@ -330,7 +369,7 @@ exports.createMembershipPayment = async (req, res) => {
   }
 };
 
-const updateMembership = async (payable, user, res) => {
+const updateMembership = async (req, res, payable, user) => {
   console.log('payable => ', payable);
   console.log('user => ', user);
 
@@ -354,6 +393,7 @@ const updateMembership = async (payable, user, res) => {
       },
       { new: true }
     ).exec();
+    console.log('amendMembership => ', amendMembership);
     res.json(amendMembership);
   }
   if (payable === '90.00') {
