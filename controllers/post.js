@@ -173,7 +173,7 @@ exports.newsFeed = async (req, res) => {
 };
 
 exports.likePost = async (req, res) => {
-  // console.log('like post controller response => ', req.body);
+  console.log('like post controller response => ', req.body);
   try {
     const post = await Post.findByIdAndUpdate(
       req.body._id,
@@ -204,7 +204,7 @@ exports.likePost = async (req, res) => {
     }
     res.json(post);
   } catch (err) {
-    err;
+    console.log(err);
   }
 };
 
@@ -220,7 +220,7 @@ exports.unlikePost = async (req, res) => {
     );
     res.json(post);
   } catch (err) {
-    err;
+    console.log(err);
   }
 };
 

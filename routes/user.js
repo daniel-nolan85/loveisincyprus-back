@@ -37,6 +37,7 @@ const {
   // searchMatches,
   listAll,
   searchFilters,
+  saveSearch,
   analyseUsers,
   progressCompletion,
   optInOrOut,
@@ -44,6 +45,7 @@ const {
   resetMessageCount,
   newNotificationCount,
   resetNotificationCount,
+  fetchUserSearches,
 } = require('../controllers/user');
 
 // routes
@@ -78,6 +80,7 @@ router.post('/decline-invite', authCheck, declineInvite);
 // router.get('/search-matches', authCheck, searchMatches);
 router.get('/fetch-users/:count', authCheck, listAll);
 router.post('/fetch-users/filters', authCheck, searchFilters);
+router.post('/save-search', authCheck, adminCheck, saveSearch);
 router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
@@ -85,5 +88,6 @@ router.put('/new-message-count', newMessageCount);
 router.put('/reset-message-count', authCheck, resetMessageCount);
 router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
+router.get('/fetch-user-searches', fetchUserSearches);
 
 module.exports = router;

@@ -8,6 +8,7 @@ const Order = require('../models/order');
 const Event = require('../models/event');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
+const UserSearch = require('../models/userSearch');
 const axios = require('axios');
 
 exports.recaptcha = async (req, res) => {
@@ -723,93 +724,119 @@ exports.declineInvite = async (req, res) => {
 // };
 
 exports.listAll = async (req, res) => {
-  const users = await User.find({}).limit(parseInt(req.params.count)).exec();
-  res.json(users);
-};
-
-const handleQuery = async (req, res, query) => {
-  const users = await User.find({ $text: { $search: query } }).exec();
-  res.json(users);
-};
-
-const handleRadioSearch = async (req, res, field, lookUp) => {
-  var query = {};
-  query[field] = lookUp;
-  const users = await User.find(query).exec();
-  res.json(users);
-};
-
-const handleRange = async (req, res, field, range) => {
-  var query = {};
-  query[field] = { $gte: range[0], $lte: range[1] };
-  try {
-    const users = await User.find(query).exec();
-    res.json(users);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const handleDropdown = async (req, res, field, key) => {
-  console.log('handleDropdown controller response => ', field);
-  console.log('handleDropdown controller response => ', key);
-  var query = {};
-  query[field] = key;
-  try {
-    const users = await User.find(query).exec();
-    res.json(users);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-const handleNumberInput = async (req, res, field, entry) => {
-  var query = {};
-  query[field] = entry;
-  const users = await User.find(query).exec();
-  res.json(users);
-};
-
-const handleStringInput = async (req, res, field, entry) => {
-  var query = {};
-  query[field] = { $regex: entry };
-  const users = await User.find(query).exec();
-  res.json(users);
-};
-
-const handleArrayInput = async (req, res, field, entry) => {
-  var query = {};
-  query[field] = { $all: entry };
-  console.log(query);
-  const users = await User.find(query).exec();
+  const users = await User.find({})
+    .limit(parseInt(req.params.count))
+    .select('_id name email username profileImage about')
+    .exec();
   res.json(users);
 };
 
 exports.searchFilters = async (req, res) => {
-  console.log('searchFilters controller response => ', req.body);
-  const { query, type, field, lookUp, range, key, entry } = req.body;
+  const { query } = req.body;
+  const searchedUsers = [];
 
   if (query) {
-    console.log('query', query);
-    await handleQuery(req, res, query);
+    const users = await User.find({ $text: { $search: query } })
+      .select('_id name email username profileImage about eventsEligible optIn')
+      .exec();
+    res.json(users);
+  } else {
+    Promise.all(
+      req.body.map(async (q) => {
+        if (q.type && q.type == 'radio') {
+          var radioQuery = {};
+          radioQuery[q.field] = q.lookUp;
+          const users = await User.find(radioQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+        if (q.range) {
+          var rangeQuery = {};
+          rangeQuery[q.field] = { $gte: q.range[0], $lte: q.range[1] };
+          const users = await User.find(rangeQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+        if (q.key) {
+          var dropdownQuery = {};
+          dropdownQuery[q.field] = q.key;
+          const users = await User.find(dropdownQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+        if (q.type && q.type == 'number') {
+          var numberQuery = {};
+          numberQuery[q.field] = q.entry;
+          const users = await User.find(numberQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+        if (q.type && q.type == 'string') {
+          var stringQuery = {};
+          stringQuery[q.field] = { $regex: q.entry };
+          const users = await User.find(stringQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+        if (q.type && q.type == 'array') {
+          var arrayQuery = {};
+          arrayQuery[q.field] = { $all: q.entry };
+          const users = await User.find(arrayQuery).select(
+            '_id name email username profileImage about eventsEligible optIn'
+          );
+          searchedUsers.push(users);
+        }
+      })
+    ).then(() => {
+      const str = (o) =>
+        JSON.stringify(
+          Object.keys(o)
+            .sort()
+            .map((key) => [key, o[key]])
+        );
+      const mapify = (arr) => new Map(arr.map((o) => [str(o), o]));
+
+      const intersection = (searchedUsers) =>
+        !searchedUsers.length
+          ? []
+          : [
+              ...searchedUsers
+                .slice(1)
+                .reduce(
+                  (map, arr) => mapify(arr.filter((o) => map.get(str(o)))),
+                  mapify(searchedUsers[0])
+                )
+                .values(),
+            ];
+
+      const filteredUsers = intersection(searchedUsers);
+      res.json(filteredUsers);
+    });
   }
-  if (type == 'radio') {
-    await handleRadioSearch(req, res, field, lookUp);
-  }
-  if (range) {
-    await handleRange(req, res, field, range);
-  }
-  if (key) {
-    await handleDropdown(req, res, field, key);
-  }
-  if (type == 'number') {
-    await handleNumberInput(req, res, field, entry);
-  }
-  if (type == 'string') {
-    await handleStringInput(req, res, field, entry);
-  }
-  if (type == 'array') {
-    await handleArrayInput(req, res, field, entry);
+};
+
+exports.saveSearch = async (req, res) => {
+  console.log('saveSearch controller response => ', req.body);
+  const { searchName, unique } = req.body;
+
+  try {
+    if (!searchName || !unique) {
+      res.json({
+        error: 'Name and fields required',
+      });
+    } else {
+      const search = new UserSearch({ name: searchName, params: unique });
+      search.save();
+      res.json(search);
+    }
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
   }
 };
 
@@ -1398,4 +1425,10 @@ exports.resetNotificationCount = async (req, res) => {
     { new: true }
   );
   res.json(user);
+};
+
+exports.fetchUserSearches = async (req, res) => {
+  const search = await UserSearch.find();
+
+  res.json(search);
 };

@@ -153,6 +153,10 @@ const userSchema = new mongoose.Schema(
     },
     messages: [{ type: ObjectId, ref: 'Message' }],
     newNotifs: [{ type: String }],
+    membership: {
+      paid: { type: Boolean, default: false },
+      expiry: { type: Date },
+    },
   },
   { timestamps: true }
 );
