@@ -438,7 +438,9 @@ exports.userUnfollow = async (req, res) => {
 exports.userFollowing = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id);
-    const following = await User.find({ _id: user.following });
+    const following = await User.find({ _id: user.following }).select(
+      '_id name email username profileImage'
+    );
     res.json(following);
   } catch (err) {
     console.log('userFollowing => ', err);
@@ -448,7 +450,9 @@ exports.userFollowing = async (req, res) => {
 exports.userFollowers = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id);
-    const followers = await User.find({ _id: user.followers });
+    const followers = await User.find({ _id: user.followers }).select(
+      '_id name email username profileImage'
+    );
     res.json(followers);
   } catch (err) {
     console.log('userFollowers => ', err);
@@ -459,7 +463,9 @@ exports.userMatches = async (req, res) => {
   // console.log('userMatches controller response => ', req.body);
   try {
     const user = await User.findById(req.body.user._id);
-    const matches = await User.find({ _id: user.matches });
+    const matches = await User.find({ _id: user.matches }).select(
+      '_id name email username profileImage'
+    );
     // if (req.body.chats && req.body.chats.length > 0) {
     //   const { chats } = req.body;
     //   matches.sort(

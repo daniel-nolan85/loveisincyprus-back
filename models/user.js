@@ -157,6 +157,15 @@ const userSchema = new mongoose.Schema(
       paid: { type: Boolean, default: false },
       expiry: { type: Date },
     },
+    bankDetails: [
+      {
+        cardHolder: String,
+        cardNumber: String,
+        expiry: String,
+        cvc: String,
+        cardBrand: String,
+      },
+    ],
   },
   { timestamps: true }
 );

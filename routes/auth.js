@@ -6,6 +6,7 @@ const router = express.Router();
 const {
   authCheck,
   adminCheck,
+  subscriberCheck,
   addFollower,
   removeFollower,
 } = require('../middleware/auth');
@@ -56,6 +57,7 @@ router.post('/create-or-update-user', authCheck, createOrUpdateUser);
 router.put('/profile-update', authCheck, profileUpdate);
 router.post('/current-user', authCheck, currentUser);
 router.post('/current-admin', authCheck, adminCheck, currentUser);
+router.post('/current-subscriber', authCheck, subscriberCheck, currentUser);
 router.post('/find-users', authCheck, findUsers);
 router.put('/user-follow', authCheck, addFollower, userFollow);
 router.put('/user-unfollow', authCheck, removeFollower, userUnfollow);

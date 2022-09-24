@@ -37,7 +37,22 @@ exports.calculateFinalAmount = async (req, res) => {
 exports.createPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
   const payable = (req.body.payable / 100).toFixed(2).toString();
-  const { userAgent } = req.body;
+  const { userAgent, user } = req.body;
+
+  const saveDetails = await User.findByIdAndUpdate(
+    { _id: user._id },
+    {
+      $addToSet: {
+        bankDetails: {
+          cardHolder: cardHolder,
+          cardNumber: cardNumber,
+          expiry: expiry,
+          cvc: cvc,
+        },
+      },
+    },
+    { new: true }
+  ).exec();
 
   const purchase = new Payment({
     amount: payable,
@@ -272,50 +287,57 @@ exports.createMembershipPayment = async (req, res) => {
       .call(purchase)
       .then(async (response) => {
         if (response.status == 'approved') {
+          let days = 0;
           if (payable === '10.00') {
+            days = 30;
+          } else if (payable === '50.00') {
+            days = 180;
+          } else {
+            days = 365;
+          }
+          const existingBank = await User.findOne({
+            _id: user._id,
+            'bankDetails.cardHolder': cardHolder,
+            'bankDetails.cardNumber': cardNumber,
+            'bankDetails.expiry': expiry,
+            'bankDetails.cvc': cvc,
+          });
+          if (existingBank) {
+            // return res.json(existingBank);
             const amendMembership = await User.findByIdAndUpdate(
               { _id: user._id },
               {
                 'membership.paid': true,
                 'membership.expiry': new Date(
-                  Date.now() + 30 * 24 * 3600 * 1000
+                  Date.now() + days * 24 * 3600 * 1000
                 ),
               },
               { new: true }
             ).exec();
-            res.json(amendMembership);
-          }
-          if (payable === '50.00') {
+            res.json({ amendMembership, response });
+          } else {
             const amendMembership = await User.findByIdAndUpdate(
               { _id: user._id },
               {
                 'membership.paid': true,
                 'membership.expiry': new Date(
-                  Date.now() + 180 * 24 * 3600 * 1000
+                  Date.now() + days * 24 * 3600 * 1000
                 ),
+                $addToSet: {
+                  bankDetails: {
+                    cardHolder,
+                    cardNumber,
+                    expiry,
+                    cvc,
+                    cardBrand: response.payment_instrument.card_brand,
+                  },
+                },
               },
               { new: true }
             ).exec();
-            res.json(amendMembership);
+            res.json({ amendMembership, response });
           }
-          if (payable === '90.00') {
-            const amendMembership = await User.findByIdAndUpdate(
-              { _id: user._id },
-              {
-                'membership.paid': true,
-                'membership.expiry': new Date(
-                  Date.now() + 365 * 24 * 3600 * 1000
-                ),
-              },
-              { new: true }
-            ).exec();
-            res.json(amendMembership);
-          }
-          // updateMembership(req, res, payable, user);
-          // console.log(response.status);
-          // res.send(response);
         } else if (response.status == 'pending') {
-          // handle 3D secure flow
           console.log('pending', response.status);
           if (response.authorization_information) {
             var form_url = response.authorization_information.url;
@@ -339,7 +361,6 @@ exports.createMembershipPayment = async (req, res) => {
             '<title>3-D Secure Example</title>' +
             '<script type="text/javascript">' +
             +'function OnLoadEvent(){' +
-            // Make the form post as soon as it has been loaded.
             +'document.ThreeDForm.submit();' +
             +'}' +
             '</script>' +
@@ -366,45 +387,5 @@ exports.createMembershipPayment = async (req, res) => {
       .catch((err) => {
         console.log(err);
       });
-  }
-};
-
-const updateMembership = async (req, res, payable, user) => {
-  console.log('payable => ', payable);
-  console.log('user => ', user);
-
-  if (payable === '10.00') {
-    const amendMembership = await User.findByIdAndUpdate(
-      { _id: user._id },
-      {
-        'membership.paid': true,
-        'membership.expiry': new Date(Date.now() + 30 * 24 * 3600 * 1000),
-      },
-      { new: true }
-    ).exec();
-    res.json(amendMembership);
-  }
-  if (payable === '50.00') {
-    const amendMembership = await User.findByIdAndUpdate(
-      { _id: user._id },
-      {
-        'membership.paid': true,
-        'membership.expiry': new Date(Date.now() + 180 * 24 * 3600 * 1000),
-      },
-      { new: true }
-    ).exec();
-    console.log('amendMembership => ', amendMembership);
-    res.json(amendMembership);
-  }
-  if (payable === '90.00') {
-    const amendMembership = await User.findByIdAndUpdate(
-      { _id: user._id },
-      {
-        'membership.paid': true,
-        'membership.expiry': new Date(Date.now() + 365 * 24 * 3600 * 1000),
-      },
-      { new: true }
-    ).exec();
-    res.json(amendMembership);
   }
 };
