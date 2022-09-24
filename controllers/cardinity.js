@@ -7,6 +7,7 @@ const Cardinity = require('cardinity-nodejs');
 
 const Client = Cardinity.client();
 const Payment = Cardinity.payment();
+const Refund = Cardinity.refund();
 
 const client = new Client(
   process.env.CARDINITY_KEY,
@@ -38,21 +39,6 @@ exports.createPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
   const payable = (req.body.payable / 100).toFixed(2).toString();
   const { userAgent, user } = req.body;
-
-  const saveDetails = await User.findByIdAndUpdate(
-    { _id: user._id },
-    {
-      $addToSet: {
-        bankDetails: {
-          cardHolder: cardHolder,
-          cardNumber: cardNumber,
-          expiry: expiry,
-          cvc: cvc,
-        },
-      },
-    },
-    { new: true }
-  ).exec();
 
   const purchase = new Payment({
     amount: payable,
@@ -308,9 +294,13 @@ exports.createMembershipPayment = async (req, res) => {
               { _id: user._id },
               {
                 'membership.paid': true,
+                'membership.trialPeriod': true,
+                'membership.startDate': new Date(Date.now()),
                 'membership.expiry': new Date(
                   Date.now() + days * 24 * 3600 * 1000
                 ),
+                'membership.cardinityId': response.id,
+                'membership.cost': payable,
               },
               { new: true }
             ).exec();
@@ -320,9 +310,13 @@ exports.createMembershipPayment = async (req, res) => {
               { _id: user._id },
               {
                 'membership.paid': true,
+                'membership.trialPeriod': true,
+                'membership.startDate': new Date(Date.now()),
                 'membership.expiry': new Date(
                   Date.now() + days * 24 * 3600 * 1000
                 ),
+                'membership.cardinityId': response.id,
+                'membership.cost': payable,
                 $addToSet: {
                   bankDetails: {
                     cardHolder,
@@ -389,3 +383,18 @@ exports.createMembershipPayment = async (req, res) => {
       });
   }
 };
+
+const refund = new Refund({
+  amount: '79.00',
+  description: 'some optional description',
+  id: 'f17abcd6-0455-414c-af46-88ad33feb46c',
+});
+
+client
+  .call(refund)
+  .then(function (response) {
+    // Deal with response
+  })
+  .catch(function (error) {
+    // Deal with error
+  });

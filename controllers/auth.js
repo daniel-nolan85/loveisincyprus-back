@@ -8,6 +8,15 @@ const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
 const user = require('../models/user');
+const Cardinity = require('cardinity-nodejs');
+
+const Client = Cardinity.client();
+const Refund = Cardinity.refund();
+
+const client = new Client(
+  process.env.CARDINITY_KEY,
+  process.env.CARDINITY_SECRET
+);
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -28,6 +37,47 @@ exports.createOrUpdateUser = async (req, res) => {
 
   if (user) {
     // console.log('USER UPDATED', user);
+    if (
+      user.membership.paid &&
+      user.membership.trialPeriod &&
+      user.membership.startDate.getTime() < Date.now() + 30000
+    ) {
+      console.log('refund this user => ');
+      const refund = new Refund({
+        amount: user.membership.cost,
+        description: 'User did not make use of their subscription',
+        id: user.membership.cardinityId,
+      });
+
+      client
+        .call(refund)
+        .then(async (response) => {
+          console.log('refund => ', refund);
+          const subscriptionUnpaid = await User.findByIdAndUpdate(
+            { _id: user._id },
+            {
+              'membership.paid': false,
+              'membership.trialPeriod': false,
+            },
+            { new: true }
+          ).exec();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    if (
+      user.membership.paid &&
+      user.membership.trialPeriod &&
+      user.membership.startDate.getTime() > Date.now() + 30000
+    ) {
+      console.log('this user is now a subscriber => ');
+      const trialEnded = await User.findByIdAndUpdate(
+        { _id: user._id },
+        { 'membership.trialPeriod': false },
+        { new: true }
+      ).exec();
+    }
     res.json(user);
   } else {
     const newUser = await new User({
