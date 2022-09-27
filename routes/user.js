@@ -47,6 +47,7 @@ const {
   resetNotificationCount,
   fetchUserSearches,
   expiredMembership,
+  clearProfileImage,
 } = require('../controllers/user');
 
 // routes
@@ -91,5 +92,6 @@ router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
 router.get('/fetch-user-searches', fetchUserSearches);
 router.put('/expired-membership', expiredMembership);
+router.put('/clear-profile-image', authCheck, clearProfileImage);
 
 module.exports = router;

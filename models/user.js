@@ -170,6 +170,10 @@ const userSchema = new mongoose.Schema(
         cardBrand: String,
       },
     ],
+    clearPhoto: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

@@ -35,49 +35,50 @@ exports.createOrUpdateUser = async (req, res) => {
     { new: true }
   );
 
-  if (user) {
-    // console.log('USER UPDATED', user);
-    if (
-      user.membership.paid &&
-      user.membership.trialPeriod &&
-      user.membership.startDate.getTime() < Date.now() + 30000
-    ) {
-      console.log('refund this user => ');
-      const refund = new Refund({
-        amount: user.membership.cost,
-        description: 'User did not make use of their subscription',
-        id: user.membership.cardinityId,
-      });
+  if (
+    user &&
+    user.membership.paid &&
+    user.membership.trialPeriod &&
+    user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
+  ) {
+    const refund = new Refund({
+      amount: user.membership.cost,
+      description: 'User did not make use of their subscription',
+      id: user.membership.cardinityId,
+    });
 
-      client
-        .call(refund)
-        .then(async (response) => {
-          console.log('refund => ', refund);
-          const subscriptionUnpaid = await User.findByIdAndUpdate(
-            { _id: user._id },
-            {
-              'membership.paid': false,
-              'membership.trialPeriod': false,
-            },
-            { new: true }
-          ).exec();
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    }
-    if (
-      user.membership.paid &&
-      user.membership.trialPeriod &&
-      user.membership.startDate.getTime() > Date.now() + 30000
-    ) {
-      console.log('this user is now a subscriber => ');
-      const trialEnded = await User.findByIdAndUpdate(
-        { _id: user._id },
-        { 'membership.trialPeriod': false },
-        { new: true }
-      ).exec();
-    }
+    client
+      .call(refund)
+      .then(async (response) => {
+        console.log('refund => ', refund);
+        const subscriptionUnpaid = await User.findByIdAndUpdate(
+          { _id: user._id },
+          {
+            'membership.paid': false,
+            'membership.trialPeriod': false,
+          },
+          { new: true }
+        ).exec();
+
+        res.json(subscriptionUnpaid);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else if (
+    user &&
+    user.membership.paid &&
+    user.membership.trialPeriod &&
+    user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 > Date.now()
+  ) {
+    const trialEnded = await User.findByIdAndUpdate(
+      { _id: user._id },
+      { 'membership.trialPeriod': false },
+      { new: true }
+    ).exec();
+    res.json(trialEnded);
+  } else if (user) {
+    console.log('USER UPDATED', user);
     res.json(user);
   } else {
     const newUser = await new User({

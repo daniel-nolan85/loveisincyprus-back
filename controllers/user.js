@@ -1454,3 +1454,27 @@ exports.expiredMembership = async (req, res) => {
     return;
   }
 };
+
+exports.clearProfileImage = async (req, res) => {
+  console.log('clearProfileImage controller response => ', req.body);
+  const { faces, user } = req.body;
+  if (faces.length > 0) {
+    const clearImage = await User.findByIdAndUpdate(
+      { _id: user._id },
+      {
+        clearPhoto: true,
+      },
+      { new: true }
+    ).exec();
+    res.json(clearImage);
+  } else {
+    const clearImage = await User.findByIdAndUpdate(
+      { _id: user._id },
+      {
+        clearPhoto: false,
+      },
+      { new: true }
+    ).exec();
+    res.json(clearImage);
+  }
+};

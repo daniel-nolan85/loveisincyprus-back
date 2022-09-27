@@ -11,6 +11,7 @@ const {
   createPayment,
   createAdPayment,
   createMembershipPayment,
+  refundSubscription,
 } = require('../controllers/cardinity');
 
 // routes
@@ -18,5 +19,6 @@ router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-payment', authCheck, createPayment);
 router.post('/create-ad-payment', authCheck, adminCheck, createAdPayment);
 router.post('/create-membership-payment', authCheck, createMembershipPayment);
+router.post('/refund-subscription', authCheck, refundSubscription);
 
 module.exports = router;

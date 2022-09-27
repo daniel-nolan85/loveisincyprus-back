@@ -384,17 +384,20 @@ exports.createMembershipPayment = async (req, res) => {
   }
 };
 
-const refund = new Refund({
-  amount: '79.00',
-  description: 'some optional description',
-  id: 'f17abcd6-0455-414c-af46-88ad33feb46c',
-});
+exports.refundSubscription = async (req, res) => {
+  console.log('refundSubscription => ', req.body);
+  // const refund = new Refund({
+  //   amount: '79.00',
+  //   description: 'some optional description',
+  //   id: 'f17abcd6-0455-414c-af46-88ad33feb46c',
+  // });
 
-client
-  .call(refund)
-  .then(function (response) {
-    // Deal with response
-  })
-  .catch(function (error) {
-    // Deal with error
-  });
+  // client
+  //   .call(refund)
+  //   .then(function (response) {
+  //     // Deal with response
+  //   })
+  //   .catch(function (error) {
+  //     // Deal with error
+  //   });
+};
