@@ -386,18 +386,29 @@ exports.createMembershipPayment = async (req, res) => {
 
 exports.refundSubscription = async (req, res) => {
   console.log('refundSubscription => ', req.body);
-  // const refund = new Refund({
-  //   amount: '79.00',
-  //   description: 'some optional description',
-  //   id: 'f17abcd6-0455-414c-af46-88ad33feb46c',
-  // });
+  const refund = new Refund({
+    amount: req.body.user.membership.cost,
+    description:
+      'User has decided to cancel their subscription within their trial period',
+    id: req.body.user.membership.cardinityId,
+  });
 
-  // client
-  //   .call(refund)
-  //   .then(function (response) {
-  //     // Deal with response
-  //   })
-  //   .catch(function (error) {
-  //     // Deal with error
-  //   });
+  client
+    .call(refund)
+    .then(async (response) => {
+      const cancelSubscription = await User.findByIdAndUpdate(
+        {
+          _id: req.body.user._id,
+        },
+        {
+          'membership.paid': false,
+          'membership.trialPeriod': false,
+        },
+        { new: true }
+      ).exec();
+      res.json(cancelSubscription);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };

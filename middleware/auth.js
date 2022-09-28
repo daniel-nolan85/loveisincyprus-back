@@ -42,6 +42,20 @@ exports.subscriberCheck = async (req, res, next) => {
   }
 };
 
+exports.eligibleForRefund = async (req, res, next) => {
+  console.log('eligibleForRefund middleware => ', req.user);
+  const { email } = req.user;
+  const eligible = await User.findOne({ email }).exec();
+
+  if (eligible.membership.trialPeriod === false) {
+    res.status(403).json({
+      err: 'Trial period expired. Access denied',
+    });
+  } else {
+    next();
+  }
+};
+
 exports.addFollower = async (req, res, next) => {
   // console.log('add follower middleware response => ', req.body);
   try {

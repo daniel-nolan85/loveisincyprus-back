@@ -357,7 +357,7 @@ exports.findUsers = async (req, res) => {
     const users = await User.aggregate([
       { $match: { _id: { $nin: following } } },
       { $sample: { size: 5 } },
-    ]);
+    ]).select('_id name email username profileImage');
     res.json(users);
   } catch (err) {
     console.log('findUsers => ', err);

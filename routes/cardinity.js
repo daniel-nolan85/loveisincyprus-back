@@ -3,7 +3,11 @@ const express = require('express');
 const router = express.Router();
 
 // middleware
-const { authCheck, adminCheck } = require('../middleware/auth');
+const {
+  authCheck,
+  adminCheck,
+  eligibleForRefund,
+} = require('../middleware/auth');
 
 // controllers
 const {
@@ -19,6 +23,11 @@ router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-payment', authCheck, createPayment);
 router.post('/create-ad-payment', authCheck, adminCheck, createAdPayment);
 router.post('/create-membership-payment', authCheck, createMembershipPayment);
-router.post('/refund-subscription', authCheck, refundSubscription);
+router.post(
+  '/refund-subscription',
+  authCheck,
+  eligibleForRefund,
+  refundSubscription
+);
 
 module.exports = router;
