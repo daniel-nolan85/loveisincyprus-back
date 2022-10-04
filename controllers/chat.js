@@ -5,15 +5,15 @@ const Message = require('../models/message');
 exports.accessChat = async (req, res) => {
   //   console.log('accessChat controller response => ', req.body);
 
-  const { user, u } = req.body;
+  const { _id, u } = req.body;
 
-  if (!user._id) {
+  if (!_id) {
     console.log('User Id param not sent with this request');
     return res.sendStatus(400);
   }
   let isChat = await Chat.find({
     $and: [
-      { users: { $elemMatch: { $eq: user._id } } },
+      { users: { $elemMatch: { $eq: _id } } },
       { users: { $elemMatch: { $eq: u._id } } },
     ],
   })
@@ -29,7 +29,7 @@ exports.accessChat = async (req, res) => {
     res.send(isChat[0]);
   } else {
     const chatData = {
-      users: [user._id, u._id],
+      users: [_id, u._id],
     };
     try {
       const createdChat = await Chat.create(chatData);
@@ -47,10 +47,10 @@ exports.accessChat = async (req, res) => {
 exports.fetchChats = async (req, res) => {
   //   console.log('fetchChats controller response => ', req.body);
 
-  const { user } = req.body;
+  const { _id } = req.body;
 
   try {
-    Chat.find({ users: { $elemMatch: { $eq: user._id } } })
+    Chat.find({ users: { $elemMatch: { $eq: _id } } })
       .populate('users')
       .populate('latestMessage')
       .sort({ updatedAt: -1 })

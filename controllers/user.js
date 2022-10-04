@@ -359,10 +359,10 @@ exports.removePoints = async (req, res) => {
 
 exports.spentPoints = async (req, res) => {
   console.log('spentPoints controller response => ', req.body);
-  const { number, reason, user, couponName } = req.body;
+  const { number, reason, _id, couponName } = req.body;
   if (reason === 'featured') {
-    const addToFeatured = await User.findOneAndUpdate(
-      { email: req.user.email },
+    const addToFeatured = await User.findByIdAndUpdate(
+      { _id },
       {
         $push: { pointsSpent: { amount: number, reason } },
         featuredMember: true,
@@ -373,8 +373,8 @@ exports.spentPoints = async (req, res) => {
   }
 
   if (reason === 'events') {
-    const addToEvents = await User.findOneAndUpdate(
-      { email: req.user.email },
+    const addToEvents = await User.findByIdAndUpdate(
+      { _id },
       {
         $push: { pointsSpent: { amount: number, reason } },
         eventsEligible: true,
@@ -385,8 +385,8 @@ exports.spentPoints = async (req, res) => {
   }
 
   if (reason === 'five') {
-    const fivePercent = await User.findOneAndUpdate(
-      { email: req.user.email },
+    const fivePercent = await User.findByIdAndUpdate(
+      { _id },
       {
         $push: { pointsSpent: { amount: number, reason } },
       },
@@ -402,7 +402,7 @@ exports.spentPoints = async (req, res) => {
 
     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
     const chat = await Chat.findOne({
-      users: { $size: 2, $all: [sender._id, user._id] },
+      users: { $size: 2, $all: [sender._id, _id] },
     });
     var newMessage = {
       sender,
@@ -433,8 +433,8 @@ exports.spentPoints = async (req, res) => {
   }
 
   if (reason === 'ten') {
-    const tenPercent = await User.findOneAndUpdate(
-      { email: req.user.email },
+    const tenPercent = await User.findByIdAndUpdate(
+      { _id },
       {
         $push: { pointsSpent: { amount: number, reason } },
       },
@@ -450,7 +450,7 @@ exports.spentPoints = async (req, res) => {
 
     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
     const chat = await Chat.findOne({
-      users: { $size: 2, $all: [sender._id, user._id] },
+      users: { $size: 2, $all: [sender._id, _id] },
     });
     var newMessage = {
       sender,

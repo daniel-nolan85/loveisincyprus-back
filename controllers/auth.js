@@ -78,7 +78,7 @@ exports.createOrUpdateUser = async (req, res) => {
     ).exec();
     res.json(trialEnded);
   } else if (user) {
-    console.log('USER UPDATED', user);
+    // console.log('USER UPDATED', user);
     res.json(user);
   } else {
     const newUser = await new User({
@@ -357,7 +357,7 @@ exports.findUsers = async (req, res) => {
     const users = await User.aggregate([
       { $match: { _id: { $nin: following } } },
       { $sample: { size: 5 } },
-    ]).select('_id name email username profileImage');
+    ]);
     res.json(users);
   } catch (err) {
     console.log('findUsers => ', err);
@@ -488,7 +488,7 @@ exports.userUnfollow = async (req, res) => {
 
 exports.userFollowing = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body._id);
     const following = await User.find({ _id: user.following }).select(
       '_id name email username profileImage'
     );
@@ -513,16 +513,17 @@ exports.userFollowers = async (req, res) => {
 exports.userMatches = async (req, res) => {
   // console.log('userMatches controller response => ', req.body);
   try {
-    const user = await User.findById(req.body.user._id);
-    const matches = await User.find({ _id: user.matches }).select(
-      '_id name email username profileImage'
-    );
+    const user = await User.findById(req.body._id);
+    const matches = await User.find({ _id: user.matches })
+      .select('_id name email username profileImage')
+      .exec();
     // if (req.body.chats && req.body.chats.length > 0) {
     //   const { chats } = req.body;
     //   matches.sort(
     //     (a, b) => b.chats.updatedAt - a.chats.updatedAt
     //   );
     // }
+    console.log('matches => ', matches);
     res.json(matches);
   } catch (err) {
     console.log('userMatches => ', err);

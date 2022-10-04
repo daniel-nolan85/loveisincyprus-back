@@ -24,3 +24,18 @@ exports.remove = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.update = async (req, res) => {
+  console.log('update controller response => ', req.body);
+  try {
+    const { name, discount, expiry } = req.body.coupon;
+    res.json(
+      await Coupon.findByIdAndUpdate(
+        { _id: req.params.couponId },
+        { name, discount, expiry }
+      ).exec()
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};

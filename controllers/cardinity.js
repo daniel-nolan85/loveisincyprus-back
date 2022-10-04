@@ -38,7 +38,7 @@ exports.calculateFinalAmount = async (req, res) => {
 exports.createPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
   const payable = (req.body.payable / 100).toFixed(2).toString();
-  const { userAgent, user } = req.body;
+  const { userAgent } = req.body;
 
   const purchase = new Payment({
     amount: payable,

@@ -6,11 +6,12 @@ const router = express.Router();
 const { authCheck, adminCheck } = require('../middleware/auth');
 
 // controllers
-const { create, list, remove } = require('../controllers/coupon');
+const { create, list, remove, update } = require('../controllers/coupon');
 
 // routes
 router.post('/coupon', authCheck, adminCheck, create);
 router.get('/coupons', list);
 router.delete('/coupon/:couponId', authCheck, adminCheck, remove);
+router.put('/coupon/:couponId', authCheck, adminCheck, update);
 
 module.exports = router;
