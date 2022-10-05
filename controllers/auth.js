@@ -4,6 +4,7 @@ const Location = require('../models/location');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const Event = require('../models/event');
+const Order = require('../models/order');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
@@ -674,10 +675,18 @@ exports.deleteUser = async (req, res) => {
 exports.recentUsers = async (req, res) => {
   try {
     const users = await User.find().sort({ createdAt: -1 }).limit(6);
-    // console.log(users);
     res.json(users);
   } catch (err) {
     console.log('recentUsers => ', err);
+  }
+};
+
+exports.recentOrders = async (req, res) => {
+  try {
+    const orders = await Order.find().sort({ createdAt: -1 }).limit(10);
+    res.json(orders);
+  } catch (err) {
+    console.log('recentOrders => ', err);
   }
 };
 
@@ -727,9 +736,9 @@ exports.usersToSwipe = async (req, res) => {
     }
     const total = await User.find();
     let usersAvailable = total.length - usersUnavailable.length;
-    const users = await User.find({ _id: { $nin: usersUnavailable } }).limit(
-      usersAvailable
-    );
+    const users = await User.find({ _id: { $nin: usersUnavailable } })
+      .limit(usersAvailable)
+      .select('_id name email profileImage age');
     // const users = await User.aggregate([
     //   { $match: { _id: { $nin: usersUnavailable } } },
     //   { $sample: { size: usersAvailable } },
@@ -994,4 +1003,37 @@ exports.removeExpiredFeatures = async (req, res) => {
   ).exec();
 
   res.json({ ok: true });
+};
+
+exports.dailyMatches = async (req, res) => {
+  const firstMember = await User.findById('621f58d359389f13dcc05a71');
+  const inception = firstMember.createdAt;
+  const today = Date.now();
+  const differenceTime = today - inception.getTime();
+  const differenceDays = Math.floor(differenceTime / (1000 * 3600 * 24));
+  const matches = await User.aggregate([
+    { $unwind: '$matches' },
+    {
+      $group: {
+        _id: '',
+        count: { $sum: 1 },
+      },
+    },
+  ]);
+  const numMatches = matches[0].count / 2;
+  const numDailyMatches = Math.ceil(numMatches / differenceDays);
+
+  res.json(numDailyMatches);
+};
+
+exports.dailySignups = async (req, res) => {
+  const firstMember = await User.findById('621f58d359389f13dcc05a71');
+  const inception = firstMember.createdAt;
+  const today = Date.now();
+  const differenceTime = today - inception.getTime();
+  const differenceDays = Math.floor(differenceTime / (1000 * 3600 * 24));
+  const signups = await User.find().estimatedDocumentCount();
+  const numDailySignups = Math.ceil(signups / differenceDays);
+
+  res.json(numDailySignups);
 };

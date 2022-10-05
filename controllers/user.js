@@ -1478,3 +1478,12 @@ exports.clearProfileImage = async (req, res) => {
     res.json(clearImage);
   }
 };
+
+exports.totalUsers = async (req, res) => {
+  try {
+    const total = await User.find().estimatedDocumentCount();
+    res.json(total);
+  } catch (err) {
+    console.log(err);
+  }
+};

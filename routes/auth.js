@@ -40,6 +40,7 @@ const {
   users,
   deleteUser,
   recentUsers,
+  recentOrders,
   searchPosts,
   fetchLocations,
   handleWhitelist,
@@ -50,6 +51,8 @@ const {
   removeUserFromFeaturedMembers,
   fetchFeaturedMembers,
   removeExpiredFeatures,
+  dailyMatches,
+  dailySignups,
 } = require('../controllers/auth');
 
 // routes
@@ -83,6 +86,7 @@ router.get('/fetch-whitelist', fetchWhitelist);
 router.post('/users', authCheck, adminCheck, users);
 router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
+router.post('/recent-orders', authCheck, adminCheck, recentOrders);
 router.post('/admin/search-posts/:query', authCheck, adminCheck, searchPosts);
 router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
@@ -109,5 +113,7 @@ router.put(
 );
 router.get('/fetch-featured-members', fetchFeaturedMembers);
 router.put('/remove-expired-features', removeExpiredFeatures);
+router.get('/daily-matches', dailyMatches);
+router.get('/daily-signups', dailySignups);
 
 module.exports = router;
