@@ -168,7 +168,7 @@ exports.saveAddress = async (req, res) => {
   // console.log('saveAddress controller response => ', req.body);
   const userAddress = await User.findOneAndUpdate(
     { email: req.user.email },
-    { address: req.body.address }
+    { $addToSet: { address: req.body.address } }
   ).exec();
   res.json({ ok: true });
 };
@@ -205,6 +205,7 @@ exports.applyCouponToUserCart = async (req, res) => {
 exports.createOrder = async (req, res) => {
   console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
+  const deliveryAddress = req.body.deliveryAddress;
   const user = await User.findOne({ email: req.user.email }).exec();
   let { products } = await Cart.findOne({ orderedBy: user._id }).exec();
 
@@ -212,6 +213,7 @@ exports.createOrder = async (req, res) => {
     products,
     paymentIntent,
     orderedBy: user._id,
+    deliveryAddress,
   }).save();
 
   let bulkOption = products.map((item) => {

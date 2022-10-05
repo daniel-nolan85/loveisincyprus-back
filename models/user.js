@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    address: Object,
+    address: [{ type: Object }],
     wishlist: [{ type: ObjectId, ref: 'Product' }],
     // points: { type: Number, awarded: { type: Date, default: Date.now } },
     pointsGained: [

@@ -660,9 +660,9 @@ exports.deleteUser = async (req, res) => {
     const following = await User.updateMany({ $pull: { following: u._id } });
     const matches = await User.updateMany({ $pull: { matches: u._id } });
     const visitors = await User.updateMany({ $pull: { visitors: u._id } });
-    const invitees = await Event.updateMany({
-      $pull: { 'invitees._id': u._id },
-    });
+    // const invitees = await Event.updateMany({
+    //   $pull: { 'invitees._id': u._id },
+    // });
     const accepted = await Event.updateMany({ $pull: { accepted: u._id } });
     const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
     const declined = await Event.updateMany({ $pull: { declined: u._id } });

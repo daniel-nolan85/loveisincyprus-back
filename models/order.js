@@ -26,6 +26,7 @@ const orderSchema = new mongoose.Schema(
       ],
     },
     orderedBy: { type: ObjectId, ref: 'User' },
+    deliveryAddress: Object,
   },
   { timestamps: true }
 );
