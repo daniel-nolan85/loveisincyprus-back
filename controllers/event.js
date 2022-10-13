@@ -409,14 +409,14 @@ exports.updateEventComment = async (req, res) => {
 };
 
 // remove user notifications
-// exports.expiredEvent = async (req, res) => {
-//   // console.log('expiredEvent controller response => ', req.body);
-//   const expired = await User.findByIdAndUpdate(
-//     { _id: req.body.user._id },
-//     { $pull: { notifications: { new: false } } }
-//   );
-//   res.json(expired);
-// };
+exports.expiredEvent = async (req, res) => {
+  // console.log('expiredEvent controller response => ', req.body);
+  const expired = await User.findByIdAndUpdate(
+    { _id: req.body.user._id },
+    { $pull: { notifications: { new: false } } }
+  );
+  res.json(expired);
+};
 
 // remove user events
 // exports.expiredEvent = async (req, res) => {
@@ -427,14 +427,14 @@ exports.updateEventComment = async (req, res) => {
 //   res.json(expired);
 // };
 
-exports.expiredEvent = async (req, res) => {
-  const expired = await User.updateMany(
-    { 'events.when': { $lte: new Date() } },
-    { 'events.$.expired': true },
-    { multi: true }
-  );
-  res.json(expired);
-};
+// exports.expiredEvent = async (req, res) => {
+//   const expired = await User.updateMany(
+//     { 'events.when': { $lte: new Date() } },
+//     { 'events.$.expired': true },
+//     { multi: true }
+//   );
+//   res.json(expired);
+// };
 
 exports.acceptEventInvite = async (req, res) => {
   console.log('acceptEventInvite controller response => ', req.body);
@@ -562,4 +562,35 @@ exports.declineEventInvite = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.removeUserEvent = async (req, res) => {
+  console.log('removeUserEvent controller response => ', req.body);
+  const { _id, event } = req.body;
+  const removeEvent = await User.findByIdAndUpdate(
+    { _id },
+    { $pull: { events: { _id: event._id } } }
+  );
+  const removeInvite = await Event.findByIdAndUpdate(
+    { _id: event._id },
+    {
+      $pull: { invitees: { _id } },
+    }
+  );
+  const updateNotification = await User.findOneAndUpdate(
+    {
+      _id,
+      'notifications.notif.createdAt': new Date(event.createdAt),
+    },
+    {
+      $pull: {
+        'notifications.$.notif.invitees': { email: req.user.email },
+        'notifications.$.notif.accepted': { email: req.user.email },
+        'notifications.$.notif.maybe': { email: req.user.email },
+        'notifications.$.notif.declined': { email: req.user.email },
+      },
+    }
+  );
+  // console.log('updateNotification => ', updateNotification);
+  res.json(updateNotification);
 };
