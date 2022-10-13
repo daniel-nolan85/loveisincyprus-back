@@ -49,6 +49,7 @@ const {
   expiredMembership,
   clearProfileImage,
   totalUsers,
+  fetchProducts,
 } = require('../controllers/user');
 
 // routes
@@ -95,5 +96,6 @@ router.get('/fetch-user-searches', fetchUserSearches);
 router.put('/expired-membership', expiredMembership);
 router.put('/clear-profile-image', authCheck, clearProfileImage);
 router.get('/total-users', totalUsers);
+router.post('/fetch-products', fetchProducts);
 
 module.exports = router;

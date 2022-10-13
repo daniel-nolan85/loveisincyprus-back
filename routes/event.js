@@ -29,6 +29,10 @@ const {
   addEventComment,
   removeEventComment,
   updateEventComment,
+  expiredEvent,
+  acceptEventInvite,
+  maybeEventInvite,
+  declineEventInvite,
 } = require('../controllers/event');
 
 // routes
@@ -69,5 +73,9 @@ router.put(
   canEditComment,
   updateEventComment
 );
+router.put('/expired-event', expiredEvent);
+router.post('/accept-event-invite', authCheck, acceptEventInvite);
+router.post('/maybe-event-invite', authCheck, maybeEventInvite);
+router.post('/decline-event-invite', authCheck, declineEventInvite);
 
 module.exports = router;

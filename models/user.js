@@ -93,6 +93,7 @@ const userSchema = new mongoose.Schema(
         invitees: [],
         cancelled: Boolean,
         going: String,
+        expired: { type: Boolean, default: false },
       },
     ],
     language: String,

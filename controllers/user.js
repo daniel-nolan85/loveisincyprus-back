@@ -165,7 +165,7 @@ exports.emptyCart = async (req, res) => {
 };
 
 exports.saveAddress = async (req, res) => {
-  // console.log('saveAddress controller response => ', req.body);
+  console.log('saveAddress controller response => ', req.body);
   const userAddress = await User.findOneAndUpdate(
     { email: req.user.email },
     { $addToSet: { address: req.body.address } }
@@ -205,16 +205,20 @@ exports.applyCouponToUserCart = async (req, res) => {
 exports.createOrder = async (req, res) => {
   console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
-  const deliveryAddress = req.body.deliveryAddress;
+  const { deliverTo, deliveryAddress } = req.body;
   const user = await User.findOne({ email: req.user.email }).exec();
-  let { products } = await Cart.findOne({ orderedBy: user._id }).exec();
-
+  let { products } = await Cart.findOne({ orderedBy: user._id })
+    .populate('products.product', 'title')
+    .exec();
   let newOrder = await new Order({
     products,
     paymentIntent,
     orderedBy: user._id,
+    deliverTo,
     deliveryAddress,
-  }).save();
+  })
+    .populate('products.product', 'title')
+    .save();
 
   let bulkOption = products.map((item) => {
     return {
@@ -229,7 +233,7 @@ exports.createOrder = async (req, res) => {
   console.log('product quantity-- and sold ++', updated);
 
   console.log('new order saved', newOrder);
-  res.json({ ok: true });
+  res.json(newOrder);
 };
 
 exports.orders = async (req, res) => {
@@ -559,12 +563,18 @@ exports.markNotifAsRead = async (req, res) => {
 exports.acceptInvite = async (req, res) => {
   console.log('acceptInvite controller response => ', req.body);
   try {
-    const user = await User.findOneAndUpdate(
-      { email: req.user.email },
-      {
-        $addToSet: { events: req.body.post.notif },
-      }
-    );
+    const existingInvite = await User.findOne({
+      _id: req.body.user._id,
+      'events._id': req.body.post.notif._id,
+    });
+    if (!existingInvite) {
+      const user = await User.findOneAndUpdate(
+        { email: req.user.email },
+        {
+          $addToSet: { events: req.body.post.notif },
+        }
+      );
+    }
     const event = await Event.findOneAndUpdate(
       {
         _id: req.body.post.notif._id,
@@ -574,6 +584,9 @@ exports.acceptInvite = async (req, res) => {
         $addToSet: { accepted: req.body.user._id },
       }
     ).populate('accepted', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
     const notification = await User.findOneAndUpdate(
       {
         email: req.user.email,
@@ -581,20 +594,20 @@ exports.acceptInvite = async (req, res) => {
       },
       {
         $pull: {
-          'notifications.$.notif.maybe': { _id: req.body.user._id },
-          'notifications.$.notif.declined': { _id: req.body.user._id },
+          'notifications.$.notif.maybe': { email: req.user.email },
+          'notifications.$.notif.declined': { email: req.user.email },
         },
-        $addToSet: { 'notifications.$.notif.accepted': req.body.user },
+        $addToSet: { 'notifications.$.notif.accepted': smallUser },
       }
     );
-    // const isGoing = await User.findOneAndUpdate(
-    //   {
-    //     email: req.user.email,
-    //     'events._id': req.body.post.notif._id,
-    //   },
-    //   { $set: { 'events.$.going': 'yes' } }
-    // );
-    res.json(user);
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post.notif._id,
+      },
+      { $set: { 'events.$.going': 'yes' } }
+    );
+    res.json(isGoing);
   } catch (err) {
     console.log(err);
   }
@@ -603,12 +616,18 @@ exports.acceptInvite = async (req, res) => {
 exports.maybe = async (req, res) => {
   console.log('maybe controller response => ', req.body);
   try {
-    const user = await User.findOneAndUpdate(
-      { email: req.user.email },
-      {
-        $addToSet: { events: req.body.post.notif },
-      }
-    );
+    const existingInvite = await User.findOne({
+      _id: req.body.user._id,
+      'events._id': req.body.post.notif._id,
+    });
+    if (!existingInvite) {
+      const user = await User.findOneAndUpdate(
+        { email: req.user.email },
+        {
+          $addToSet: { events: req.body.post.notif },
+        }
+      );
+    }
     const event = await Event.findOneAndUpdate(
       {
         _id: req.body.post.notif._id,
@@ -618,6 +637,9 @@ exports.maybe = async (req, res) => {
         $addToSet: { maybe: req.body.user._id },
       }
     ).populate('maybe', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
     const notification = await User.findOneAndUpdate(
       {
         email: req.user.email,
@@ -625,34 +647,40 @@ exports.maybe = async (req, res) => {
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { _id: req.body.user._id },
-          'notifications.$.notif.declined': { _id: req.body.user._id },
+          'notifications.$.notif.accepted': { email: req.user.email },
+          'notifications.$.notif.declined': { email: req.user.email },
         },
-        $addToSet: { 'notifications.$.notif.maybe': req.body.user },
+        $addToSet: { 'notifications.$.notif.maybe': smallUser },
       }
     );
-    // const isGoing = await User.findOneAndUpdate(
-    //   {
-    //     email: req.user.email,
-    //     'events._id': req.body.post.notif._id,
-    //   },
-    //   { $set: { 'events.$.going': 'maybe' } }
-    // );
-    res.json(user);
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post.notif._id,
+      },
+      { $set: { 'events.$.going': 'maybe' } }
+    );
+    res.json(isGoing);
   } catch (err) {
     console.log(err);
   }
 };
 
 exports.declineInvite = async (req, res) => {
-  console.log('decline controller response => ', req.body);
+  console.log('declineInvite controller response => ', req.body);
   try {
-    const user = await User.findOneAndUpdate(
-      { email: req.user.email },
-      {
-        $addToSet: { events: req.body.post.notif },
-      }
-    );
+    const existingInvite = await User.findOne({
+      _id: req.body.user._id,
+      'events._id': req.body.post.notif._id,
+    });
+    if (!existingInvite) {
+      const user = await User.findOneAndUpdate(
+        { email: req.user.email },
+        {
+          $addToSet: { events: req.body.post.notif },
+        }
+      );
+    }
     const event = await Event.findOneAndUpdate(
       {
         _id: req.body.post.notif._id,
@@ -662,6 +690,9 @@ exports.declineInvite = async (req, res) => {
         $addToSet: { declined: req.body.user._id },
       }
     ).populate('declined', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
     const notification = await User.findOneAndUpdate(
       {
         email: req.user.email,
@@ -669,20 +700,20 @@ exports.declineInvite = async (req, res) => {
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { _id: req.body.user._id },
-          'notifications.$.notif.maybe': { _id: req.body.user._id },
+          'notifications.$.notif.accepted': { email: req.user.email },
+          'notifications.$.notif.maybe': { email: req.user.email },
         },
-        $addToSet: { 'notifications.$.notif.declined': req.body.user },
+        $addToSet: { 'notifications.$.notif.declined': smallUser },
       }
     );
-    // const isGoing = await User.findOneAndUpdate(
-    //   {
-    //     email: req.user.email,
-    //     'events._id': req.body.post.notif._id,
-    //   },
-    //   { $set: { 'events.$.going': 'no' } }
-    // );
-    res.json(user);
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post.notif._id,
+      },
+      { $set: { 'events.$.going': 'no' } }
+    );
+    res.json(isGoing);
   } catch (err) {
     console.log(err);
   }
@@ -1488,4 +1519,12 @@ exports.totalUsers = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.fetchProducts = async (req, res) => {
+  console.log('fetchProducts controller response => ', req.body);
+  const products = await Order.findById({ _id: req.body._id })
+    .populate('products.product')
+    .exec();
+  res.json(products);
 };

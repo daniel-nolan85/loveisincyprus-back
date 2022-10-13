@@ -80,7 +80,7 @@ exports.fetchUserEvents = async (req, res) => {
   console.log('fetchUserEvents controller response => ', req.body);
   res.json(
     await Event.find({
-      invitees: { $elemMatch: { _id: req.body.user._id } },
+      invitees: { $elemMatch: { _id: req.body._id } },
     }).exec()
   );
 };
@@ -89,7 +89,7 @@ exports.fetchPrevEvents = async (req, res) => {
   console.log('fetchPrevEvents controller response => ', req.body);
   res.json(
     await Event.find({
-      invitees: { $elemMatch: { _id: req.body.user._id } },
+      invitees: { $elemMatch: { _id: req.body._id } },
       when: { $lt: new Date() },
     }).exec()
   );
@@ -99,7 +99,7 @@ exports.fetchComingEvents = async (req, res) => {
   console.log('fetchComingEvents controller response => ', req.body);
   res.json(
     await Event.find({
-      invitees: { $elemMatch: { _id: req.body.user._id } },
+      invitees: { $elemMatch: { _id: req.body._id } },
       when: { $gt: new Date() },
     }).exec()
   );
@@ -109,6 +109,9 @@ exports.fetchEvent = async (req, res) => {
   console.log('fetchEvent controller response => ', req.body);
   res.json(
     await Event.findById(req.body.params.eventId)
+      .populate('accepted', '_id name email profileImage')
+      .populate('maybe', '_id name email profileImage')
+      .populate('declined', '_id name email profileImage')
       .populate('post.postedBy', '_id name email profileImage')
       .populate('post.likes', '_id name email profileImage')
       .populate('post.comments.postedBy', '_id name email profileImage')
@@ -400,6 +403,162 @@ exports.updateEventComment = async (req, res) => {
       ],
     });
     res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// remove user notifications
+// exports.expiredEvent = async (req, res) => {
+//   // console.log('expiredEvent controller response => ', req.body);
+//   const expired = await User.findByIdAndUpdate(
+//     { _id: req.body.user._id },
+//     { $pull: { notifications: { new: false } } }
+//   );
+//   res.json(expired);
+// };
+
+// remove user events
+// exports.expiredEvent = async (req, res) => {
+//   const expired = await User.findByIdAndUpdate(
+//     { _id: req.body.user._id },
+//     { $pull: { events: { cancelled: false } } }
+//   );
+//   res.json(expired);
+// };
+
+exports.expiredEvent = async (req, res) => {
+  const expired = await User.updateMany(
+    { 'events.when': { $lte: new Date() } },
+    { 'events.$.expired': true },
+    { multi: true }
+  );
+  res.json(expired);
+};
+
+exports.acceptEventInvite = async (req, res) => {
+  console.log('acceptEventInvite controller response => ', req.body);
+  try {
+    const event = await Event.findOneAndUpdate(
+      {
+        _id: req.body.post._id,
+      },
+      {
+        $pull: { maybe: req.body.user._id, declined: req.body.user._id },
+        $addToSet: { accepted: req.body.user._id },
+      }
+    ).populate('accepted', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
+    const notification = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'notifications.notif.createdAt': new Date(req.body.post.createdAt),
+      },
+      {
+        $pull: {
+          'notifications.$.notif.maybe': { email: req.user.email },
+          'notifications.$.notif.declined': { email: req.user.email },
+        },
+        $addToSet: { 'notifications.$.notif.accepted': smallUser },
+      }
+    );
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post._id,
+      },
+      { $set: { 'events.$.going': 'yes' } }
+    );
+    res.json(isGoing);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.maybeEventInvite = async (req, res) => {
+  console.log('maybe controller response => ', req.body);
+  try {
+    const event = await Event.findOneAndUpdate(
+      {
+        _id: req.body.post._id,
+      },
+      {
+        $pull: { accepted: req.body.user._id, declined: req.body.user._id },
+        $addToSet: { maybe: req.body.user._id },
+      }
+    ).populate('maybe', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
+    const notification = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'notifications.notif.createdAt': new Date(req.body.post.createdAt),
+      },
+      {
+        $pull: {
+          'notifications.$.notif.accepted': { email: req.user.email },
+          'notifications.$.notif.declined': { email: req.user.email },
+        },
+        $addToSet: { 'notifications.$.notif.maybe': smallUser },
+      }
+    );
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post._id,
+      },
+      { $set: { 'events.$.going': 'maybe' } }
+    );
+    res.json(isGoing);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.declineEventInvite = async (req, res) => {
+  console.log('declineInvite controller response body => ', req.body);
+  console.log('declineInvite controller response user => ', req.user);
+  const id = req.body.post._id;
+  // console.log('id => ', id);
+  try {
+    const event = await Event.findOneAndUpdate(
+      {
+        _id: req.body.post._id,
+      },
+      {
+        $pull: { accepted: req.body.user._id, maybe: req.body.user._id },
+        $addToSet: { declined: req.body.user._id },
+      }
+    ).populate('declined', '_id name email profileImage');
+    const smallUser = await User.findById({ _id: req.body.user._id }).select(
+      '_id name email username profileImage'
+    );
+    const notification = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        // 'notifications.notif': { $elemMatch: { _id: req.body.post._id } },
+        'notifications.notif.createdAt': new Date(req.body.post.createdAt),
+      },
+      {
+        $pull: {
+          'notifications.$.notif.accepted': { email: req.user.email },
+          'notifications.$.notif.maybe': { email: req.user.email },
+        },
+        $addToSet: { 'notifications.$.notif.declined': smallUser },
+      }
+    );
+    // console.log('notification => ', notification);
+    const isGoing = await User.findOneAndUpdate(
+      {
+        email: req.user.email,
+        'events._id': req.body.post._id,
+      },
+      { $set: { 'events.$.going': 'no' } }
+    );
+    res.json(isGoing);
   } catch (err) {
     console.log(err);
   }
