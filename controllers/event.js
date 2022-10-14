@@ -409,14 +409,14 @@ exports.updateEventComment = async (req, res) => {
 };
 
 // remove user notifications
-exports.expiredEvent = async (req, res) => {
-  // console.log('expiredEvent controller response => ', req.body);
-  const expired = await User.findByIdAndUpdate(
-    { _id: req.body.user._id },
-    { $pull: { notifications: { new: false } } }
-  );
-  res.json(expired);
-};
+// exports.expiredEvent = async (req, res) => {
+//   // console.log('expiredEvent controller response => ', req.body);
+//   const expired = await User.findByIdAndUpdate(
+//     { _id: req.body.user._id },
+//     { $pull: { notifications: { new: false } } }
+//   );
+//   res.json(expired);
+// };
 
 // remove user events
 // exports.expiredEvent = async (req, res) => {
@@ -427,14 +427,14 @@ exports.expiredEvent = async (req, res) => {
 //   res.json(expired);
 // };
 
-// exports.expiredEvent = async (req, res) => {
-//   const expired = await User.updateMany(
-//     { 'events.when': { $lte: new Date() } },
-//     { 'events.$.expired': true },
-//     { multi: true }
-//   );
-//   res.json(expired);
-// };
+exports.expiredEvent = async (req, res) => {
+  const expired = await User.updateMany(
+    { 'events.when': { $lte: new Date() } },
+    { 'events.$.expired': true },
+    { multi: true }
+  );
+  res.json(expired);
+};
 
 exports.acceptEventInvite = async (req, res) => {
   console.log('acceptEventInvite controller response => ', req.body);
