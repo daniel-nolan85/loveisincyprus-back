@@ -17,7 +17,7 @@ exports.accessChat = async (req, res) => {
       { users: { $elemMatch: { $eq: u._id } } },
     ],
   })
-    .populate('users')
+    .populate('users', 'name username email profileImage')
     .populate('latestMessage');
 
   isChat = await User.populate(isChat, {
@@ -34,7 +34,8 @@ exports.accessChat = async (req, res) => {
     try {
       const createdChat = await Chat.create(chatData);
       const fullChat = await Chat.findOne({ _id: createdChat._id }).populate(
-        'users'
+        'users',
+        'name username email profileImage'
       );
       res.status(200).send(fullChat);
     } catch (err) {
@@ -51,7 +52,7 @@ exports.fetchChats = async (req, res) => {
 
   try {
     Chat.find({ users: { $elemMatch: { $eq: _id } } })
-      .populate('users')
+      .populate('users', '_id name email username profileImage')
       .populate('latestMessage')
       .sort({ updatedAt: -1 })
       .then(async (results) => {
@@ -69,13 +70,13 @@ exports.fetchChats = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   // console.log('sendMessage controller response => ', req.body);
-  const { user, content, chatId } = req.body;
+  const { _id, content, chatId } = req.body;
 
   if (!content || !chatId) {
     console.log('Invalid data passed into this request');
     return res.sendStatus(400);
   }
-  const sender = await User.findOne({ _id: user._id });
+  const sender = await User.findOne({ _id });
   const chat = await Chat.findOne({ _id: chatId });
   var newMessage = {
     sender,
@@ -111,6 +112,7 @@ exports.allMessages = async (req, res) => {
     const messages = await Message.find({ chat: req.params.chatId })
       .populate('sender', 'name username email profileImage')
       .populate('chat');
+    // console.log('messages => ', messages);
     res.json(messages);
   } catch (err) {
     res.status(400);
@@ -119,7 +121,7 @@ exports.allMessages = async (req, res) => {
 };
 
 exports.massMail = async (req, res) => {
-  console.log('massMail controller response => ', req.body);
+  // console.log('massMail controller response => ', req.body);
   const { content, selected } = req.body;
 
   if (!content || selected.length < 1) {
@@ -141,8 +143,8 @@ exports.massMail = async (req, res) => {
     });
     chats.push(chat);
   }
-  console.log('userIds => ', userIds);
-  console.log('chats => ', chats);
+  // console.log('userIds => ', userIds);
+  // console.log('chats => ', chats);
 
   for (var i = 0; i < chats.length; i++) {
     var newMessage = {

@@ -37,11 +37,16 @@ exports.calculateFinalAmount = async (req, res) => {
 
 exports.createPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
-  const payable = (req.body.payable / 100).toFixed(2).toString();
+  const deliveryFee = parseFloat(req.body.deliveryFee.toFixed(2));
+  const payable = parseFloat((req.body.payable / 100).toFixed(2));
+  const amount = (payable + deliveryFee).toFixed(2).toString();
   const { userAgent } = req.body;
+  console.log('deliveryFee => ', deliveryFee);
+  console.log('payable => ', payable);
+  console.log('amount => ', amount);
 
   const purchase = new Payment({
-    amount: payable,
+    amount,
     currency: 'eur',
     country: 'CY',
     payment_method: 'card',

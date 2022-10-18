@@ -56,6 +56,13 @@ const productSchema = new mongoose.Schema(
         postedBy: { type: ObjectId, ref: 'User' },
       },
     ],
+    weight: {
+      type: Number,
+      trim: true,
+      required: true,
+      minlength: [1, 'Weight is too short'],
+      maxlength: [50, 'Weight is too long'],
+    },
   },
   { timestamps: true }
 );

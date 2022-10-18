@@ -29,7 +29,7 @@ exports.adminCheck = async (req, res, next) => {
 };
 
 exports.subscriberCheck = async (req, res, next) => {
-  console.log('subscriberCheck middleware => ', req.user);
+  // console.log('subscriberCheck middleware => ', req.user);
   const { email } = req.user;
   const subscriber = await User.findOne({ email }).exec();
 
@@ -43,7 +43,7 @@ exports.subscriberCheck = async (req, res, next) => {
 };
 
 exports.eligibleForRefund = async (req, res, next) => {
-  console.log('eligibleForRefund middleware => ', req.user);
+  // console.log('eligibleForRefund middleware => ', req.user);
   const { email } = req.user;
   const eligible = await User.findOne({ email }).exec();
 

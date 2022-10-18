@@ -39,3 +39,11 @@ exports.update = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.deleteAfterUse = async (req, res) => {
+  try {
+    res.json(await Coupon.findByIdAndDelete(req.params.couponId).exec());
+  } catch (err) {
+    console.log(err);
+  }
+};

@@ -199,13 +199,13 @@ exports.applyCouponToUserCart = async (req, res) => {
     { totalAfterDiscount },
     { new: true }
   ).exec();
-  res.json(totalAfterDiscount);
+  res.json({ validCoupon, totalAfterDiscount });
 };
 
 exports.createOrder = async (req, res) => {
   console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
-  const { deliverTo, deliveryAddress } = req.body;
+  const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
   const user = await User.findOne({ email: req.user.email }).exec();
   let { products } = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product', 'title')
@@ -216,6 +216,8 @@ exports.createOrder = async (req, res) => {
     orderedBy: user._id,
     deliverTo,
     deliveryAddress,
+    discount,
+    deliveryFee,
   })
     .populate('products.product', 'title')
     .save();
@@ -239,6 +241,7 @@ exports.createOrder = async (req, res) => {
 exports.orders = async (req, res) => {
   const user = await User.findOne({ email: req.user.email }).exec();
   const userOrders = await Order.find({ orderedBy: user._id })
+    .sort('-createdAt')
     .populate('products.product')
     .exec();
   res.json(userOrders);
@@ -303,7 +306,7 @@ exports.getUserPointsTotal = async (req, res) => {
 };
 
 exports.addPoints = async (req, res) => {
-  // console.log('addPoints controller response => ', req.body);
+  console.log('addPoints controller response => ', req.body);
   // console.log('addPoints controller response => ', req.user);
   try {
     const { number, reason, otherUser } = req.body;
