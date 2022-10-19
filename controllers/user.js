@@ -1377,14 +1377,14 @@ exports.optInOrOut = async (req, res) => {
       req.body.user._id,
       { optIn: false },
       { new: true }
-    );
+    ).select('optIn');
     res.json(optOut);
   } else {
     const optIn = await User.findByIdAndUpdate(
       req.body.user._id,
       { optIn: true },
       { new: true }
-    );
+    ).select('optIn');
     res.json(optIn);
   }
 };
