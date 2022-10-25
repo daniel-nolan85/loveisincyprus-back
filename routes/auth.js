@@ -13,7 +13,10 @@ const {
 
 // controllers
 const {
-  createOrUpdateUser,
+  // createOrUpdateUser,
+  userExists,
+  createUser,
+  loginUser,
   currentUser,
   profileUpdate,
   findUsers,
@@ -56,14 +59,23 @@ const {
 } = require('../controllers/auth');
 
 // routes
-router.post('/create-or-update-user', authCheck, createOrUpdateUser);
+// router.post('/create-or-update-user', authCheck, createOrUpdateUser);
+router.get('/user-exists/:mobile', userExists);
+router.post('/create-user', authCheck, createUser);
+router.post('/login-user', authCheck, loginUser);
 router.put('/profile-update', authCheck, profileUpdate);
 router.post('/current-user', authCheck, currentUser);
 router.post('/current-admin', authCheck, adminCheck, currentUser);
 router.post('/current-subscriber', authCheck, subscriberCheck, currentUser);
 router.post('/find-users', authCheck, findUsers);
-router.put('/user-follow', authCheck, addFollower, userFollow);
-router.put('/user-unfollow', authCheck, removeFollower, userUnfollow);
+router.put('/user-follow', authCheck, subscriberCheck, addFollower, userFollow);
+router.put(
+  '/user-unfollow',
+  authCheck,
+  subscriberCheck,
+  removeFollower,
+  userUnfollow
+);
 router.post('/liked-users', authCheck, userFollowing);
 router.post('/users-who-like-me', authCheck, userFollowers);
 router.post('/my-matches', authCheck, userMatches);

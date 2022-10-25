@@ -113,7 +113,7 @@ exports.visitorPhotos = async (req, res) => {
 exports.userCart = async (req, res) => {
   const { cart } = req.body;
   let products = [];
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   let cartExistByThisUser = await Cart.findOne({ orderedBy: user._id }).exec();
 
   if (cartExistByThisUser) {
@@ -149,7 +149,7 @@ exports.userCart = async (req, res) => {
 };
 
 exports.getUserCart = async (req, res) => {
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   let cart = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product')
     .exec();
@@ -159,7 +159,7 @@ exports.getUserCart = async (req, res) => {
 };
 
 exports.emptyCart = async (req, res) => {
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   const cart = await Cart.findOneAndRemove({ orderedBy: user._id }).exec();
   res.json(cart);
 };
@@ -167,7 +167,7 @@ exports.emptyCart = async (req, res) => {
 exports.saveAddress = async (req, res) => {
   console.log('saveAddress controller response => ', req.body);
   const userAddress = await User.findOneAndUpdate(
-    { email: req.user.email },
+    { mobile: req.user.phone_number },
     { $addToSet: { address: req.body.address } }
   ).exec();
   res.json({ ok: true });
@@ -183,7 +183,7 @@ exports.applyCouponToUserCart = async (req, res) => {
     });
   }
   console.log('VALID COUPON', validCoupon);
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   let { products, cartTotal } = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product', '_id title price')
     .exec();
@@ -206,7 +206,7 @@ exports.createOrder = async (req, res) => {
   console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   let { products } = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product', 'title')
     .exec();
@@ -239,7 +239,7 @@ exports.createOrder = async (req, res) => {
 };
 
 exports.orders = async (req, res) => {
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   const userOrders = await Order.find({ orderedBy: user._id })
     .sort('-createdAt')
     .populate('products.product')
@@ -250,14 +250,14 @@ exports.orders = async (req, res) => {
 exports.addToWishlist = async (req, res) => {
   const { productId } = req.body;
   const user = await User.findOneAndUpdate(
-    { email: req.user.email },
+    { mobile: req.user.phone_number },
     { $addToSet: { wishlist: productId } }
   ).exec();
   res.json({ ok: true });
 };
 
 exports.wishlist = async (req, res) => {
-  const list = await User.findOne({ email: req.user.email })
+  const list = await User.findOne({ mobile: req.user.phone_number })
     .select('wishlist')
     .populate('wishlist')
     .exec();
@@ -267,22 +267,22 @@ exports.wishlist = async (req, res) => {
 exports.removeFromWishlist = async (req, res) => {
   const { productId } = req.params;
   const user = await User.findOneAndUpdate(
-    { email: req.user.email },
+    { mobile: req.user.phone_number },
     { $pull: { wishlist: productId } }
   ).exec();
   res.json({ ok: true });
 };
 
 exports.getUserPointsTotal = async (req, res) => {
-  const numberToAdd = await User.findOne({ email: req.user.email }).select(
-    'pointsGained'
-  );
-  const numberToRemove = await User.findOne({ email: req.user.email }).select(
-    'pointsLost'
-  );
-  const numberSpent = await User.findOne({ email: req.user.email }).select(
-    'pointsSpent'
-  );
+  const numberToAdd = await User.findOne({
+    mobile: req.user.phone_number,
+  }).select('pointsGained');
+  const numberToRemove = await User.findOne({
+    mobile: req.user.phone_number,
+  }).select('pointsLost');
+  const numberSpent = await User.findOne({
+    mobile: req.user.phone_number,
+  }).select('pointsSpent');
   // numberToAdd.pointsGained.reduce((accumulator, object) => {
   //   return accumulator + object.amount;
   // }, 0);
@@ -313,7 +313,7 @@ exports.addPoints = async (req, res) => {
     const recentLogIn = await User.find({
       $and: [
         {
-          email: req.user.email,
+          mobile: req.user.phone_number,
           'pointsGained.reason': 'login',
           'pointsGained.awarded': {
             $gt: new Date(Date.now() - 24 * 60 * 60 * 1000),
@@ -336,7 +336,7 @@ exports.addPoints = async (req, res) => {
     }
 
     const awardPoints = await User.findOneAndUpdate(
-      { email: req.user.email },
+      { mobile: req.user.phone_number },
       {
         $push: { pointsGained: { amount: number, reason } },
       },
@@ -354,7 +354,7 @@ exports.removePoints = async (req, res) => {
   try {
     const { number, reason } = req.body;
     const removePoints = await User.findOneAndUpdate(
-      { email: req.user.email },
+      { mobile: req.user.phone_number },
       {
         $push: { pointsLost: { amount: number, reason } },
       },
@@ -491,7 +491,7 @@ exports.spentPoints = async (req, res) => {
 };
 
 exports.getUserPointsGainedData = async (req, res) => {
-  const data = await User.findOne({ email: req.user.email })
+  const data = await User.findOne({ mobile: req.user.phone_number })
     .select('pointsGained')
     .populate('pointsGained')
     .exec();
@@ -500,7 +500,7 @@ exports.getUserPointsGainedData = async (req, res) => {
 };
 
 exports.getUserPointsLostData = async (req, res) => {
-  const data = await User.findOne({ email: req.user.email })
+  const data = await User.findOne({ mobile: req.user.phone_number })
     .select('pointsLost')
     .populate('pointsLost')
     .exec();
@@ -509,7 +509,7 @@ exports.getUserPointsLostData = async (req, res) => {
 };
 
 exports.getUserPointsSpentData = async (req, res) => {
-  const data = await User.findOne({ email: req.user.email })
+  const data = await User.findOne({ mobile: req.user.phone_number })
     .select('pointsSpent')
     .populate('pointsSpent')
     .exec();
@@ -557,7 +557,7 @@ exports.populateNotifications = async (req, res) => {
 exports.markNotifAsRead = async (req, res) => {
   // console.log('markNotifAsRead controller response => ', req.body);
   const notif = await User.findOneAndUpdate(
-    { email: req.user.email, 'notifications._id': req.body.n._id },
+    { mobile: req.user.phone_number, 'notifications._id': req.body.n._id },
     { $set: { 'notifications.$.new': 'false' } }
   );
   res.json({ ok: true });
@@ -572,7 +572,7 @@ exports.acceptInvite = async (req, res) => {
     });
     if (!existingInvite) {
       const user = await User.findOneAndUpdate(
-        { email: req.user.email },
+        { mobile: req.user.phone_number },
         {
           $addToSet: { events: req.body.post.notif },
         }
@@ -592,20 +592,20 @@ exports.acceptInvite = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'notifications._id': req.body.post._id,
       },
       {
         $pull: {
-          'notifications.$.notif.maybe': { email: req.user.email },
-          'notifications.$.notif.declined': { email: req.user.email },
+          'notifications.$.notif.maybe': { mobile: req.user.phone_number },
+          'notifications.$.notif.declined': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.accepted': smallUser },
       }
     );
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post.notif._id,
       },
       { $set: { 'events.$.going': 'yes' } }
@@ -625,7 +625,7 @@ exports.maybe = async (req, res) => {
     });
     if (!existingInvite) {
       const user = await User.findOneAndUpdate(
-        { email: req.user.email },
+        { mobile: req.user.phone_number },
         {
           $addToSet: { events: req.body.post.notif },
         }
@@ -645,20 +645,20 @@ exports.maybe = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'notifications._id': req.body.post._id,
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { email: req.user.email },
-          'notifications.$.notif.declined': { email: req.user.email },
+          'notifications.$.notif.accepted': { mobile: req.user.phone_number },
+          'notifications.$.notif.declined': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.maybe': smallUser },
       }
     );
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post.notif._id,
       },
       { $set: { 'events.$.going': 'maybe' } }
@@ -678,7 +678,7 @@ exports.declineInvite = async (req, res) => {
     });
     if (!existingInvite) {
       const user = await User.findOneAndUpdate(
-        { email: req.user.email },
+        { mobile: req.user.phone_number },
         {
           $addToSet: { events: req.body.post.notif },
         }
@@ -698,20 +698,20 @@ exports.declineInvite = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'notifications._id': req.body.post._id,
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { email: req.user.email },
-          'notifications.$.notif.maybe': { email: req.user.email },
+          'notifications.$.notif.accepted': { mobile: req.user.phone_number },
+          'notifications.$.notif.maybe': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.declined': smallUser },
       }
     );
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post.notif._id,
       },
       { $set: { 'events.$.going': 'no' } }
@@ -727,7 +727,7 @@ exports.declineInvite = async (req, res) => {
 //   console.log('deleteNotification controller response => ', n);
 //   try {
 //     const notification = await User.findOneAndUpdate(
-//       { email: req.user.email },
+//       { mobile: req.user.phone_number },
 //       {
 //         $pull: {
 //           notifications: { notif: n._id },

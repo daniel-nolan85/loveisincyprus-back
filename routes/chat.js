@@ -15,13 +15,15 @@ const {
   sendMessage,
   allMessages,
   massMail,
+  chatMatches,
 } = require('../controllers/chat');
 
 // routes
-router.post('/access-chat', authCheck, subscriberCheck, accessChat);
-router.post('/fetch-chats', authCheck, subscriberCheck, fetchChats);
-router.post('/send-message', authCheck, subscriberCheck, sendMessage);
-router.get('/chats/:chatId', authCheck, subscriberCheck, allMessages);
+router.post('/access-chat', authCheck, accessChat);
+router.post('/fetch-chats', authCheck, fetchChats);
+router.post('/send-message', authCheck, sendMessage);
+router.get('/chats/:chatId', authCheck, allMessages);
 router.post('/mass-mail', authCheck, adminCheck, massMail);
+router.post('/my-chat-matches', authCheck, chatMatches);
 
 module.exports = router;

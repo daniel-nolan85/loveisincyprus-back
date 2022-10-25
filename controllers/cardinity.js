@@ -16,7 +16,7 @@ const client = new Client(
 
 exports.calculateFinalAmount = async (req, res) => {
   const { coupon } = req.body;
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   const { cartTotal, totalAfterDiscount } = await Cart.findOne({
     orderedBy: user._id,
   }).exec();

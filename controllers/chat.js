@@ -95,8 +95,19 @@ exports.sendMessage = async (req, res) => {
       path: 'chat.users',
       select: 'name username email profileImage',
     });
+    const receiver = chat.users.find((u) => u._id !== _id);
+    console.log('receiver => ', receiver);
+    const notifyReceiver = await User.findByIdAndUpdate(
+      { _id: receiver._id },
+      {
+        $push: {
+          messages: message,
+        },
+      },
+      { new: true }
+    );
 
-    await Chat.findByIdAndUpdate(chatId, {
+    const updateLatest = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
     });
     // console.log('message ==> ', message);
@@ -167,5 +178,21 @@ exports.massMail = async (req, res) => {
       latestMessage: message,
     });
     res.json(message);
+  }
+};
+
+exports.chatMatches = async (req, res) => {
+  try {
+    const user = await User.findById(req.body._id);
+    const matches = await User.find({ _id: user.matches })
+      .select('_id name email username profileImage')
+      .exec();
+    const admin = await User.findById('621f58d359389f13dcc05a71')
+      .select('_id name email username profileImage')
+      .exec();
+    const usersToChat = matches.concat(admin);
+    res.json(usersToChat);
+  } catch (err) {
+    console.log('userMatches => ', err);
   }
 };

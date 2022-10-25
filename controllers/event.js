@@ -453,20 +453,20 @@ exports.acceptEventInvite = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'notifications.notif.createdAt': new Date(req.body.post.createdAt),
       },
       {
         $pull: {
-          'notifications.$.notif.maybe': { email: req.user.email },
-          'notifications.$.notif.declined': { email: req.user.email },
+          'notifications.$.notif.maybe': { mobile: req.user.phone_number },
+          'notifications.$.notif.declined': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.accepted': smallUser },
       }
     );
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post._id,
       },
       { $set: { 'events.$.going': 'yes' } }
@@ -494,20 +494,20 @@ exports.maybeEventInvite = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'notifications.notif.createdAt': new Date(req.body.post.createdAt),
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { email: req.user.email },
-          'notifications.$.notif.declined': { email: req.user.email },
+          'notifications.$.notif.accepted': { mobile: req.user.phone_number },
+          'notifications.$.notif.declined': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.maybe': smallUser },
       }
     );
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post._id,
       },
       { $set: { 'events.$.going': 'maybe' } }
@@ -538,14 +538,14 @@ exports.declineEventInvite = async (req, res) => {
     );
     const notification = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         // 'notifications.notif': { $elemMatch: { _id: req.body.post._id } },
         'notifications.notif.createdAt': new Date(req.body.post.createdAt),
       },
       {
         $pull: {
-          'notifications.$.notif.accepted': { email: req.user.email },
-          'notifications.$.notif.maybe': { email: req.user.email },
+          'notifications.$.notif.accepted': { mobile: req.user.phone_number },
+          'notifications.$.notif.maybe': { mobile: req.user.phone_number },
         },
         $addToSet: { 'notifications.$.notif.declined': smallUser },
       }
@@ -553,7 +553,7 @@ exports.declineEventInvite = async (req, res) => {
     // console.log('notification => ', notification);
     const isGoing = await User.findOneAndUpdate(
       {
-        email: req.user.email,
+        mobile: req.user.phone_number,
         'events._id': req.body.post._id,
       },
       { $set: { 'events.$.going': 'no' } }
@@ -584,10 +584,10 @@ exports.removeUserEvent = async (req, res) => {
     },
     {
       $pull: {
-        'notifications.$.notif.invitees': { email: req.user.email },
-        'notifications.$.notif.accepted': { email: req.user.email },
-        'notifications.$.notif.maybe': { email: req.user.email },
-        'notifications.$.notif.declined': { email: req.user.email },
+        'notifications.$.notif.invitees': { mobile: req.user.phone_number },
+        'notifications.$.notif.accepted': { mobile: req.user.phone_number },
+        'notifications.$.notif.maybe': { mobile: req.user.phone_number },
+        'notifications.$.notif.declined': { mobile: req.user.phone_number },
       },
     }
   );

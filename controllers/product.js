@@ -104,7 +104,7 @@ exports.list = async (req, res) => {
 
 exports.productStar = async (req, res) => {
   const product = await Product.findById(req.params.productId).exec();
-  const user = await User.findOne({ email: req.user.email }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   const { star } = req.body;
   let existingRatingObject = product.ratings.find(
     (el) => el.postedBy.toString() === user._id.toString()

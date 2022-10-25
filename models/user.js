@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       text: true,
     },
+    mobile: { type: String, unique: true, required: true },
     role: {
       type: String,
       default: 'subscriber',

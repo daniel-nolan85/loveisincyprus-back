@@ -25,16 +25,74 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-exports.createOrUpdateUser = async (req, res) => {
-  // const { name, picture, email } = req.user;
-  const { name, photo, email, username, followers, following } = req.user;
+exports.userExists = async (req, res) => {
+  const { mobile } = req.params;
+  const user = await User.find({ mobile }).select('_id');
+  res.json(user);
+};
+
+exports.createUser = async (req, res) => {
+  const { name, email, mobile } = req.body;
   const content = 'Welcome to LoveIsInCyprus!';
-  const user = await User.findOneAndUpdate(
-    { email },
-    // { name: email.split('@')[0], picture },
-    // { name, photo },
-    { new: true }
-  );
+  const newUser = await new User({
+    name,
+    email,
+    username: nanoid(6),
+    mobile,
+  }).save();
+  console.log('USER CREATED', newUser);
+  // res.json(newUser);
+
+  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+  const chat = await new Chat({
+    users: [sender._id, newUser._id],
+  }).save();
+
+  var newMessage = {
+    sender,
+    content,
+    chat,
+  };
+  try {
+    var message = await Message.create(newMessage);
+    message = await message.populate(
+      'sender',
+      'name username email profileImage'
+    );
+    message = await message.populate('chat');
+    message = await User.populate(message, {
+      path: 'chat.users',
+      select: 'name username email profileImage',
+    });
+
+    const updateLatest = await Chat.findOneAndUpdate(
+      { _id: chat._id },
+      {
+        latestMessage: message,
+      }
+    );
+
+    const notifyReceiver = await User.findByIdAndUpdate(
+      { _id: newUser._id },
+      {
+        $push: {
+          messages: message,
+        },
+      },
+      { new: true }
+    );
+    res.json(notifyReceiver);
+
+    // console.log('notifyReceiver => ', notifyReceiver);
+  } catch (err) {
+    res.status(400);
+    throw new Error(err.message);
+  }
+};
+
+exports.loginUser = async (req, res) => {
+  const { mobile } = req.body;
+  const user = await User.findOne({ mobile });
 
   if (
     user &&
@@ -79,54 +137,106 @@ exports.createOrUpdateUser = async (req, res) => {
     ).exec();
     res.json(trialEnded);
   } else if (user) {
-    // console.log('USER UPDATED', user);
+    console.log('USER LOGGED IN', user);
     res.json(user);
   } else {
-    const newUser = await new User({
-      email,
-      // name,
-      // picture,
-      // photo,
-      username: nanoid(6),
-      followers,
-      following,
-    }).save();
-    // console.log('USER CREATED', newUser);
-    res.json(newUser);
-
-    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-    const chat = await new Chat({
-      users: [sender._id, newUser._id],
-    }).save();
-
-    var newMessage = {
-      sender,
-      content,
-      chat,
-    };
-    try {
-      var message = await Message.create(newMessage);
-      message = await message.populate(
-        'sender',
-        'name username email profileImage'
-      );
-      message = await message.populate('chat');
-      message = await User.populate(message, {
-        path: 'chat.users',
-        select: 'name username email profileImage',
-      });
-      await Chat.findOneAndUpdate(chat, {
-        latestMessage: message,
-      });
-    } catch (err) {
-      res.status(400);
-      throw new Error(err.message);
-    }
+    return res.status(400).send('User not found');
   }
 };
 
+// exports.createOrUpdateUser = async (req, res) => {
+//   const { name, email, mobile } = req.body;
+//   const content = 'Welcome to LoveIsInCyprus!';
+//   const user = await User.findOne({ email });
+
+//   if (
+//     user &&
+//     user.membership.paid &&
+//     user.membership.trialPeriod &&
+//     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
+//   ) {
+//     const refund = new Refund({
+//       amount: user.membership.cost,
+//       description: 'User did not make use of their subscription',
+//       id: user.membership.cardinityId,
+//     });
+
+//     client
+//       .call(refund)
+//       .then(async (response) => {
+//         console.log('refund => ', refund);
+//         const subscriptionUnpaid = await User.findByIdAndUpdate(
+//           { _id: user._id },
+//           {
+//             'membership.paid': false,
+//             'membership.trialPeriod': false,
+//           },
+//           { new: true }
+//         ).exec();
+
+//         res.json(subscriptionUnpaid);
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   } else if (
+//     user &&
+//     user.membership.paid &&
+//     user.membership.trialPeriod &&
+//     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 > Date.now()
+//   ) {
+//     const trialEnded = await User.findByIdAndUpdate(
+//       { _id: user._id },
+//       { 'membership.trialPeriod': false },
+//       { new: true }
+//     ).exec();
+//     res.json(trialEnded);
+//   } else if (user) {
+//     console.log('USER LOGGED IN', user);
+//     res.json(user);
+//   } else {
+//     const newUser = await new User({
+//       name,
+//       email,
+//       username: nanoid(6),
+//       mobile,
+//     }).save();
+//     console.log('USER CREATED', newUser);
+//     res.json(newUser);
+
+//     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+//     const chat = await new Chat({
+//       users: [sender._id, newUser._id],
+//     }).save();
+
+//     var newMessage = {
+//       sender,
+//       content,
+//       chat,
+//     };
+//     try {
+//       var message = await Message.create(newMessage);
+//       message = await message.populate(
+//         'sender',
+//         'name username email profileImage'
+//       );
+//       message = await message.populate('chat');
+//       message = await User.populate(message, {
+//         path: 'chat.users',
+//         select: 'name username email profileImage',
+//       });
+//       await Chat.findOneAndUpdate(chat, {
+//         latestMessage: message,
+//       });
+//     } catch (err) {
+//       res.status(400);
+//       throw new Error(err.message);
+//     }
+//   }
+// };
+
 exports.currentUser = async (req, res) => {
-  User.findOne({ email: req.user.email }).exec((err, user) => {
+  User.findOne({ mobile: req.user.phone_number }).exec((err, user) => {
     if (err) throw new Error(err);
     res.json(user);
   });
@@ -145,6 +255,9 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.name) {
       data.name = req.body.name;
+    }
+    if (req.body.email) {
+      data.email = req.body.email;
     }
     if (req.body.profileImage) {
       data.profileImage = req.body.profileImage;
@@ -516,18 +629,11 @@ exports.userFollowers = async (req, res) => {
 };
 
 exports.userMatches = async (req, res) => {
-  // console.log('userMatches controller response => ', req.body);
   try {
     const user = await User.findById(req.body._id);
     const matches = await User.find({ _id: user.matches })
       .select('_id name email username profileImage')
       .exec();
-    // if (req.body.chats && req.body.chats.length > 0) {
-    //   const { chats } = req.body;
-    //   matches.sort(
-    //     (a, b) => b.chats.updatedAt - a.chats.updatedAt
-    //   );
-    // }
     console.log('matches => ', matches);
     res.json(matches);
   } catch (err) {
