@@ -16,8 +16,8 @@ exports.authCheck = async (req, res, next) => {
 };
 
 exports.adminCheck = async (req, res, next) => {
-  const { email } = req.user;
-  const adminUser = await User.findOne({ email }).exec();
+  const { mobile } = req.user;
+  const adminUser = await User.findOne({ mobile }).exec();
 
   if (adminUser.role !== 'admin') {
     res.status(403).json({
@@ -30,8 +30,8 @@ exports.adminCheck = async (req, res, next) => {
 
 exports.subscriberCheck = async (req, res, next) => {
   // console.log('subscriberCheck middleware => ', req.user);
-  const { email } = req.user;
-  const subscriber = await User.findOne({ email }).exec();
+  const { mobile } = req.user;
+  const subscriber = await User.findOne({ mobile }).exec();
 
   if (subscriber.membership.paid === false) {
     res.status(403).json({
@@ -44,8 +44,8 @@ exports.subscriberCheck = async (req, res, next) => {
 
 exports.eligibleForRefund = async (req, res, next) => {
   // console.log('eligibleForRefund middleware => ', req.user);
-  const { email } = req.user;
-  const eligible = await User.findOne({ email }).exec();
+  const { mobile } = req.user;
+  const eligible = await User.findOne({ mobile }).exec();
 
   if (eligible.membership.trialPeriod === false) {
     res.status(403).json({

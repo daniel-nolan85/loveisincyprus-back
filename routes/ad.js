@@ -14,6 +14,7 @@ const {
   disapproveAd,
   approveAd,
   handleExpiredAds,
+  removeAd,
 } = require('../controllers/ad');
 
 const { uploadImage } = require('../controllers/post');
@@ -26,9 +27,10 @@ router.post(
   uploadImage
 );
 router.post('/fetch-ads', fetchAds);
-router.post('/fetch-approved-ads', authCheck, fetchApprovedAds);
+router.get('/fetch-approved-ads', fetchApprovedAds);
 router.put('/disapprove-ad', authCheck, adminCheck, disapproveAd);
 router.put('/approve-ad', authCheck, adminCheck, approveAd);
 router.put('/expired-ad', handleExpiredAds);
+router.delete('/remove-ad/:adId', removeAd);
 
 module.exports = router;

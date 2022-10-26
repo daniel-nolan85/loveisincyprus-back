@@ -10,6 +10,7 @@ const Chat = require('../models/chat');
 const Message = require('../models/message');
 const UserSearch = require('../models/userSearch');
 const axios = require('axios');
+const user = require('../models/user');
 
 exports.recaptcha = async (req, res) => {
   // console.log('recaptcha controller response => ', req.body);
@@ -325,13 +326,27 @@ exports.addPoints = async (req, res) => {
 
     if (reason === 'new visitor') {
       const awardOtherUserPoints = await User.findOneAndUpdate(
-        { email: otherUser.email },
+        { mobile: otherUser.mobile },
         {
           $push: { pointsGained: { amount: number, reason } },
         },
         { new: true }
       ).exec();
       res.json(awardOtherUserPoints);
+      return;
+    }
+
+    if (reason === 'verified') {
+      const newlyVerified = await user
+        .findByIdAndUpdate(
+          { _id: otherUser._id },
+          {
+            $push: { pointsGained: { amount: number, reason } },
+          },
+          { new: true }
+        )
+        .exec();
+      res.json(newlyVerified);
       return;
     }
 

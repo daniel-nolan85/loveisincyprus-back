@@ -1,6 +1,7 @@
 const Order = require('../models/order');
 const User = require('../models/user');
 const Message = require('../models/message');
+const Ad = require('../models/ad');
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -22,7 +23,9 @@ exports.orderStatus = async (req, res) => {
 };
 
 exports.fetchOptIns = async (req, res) => {
-  const optIns = await User.find({ optIn: true });
+  const optIns = await User.find({ optIn: true }).select(
+    'optIn _id name email username profileImage pointsGained pointsLost pointsSpent featuredMember'
+  );
   res.json(optIns);
 };
 
@@ -48,7 +51,7 @@ exports.incomeTaken = async (req, res) => {
 
   const subscriptions = await User.find({
     'membership.trialPeriod': false,
-  });
+  }).select('membership');
 
   let sumOfSubscriptions = 0;
   subscriptions.map((subscription) => {
@@ -59,4 +62,22 @@ exports.incomeTaken = async (req, res) => {
   const income = parseFloat(sumOfOrders) + parseFloat(sumOfSubscriptions);
 
   res.json(income);
+};
+
+exports.fetchNewAds = async (req, res) => {
+  try {
+    const pending = await Ad.find({ status: 'pending' }).select('_id');
+    res.json(pending);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchNewVerifs = async (req, res) => {
+  try {
+    const pending = await User.find({ verified: 'pending' }).select('_id');
+    res.json(pending);
+  } catch (err) {
+    console.log(err);
+  }
 };

@@ -43,7 +43,9 @@ exports.createUser = async (req, res) => {
   console.log('USER CREATED', newUser);
   // res.json(newUser);
 
-  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' }).select(
+    'name username email profileImage'
+  );
   const chat = await new Chat({
     users: [sender._id, newUser._id],
   }).save();
@@ -80,7 +82,7 @@ exports.createUser = async (req, res) => {
         },
       },
       { new: true }
-    );
+    ).select('messages, newNotifs');
     res.json(notifyReceiver);
 
     // console.log('notifyReceiver => ', notifyReceiver);
@@ -92,7 +94,9 @@ exports.createUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   const { mobile } = req.body;
-  const user = await User.findOne({ mobile });
+  const user = await User.findOne({ mobile }).select(
+    '_id membership messages newNotifs name email following followers matches'
+  );
 
   if (
     user &&
@@ -117,7 +121,11 @@ exports.loginUser = async (req, res) => {
             'membership.trialPeriod': false,
           },
           { new: true }
-        ).exec();
+        )
+          .select(
+            '_id membership messages newNotifs name email following followers matches'
+          )
+          .exec();
 
         res.json(subscriptionUnpaid);
       })
@@ -134,7 +142,11 @@ exports.loginUser = async (req, res) => {
       { _id: user._id },
       { 'membership.trialPeriod': false },
       { new: true }
-    ).exec();
+    )
+      .select(
+        '_id membership messages newNotifs name email following followers matches'
+      )
+      .exec();
     res.json(trialEnded);
   } else if (user) {
     console.log('USER LOGGED IN', user);
@@ -147,7 +159,7 @@ exports.loginUser = async (req, res) => {
 // exports.createOrUpdateUser = async (req, res) => {
 //   const { name, email, mobile } = req.body;
 //   const content = 'Welcome to LoveIsInCyprus!';
-//   const user = await User.findOne({ email });
+//   const user = await User.findOne({ phone_number });
 
 //   if (
 //     user &&
@@ -409,7 +421,12 @@ exports.profileUpdate = async (req, res) => {
 
     let user = await User.findByIdAndUpdate(req.body.user._id, data, {
       new: true,
-    });
+    }).select(
+      `username about name email profileImage coverImage gender birthday age location genderWanted relWanted language
+       maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity
+       feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+       roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency`
+    );
 
     if (req.body.profileImage) {
       let user1 = await User.findByIdAndUpdate(
@@ -464,13 +481,22 @@ exports.profileUpdate = async (req, res) => {
 
 exports.findUsers = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select('_id following');
     let following = user.following;
     following.push(user._id);
     // const users = await User.find({ _id: { $nin: following } }).limit(1);
     const users = await User.aggregate([
       { $match: { _id: { $nin: following } } },
       { $sample: { size: 5 } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          profileImage: 1,
+        },
+      },
     ]);
     res.json(users);
   } catch (err) {
@@ -499,7 +525,7 @@ exports.findUsers = async (req, res) => {
 
 exports.userFollow = async (req, res) => {
   try {
-    const check = await User.findById(req.body.u._id);
+    const check = await User.findById(req.body.u._id).select('following');
 
     if (check.following.includes(req.body.user._id)) {
       const user = await User.findByIdAndUpdate(
@@ -560,7 +586,7 @@ exports.userFollow = async (req, res) => {
 
 exports.userUnfollow = async (req, res) => {
   try {
-    const check = await User.findById(req.body.u._id);
+    const check = await User.findById(req.body.u._id).select('following');
 
     if (check.following.includes(req.body.user._id)) {
       const user = await User.findByIdAndUpdate(
@@ -606,7 +632,7 @@ exports.userUnfollow = async (req, res) => {
 
 exports.userFollowing = async (req, res) => {
   try {
-    const user = await User.findById(req.body._id);
+    const user = await User.findById(req.body._id).select('following');
     const following = await User.find({ _id: user.following }).select(
       '_id name email username profileImage'
     );
@@ -618,7 +644,7 @@ exports.userFollowing = async (req, res) => {
 
 exports.userFollowers = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select('followers');
     const followers = await User.find({ _id: user.followers }).select(
       '_id name email username profileImage'
     );
@@ -630,7 +656,7 @@ exports.userFollowers = async (req, res) => {
 
 exports.userMatches = async (req, res) => {
   try {
-    const user = await User.findById(req.body._id);
+    const user = await User.findById(req.body._id).select('matches');
     const matches = await User.find({ _id: user.matches })
       .select('_id name email username profileImage')
       .exec();
@@ -643,8 +669,10 @@ exports.userMatches = async (req, res) => {
 
 exports.userVisitors = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user._id);
-    const visitors = await User.find({ _id: user.visitors });
+    const user = await User.findById(req.body.user._id).select('visitors');
+    const visitors = await User.find({ _id: user.visitors })
+      .select('_id name email username profileImage')
+      .exec();
     res.json(visitors);
   } catch (err) {
     console.log('userVisitors => ', err);
@@ -654,12 +682,21 @@ exports.userVisitors = async (req, res) => {
 exports.nineMatches = async (req, res) => {
   // console.log('nineMatches controller response', req.body);
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select('matches');
     let matches = user.matches;
     // const matches = await User.find({ _id: user.matches });
     const users = await User.aggregate([
       { $match: { _id: { $in: matches } } },
       { $sample: { size: 9 } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          profileImage: 1,
+        },
+      },
     ]);
     // console.log('ninematches controller response', users);
     res.json(users);
@@ -690,7 +727,9 @@ exports.userProfile = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const thisUser = await User.findById(userId);
+    const thisUser = await User.findById(userId).select(
+      '_id name email username profileImage'
+    );
     res.json(thisUser);
   } catch (err) {
     console.log('userProfile => ', err);
@@ -710,7 +749,7 @@ exports.cropCover = async (req, res) => {
           },
         },
         { new: true }
-      );
+      ).select('coverPhotos');
       res.json({
         url: result.secure_url,
         public_id: result.public_id,
@@ -734,7 +773,7 @@ exports.cropProfile = async (req, res) => {
           },
         },
         { new: true }
-      );
+      ).select('profilePhotos');
       res.json({
         url: result.secure_url,
         public_id: result.public_id,
@@ -784,7 +823,10 @@ exports.deleteUser = async (req, res) => {
 
 exports.recentUsers = async (req, res) => {
   try {
-    const users = await User.find().sort({ createdAt: -1 }).limit(6);
+    const users = await User.find()
+      .select('_id name email username profileImage')
+      .sort({ createdAt: -1 })
+      .limit(6);
     res.json(users);
   } catch (err) {
     console.log('recentUsers => ', err);
@@ -838,13 +880,15 @@ exports.searchPosts = async (req, res) => {
 exports.usersToSwipe = async (req, res) => {
   try {
     // let usersUnavailable = [];
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select(
+      '_id nopes following'
+    );
     let usersUnavailable = user.following;
     usersUnavailable.push(user._id);
     if (user.nopes.length > 0) {
       user.nopes.map((nope) => usersUnavailable.push(nope._id));
     }
-    const total = await User.find();
+    const total = await User.find().select('_id');
     let usersAvailable = total.length - usersUnavailable.length;
     const users = await User.find({ _id: { $nin: usersUnavailable } })
       .limit(usersAvailable)
@@ -866,7 +910,7 @@ exports.leftSwipe = async (req, res) => {
     $addToSet: {
       nopes: req.body.u._id,
     },
-  });
+  }).select('nopes');
   res.json(user);
 };
 
@@ -876,19 +920,28 @@ exports.fetchVisitor = async (req, res) => {
     $addToSet: {
       visitors: req.body.user._id,
     },
-  });
+  }).select('_id name email username profileImage');
   res.json(user);
 };
 
 exports.nineVisitors = async (req, res) => {
   // console.log('nineVisitors controller response', req.body);
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select('visitors');
     let visitors = user.visitors;
     // const followers = await User.find({ _id: user.followers });
     const users = await User.aggregate([
       { $match: { _id: { $in: visitors } } },
       { $sample: { size: 9 } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          profileImage: 1,
+        },
+      },
     ]);
     // console.log('ninefollowers controller response', users);
     res.json(users);
@@ -900,7 +953,9 @@ exports.nineVisitors = async (req, res) => {
 exports.ninePhotos = async (req, res) => {
   // console.log('ninePhotos controller response', req.body);
   try {
-    const user = await User.findById(req.body.user._id);
+    const user = await User.findById(req.body.user._id).select(
+      'profilePhotos coverPhotos uploadedPhotos'
+    );
     let photos = [];
     if (user.profilePhotos) {
       photos.push(user.profilePhotos);
@@ -922,7 +977,9 @@ exports.ninePhotos = async (req, res) => {
 exports.usersNinePhotos = async (req, res) => {
   // console.log('usersNinePhotos controller response', req.body);
   try {
-    const user = await User.findById(req.body.userId);
+    const user = await User.findById(req.body.userId).select(
+      'profilePhotos coverPhotos uploadedPhotos'
+    );
     let photos = [];
     if (user.profilePhotos) {
       photos.push(user.profilePhotos);
@@ -1030,7 +1087,7 @@ exports.addUserToAdmin = async (req, res) => {
       req.body.u._id,
       { role: 'admin' },
       { new: true }
-    );
+    ).select('role');
     res.json(makeAdmin);
   } catch (err) {
     console.log(err);
@@ -1044,7 +1101,7 @@ exports.removeUserFromAdmin = async (req, res) => {
       req.body.u._id,
       { role: 'subscriber' },
       { new: true }
-    );
+    ).select('role');
     res.json(makeSubscriber);
   } catch (err) {
     console.log(err);
@@ -1058,7 +1115,7 @@ exports.addUserToFeaturedMembers = async (req, res) => {
       req.body.u._id,
       { featuredMember: true },
       { new: true }
-    );
+    ).select('featuredMember');
     res.json(makeFeaturedMember);
   } catch (err) {
     console.log(err);
@@ -1072,7 +1129,7 @@ exports.removeUserFromFeaturedMembers = async (req, res) => {
       req.body.u._id,
       { featuredMember: false },
       { new: true }
-    );
+    ).select('featuredMember');
     res.json(unMakeFeaturedMember);
   } catch (err) {
     console.log(err);
@@ -1080,7 +1137,9 @@ exports.removeUserFromFeaturedMembers = async (req, res) => {
 };
 
 exports.fetchFeaturedMembers = async (req, res) => {
-  const featuredMembers = await User.find({ featuredMember: true });
+  const featuredMembers = await User.find({ featuredMember: true }).select(
+    '_id name email username profileImage featuredMember'
+  );
   res.json(featuredMembers);
 };
 
@@ -1116,7 +1175,9 @@ exports.removeExpiredFeatures = async (req, res) => {
 };
 
 exports.dailyMatches = async (req, res) => {
-  const firstMember = await User.findById('621f58d359389f13dcc05a71');
+  const firstMember = await User.findById('621f58d359389f13dcc05a71').select(
+    '_id createdAt'
+  );
   const inception = firstMember.createdAt;
   const today = Date.now();
   const differenceTime = today - inception.getTime();
@@ -1137,7 +1198,9 @@ exports.dailyMatches = async (req, res) => {
 };
 
 exports.dailySignups = async (req, res) => {
-  const firstMember = await User.findById('621f58d359389f13dcc05a71');
+  const firstMember = await User.findById('621f58d359389f13dcc05a71').select(
+    '_id createdAt'
+  );
   const inception = firstMember.createdAt;
   const today = Date.now();
   const differenceTime = today - inception.getTime();

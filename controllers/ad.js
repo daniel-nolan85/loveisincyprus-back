@@ -48,7 +48,7 @@ exports.submitAd = async (req, res) => {
 
 exports.fetchAds = async (req, res) => {
   try {
-    const ads = await Ad.find();
+    const ads = await Ad.find().sort({ createdAt: -1 });
     res.json(ads);
   } catch (err) {
     console.log(err);
@@ -65,7 +65,7 @@ exports.fetchApprovedAds = async (req, res) => {
 };
 
 exports.disapproveAd = async (req, res) => {
-  // console.log('disapproveAd controller response => ', req.body);
+  console.log('disapproveAd controller response => ', req.body);
   const { ad, reason } = req.body;
   const rejectAd = await Ad.findByIdAndUpdate(
     ad._id,
@@ -231,4 +231,12 @@ exports.handleExpiredAds = async (req, res) => {
   ).exec();
 
   res.json({ ok: true });
+};
+
+exports.removeAd = async (req, res) => {
+  try {
+    res.json(await Ad.findByIdAndDelete(req.params.adId).exec());
+  } catch (err) {
+    console.log(err);
+  }
 };

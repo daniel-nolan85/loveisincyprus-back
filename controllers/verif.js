@@ -33,10 +33,9 @@ exports.submitVerif = async (req, res) => {
 
 exports.fetchVerifs = async (req, res) => {
   try {
-    const verifs = await Verif.find().populate(
-      'postedBy',
-      '_id name profileImage email'
-    );
+    const verifs = await Verif.find()
+      .populate('postedBy', '_id name profileImage email')
+      .sort({ createdAt: -1 });
     res.json(verifs);
   } catch (err) {
     console.log(err);
@@ -52,9 +51,11 @@ exports.disapproveVerif = async (req, res) => {
     { new: true }
   ).exec();
 
+  const pullVerif = await Verif.deleteOne({ postedBy: verif.postedBy._id });
+
   const content = reason
-    ? `Your recent submission to become verified has been rejected for the following reason: ${reason}`
-    : 'Your recent submission to become verified has been rejected';
+    ? `Your recent submission to become verified has been rejected for the following reason: ${reason}. You can re-try any time.`
+    : 'Your recent submission to become verified has been rejected. You can re-try any time.';
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
   const chat = await Chat.findOne({
@@ -95,9 +96,13 @@ exports.approveVerif = async (req, res) => {
     verif.postedBy._id,
     { verified: 'true' },
     { new: true }
-  ).exec();
+  )
+    .select('_id')
+    .exec();
 
-  const content = `Your recent submission to become verified has been approved and you will now have full access to all areas of the site`;
+  const pullVerif = await Verif.deleteOne({ postedBy: verif.postedBy._id });
+
+  const content = `Your recent submission to become verified has been approved. You have been awarded 80 points.`;
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
   const chat = await Chat.findOne({
@@ -127,7 +132,7 @@ exports.approveVerif = async (req, res) => {
     await Chat.findByIdAndUpdate(chat._id, {
       latestMessage: message,
     });
-    res.json(message);
+    res.json({ userStatus, message });
   } catch (err) {
     res.status(400);
     throw new Error(err.message);
