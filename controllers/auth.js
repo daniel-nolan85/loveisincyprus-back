@@ -564,6 +564,24 @@ exports.userFollow = async (req, res) => {
         .populate('followers', '_id name email profileImage');
       res.json(user);
     }
+    const notify = await User.findByIdAndUpdate(
+      req.body.u._id,
+      {
+        $push: {
+          notifications: {
+            notif: {
+              follower: req.body.user._id,
+              name: req.body.user.name,
+              email: req.body.user.email,
+              username: req.body.user.username,
+              profileImage: req.body.user.profileImage,
+            },
+            action: 'user liked you',
+          },
+        },
+      },
+      { new: true }
+    );
   } catch (err) {
     console.log('userFollow => ', err);
   }
@@ -915,12 +933,32 @@ exports.leftSwipe = async (req, res) => {
 };
 
 exports.fetchVisitor = async (req, res) => {
-  // console.log('fetchVisitor controller response => ', req.body);
+  console.log('fetchVisitor controller response => ', req.body);
   const user = await User.findByIdAndUpdate(req.body.userId, {
     $addToSet: {
       visitors: req.body.user._id,
     },
-  }).select('_id name email username profileImage');
+  }).select('_id name email username profileImage visitors');
+  if (!user.visitors.includes(req.body.user._id)) {
+    const notify = await User.findByIdAndUpdate(
+      req.body.userId,
+      {
+        $push: {
+          notifications: {
+            notif: {
+              visitor: req.body.user._id,
+              name: req.body.user.name,
+              email: req.body.user.email,
+              username: req.body.user.username,
+              profileImage: req.body.user.profileImage,
+            },
+            action: 'user visited you',
+          },
+        },
+      },
+      { new: true }
+    );
+  }
   res.json(user);
 };
 

@@ -57,7 +57,9 @@ exports.fetchAds = async (req, res) => {
 
 exports.fetchApprovedAds = async (req, res) => {
   try {
-    const approved = await Ad.find({ status: 'approved' });
+    const approved = await Ad.find({ status: 'approved' }).sort({
+      createdAt: -1,
+    });
     res.json(approved);
   } catch (err) {
     console.log(err);
@@ -74,21 +76,21 @@ exports.disapproveAd = async (req, res) => {
   ).exec();
 
   let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'mail.loveisincyprus.com',
     port: 465,
     auth: {
-      user: 'loveisincyprus@gmail.com',
-      pass: 'revamp22',
+      user: 'loveisi3',
+      pass: ']De*5YrqW62Dr4',
     },
     secure: true,
   });
 
   const content = reason
-    ? `Your recent advertisement submission has been rejected for the following reason: ${reason}`
-    : 'Your recent advertisement submission has been rejected';
+    ? `Your recent advertisement submission has been rejected for the following reason: ${reason}. You have not been charged. Feel free to re-try any time.`
+    : 'Your recent advertisement submission has been rejected.  You have not been charged. Feel free to re-try any time.';
 
   let mailOptions = {
-    from: 'loveisincyprus@gmail.com',
+    from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
@@ -123,19 +125,19 @@ exports.approveAd = async (req, res) => {
   ).exec();
 
   let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'mail.loveisincyprus.com',
     port: 465,
     auth: {
-      user: 'loveisincyprus@gmail.com',
-      pass: 'revamp22',
+      user: 'loveisi3',
+      pass: ']De*5YrqW62Dr4',
     },
     secure: true,
   });
 
-  const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}`;
+  const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}.`;
 
   let mailOptions = {
-    from: 'loveisincyprus@gmail.com',
+    from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `

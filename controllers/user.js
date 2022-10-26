@@ -32,18 +32,18 @@ exports.contactFormEmail = (req, res) => {
   const { name, email, subject, message } = req.body.values;
 
   let transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'mail.loveisincyprus.com',
     port: 465,
     auth: {
-      user: 'loveisincyprus@gmail.com',
-      pass: 'revamp22',
+      user: 'loveisi3',
+      pass: ']De*5YrqW62Dr4',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: email,
-    to: 'loveisincyprus@gmail.com',
+    from: 'customercare@loveisincyprus.com',
+    to: 'customercare@loveisincyprus.com',
     subject: subject,
     html: `
       <h3>Information</h3>
@@ -64,6 +64,42 @@ exports.contactFormEmail = (req, res) => {
       res.send('Success');
     }
   });
+
+  transporter.close();
+
+  // let transporter = nodemailer.createTransport({
+  //   service: 'gmail',
+  //   port: 465,
+  //   auth: {
+  //     user: 'loveisincyprus@gmail.com',
+  //     pass: 'revamp22',
+  //   },
+  //   secure: true,
+  // });
+
+  // let mailOptions = {
+  //   from: email,
+  //   to: 'loveisincyprus@gmail.com',
+  //   subject: subject,
+  //   html: `
+  //     <h3>Information</h3>
+  //     <ul>
+  //     <li>Name: ${name}</li>
+  //     <li>Email: ${email}</li>
+  //     </ul>
+
+  //     <h3>Message</h3>
+  //     <p>${message}</p>
+  //     `,
+  // };
+
+  // transporter.sendMail(mailOptions, (err, response) => {
+  //   if (err) {
+  //     res.send(err);
+  //   } else {
+  //     res.send('Success');
+  //   }
+  // });
   // transporter.close();
 };
 
@@ -207,7 +243,9 @@ exports.createOrder = async (req, res) => {
   console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
-  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number })
+    .select('_id email')
+    .exec();
   let { products } = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product', 'title')
     .exec();
@@ -222,6 +260,74 @@ exports.createOrder = async (req, res) => {
   })
     .populate('products.product', 'title')
     .save();
+
+  console.log('products => ', products);
+  console.log('user => ', user);
+
+  const listItems = products.map((p) => {
+    return `
+      <tr>
+        <td>${p.product.title}</td>
+        <td>${p.price}</td>
+        <td>${p.count}</td>
+      </tr>`;
+  });
+
+  let transporter = nodemailer.createTransport({
+    host: 'mail.loveisincyprus.com',
+    port: 465,
+    auth: {
+      user: 'loveisi3',
+      pass: ']De*5YrqW62Dr4',
+    },
+    secure: true,
+  });
+
+  let mailOptions = {
+    from: 'customercare@loveisincyprus.com',
+    to: user.email,
+    subject: 'Order confirmation from Love is in Cyprus',
+    html: `
+      <h3 style="margin-bottom: 5px;">Thanks for your recent order</h3>
+      <p style="margin-bottom: 5px;">Your payment has been successfully authorised and we will soon dispatch the following items:</p>
+      <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${listItems}
+        </tbody>
+      </table>
+      <p style='margin-bottom: 5px;'>
+            Discount: ${
+              newOrder.discount
+                ? '€' + newOrder.discount.toFixed(2)
+                : 'No coupon applied'
+            }
+      </p>
+      <p style="margin-bottom: 5px;">${
+        newOrder.deliveryFee &&
+        'Delivery fee: €' + newOrder.deliveryFee.toFixed(2)
+      }</p>
+      <h3 style="margin-bottom: 15px;">${
+        'Total: €' + newOrder.paymentIntent.amount
+      }</h3>
+      <h3>We'll let you know when your order has been dispatched</h3>
+    `,
+  };
+
+  transporter.sendMail(mailOptions, (err, response) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('Success');
+    }
+  });
+  transporter.close();
 
   let bulkOption = products.map((item) => {
     return {
