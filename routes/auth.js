@@ -44,7 +44,7 @@ const {
   deleteUser,
   recentUsers,
   recentOrders,
-  searchPosts,
+  // searchPosts,
   fetchLocations,
   handleWhitelist,
   searchLocations,
@@ -99,8 +99,8 @@ router.post('/users', authCheck, adminCheck, users);
 router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
 router.post('/recent-orders', authCheck, adminCheck, recentOrders);
-router.post('/admin/search-posts/:query', authCheck, adminCheck, searchPosts);
-router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
+// router.post('/admin/search-posts/:query', authCheck, adminCheck, searchPosts);
+// router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
 router.post('/admin/fetch-locations', authCheck, adminCheck, fetchLocations);
 router.post('/admin/handle-whitelist', authCheck, adminCheck, handleWhitelist);

@@ -4,6 +4,8 @@ const Product = require('../models/product');
 const Coupon = require('../models/coupon');
 const Ad = require('../models/ad');
 const Cardinity = require('cardinity-nodejs');
+const nodemailer = require('nodemailer');
+const moment = require('moment');
 
 const Client = Cardinity.client();
 const Payment = Cardinity.payment();
@@ -16,7 +18,9 @@ const client = new Client(
 
 exports.calculateFinalAmount = async (req, res) => {
   const { coupon } = req.body;
-  const user = await User.findOne({ mobile: req.user.phone_number }).exec();
+  const user = await User.findOne({ mobile: req.user.phone_number })
+    .select('_id')
+    .exec();
   const { cartTotal, totalAfterDiscount } = await Cart.findOne({
     orderedBy: user._id,
   }).exec();
@@ -292,7 +296,7 @@ exports.createMembershipPayment = async (req, res) => {
             'bankDetails.cardNumber': cardNumber,
             'bankDetails.expiry': expiry,
             'bankDetails.cvc': cvc,
-          });
+          }).select('membership bankDetails email');
           if (existingBank) {
             // return res.json(existingBank);
             const amendMembership = await User.findByIdAndUpdate(
@@ -308,8 +312,47 @@ exports.createMembershipPayment = async (req, res) => {
                 'membership.cost': payable,
               },
               { new: true }
-            ).exec();
+            )
+              .select('membership bankDetails email')
+              .exec();
             res.json({ amendMembership, response });
+            const fortnight = new Date(Date.now() + 12096e5);
+
+            let transporter = nodemailer.createTransport({
+              host: 'mail.loveisincyprus.com',
+              port: 465,
+              auth: {
+                user: 'loveisi3',
+                pass: ']De*5YrqW62Dr4',
+              },
+              secure: true,
+            });
+
+            let mailOptions = {
+              from: 'customercare@loveisincyprus.com',
+              to: amendMembership.email,
+              subject: 'Thanks for subscribing',
+              html: `
+              <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
+              <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
+                amendMembership.membership.expiry
+              ).format('MMMM Do YYYY')}</p>
+              <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
+                fortnight
+              ).format(
+                'MMMM Do YYYY'
+              )} to receive a full refund, no questions asked.</p>
+            `,
+            };
+
+            transporter.sendMail(mailOptions, (err, response) => {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send('Success');
+              }
+            });
+            transporter.close();
           } else {
             const amendMembership = await User.findByIdAndUpdate(
               { _id: user._id },
@@ -333,8 +376,47 @@ exports.createMembershipPayment = async (req, res) => {
                 },
               },
               { new: true }
-            ).exec();
+            )
+              .select('membership bankDetails email')
+              .exec();
             res.json({ amendMembership, response });
+            const fortnight = new Date(Date.now() + 12096e5);
+
+            let transporter = nodemailer.createTransport({
+              host: 'mail.loveisincyprus.com',
+              port: 465,
+              auth: {
+                user: 'loveisi3',
+                pass: ']De*5YrqW62Dr4',
+              },
+              secure: true,
+            });
+
+            let mailOptions = {
+              from: 'customercare@loveisincyprus.com',
+              to: amendMembership.email,
+              subject: 'Thanks for subscribing',
+              html: `
+              <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
+              <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
+                amendMembership.membership.expiry
+              ).format('MMMM Do YYYY')}</p>
+              <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
+                fortnight
+              ).format(
+                'MMMM Do YYYY'
+              )} to receive a full refund, no questions asked.</p>
+            `,
+            };
+
+            transporter.sendMail(mailOptions, (err, response) => {
+              if (err) {
+                res.send(err);
+              } else {
+                res.send('Success');
+              }
+            });
+            transporter.close();
           }
         } else if (response.status == 'pending') {
           console.log('pending', response.status);
@@ -410,7 +492,9 @@ exports.refundSubscription = async (req, res) => {
           'membership.trialPeriod': false,
         },
         { new: true }
-      ).exec();
+      )
+        .select('membership')
+        .exec();
       res.json(cancelSubscription);
     })
     .catch((err) => {

@@ -42,7 +42,7 @@ const {
   progressCompletion,
   optInOrOut,
   newMessageCount,
-  resetMessageCount,
+  // resetMessageCount,
   newNotificationCount,
   resetNotificationCount,
   fetchUserSearches,
@@ -89,7 +89,7 @@ router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
 router.put('/new-message-count', newMessageCount);
-router.put('/reset-message-count', authCheck, resetMessageCount);
+// router.put('/reset-message-count', authCheck, resetMessageCount);
 router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
 router.get('/fetch-user-searches', fetchUserSearches);

@@ -59,16 +59,32 @@ io.on('connection', (socket) => {
     socket.join(room);
     console.log(`User joined room: ${room}`);
   });
-  socket.on('typing', (room) => socket.in(room).emit('typing'));
-  socket.on('stop typing', (room) => socket.in(room).emit('stop typing'));
+  socket.on('typing', (_id, theirId) => {
+    socket.in(theirId).emit('typing', _id);
+  });
+  socket.on('stop typing', (room) => {
+    console.log('stop typing');
+    console.log(room);
+    socket.in(room).emit('stop typing');
+  });
   socket.on('new message', (newMessageReceived) => {
     var chat = newMessageReceived.chat;
     if (!chat.users) return console.log('chat.users not defined');
     chat.users.forEach((user) => {
       if (user._id == newMessageReceived.sender._id) return;
-      socket.in(user._id).emit('message received', newMessageReceived);
+      socket
+        .in(user._id)
+        .emit('message received', newMessageReceived, user._id);
     });
     // console.log('newMessageReceived => ', newMessageReceived);
+  });
+  socket.on('reorder users', (chats, _id, theirChats, theirId) => {
+    console.log('chats => ', chats);
+    console.log('_id => ', _id);
+    console.log('theirChats => ', theirChats);
+    console.log('theirId => ', theirId);
+    socket.in(_id).emit('my users reordered', chats, _id);
+    socket.in(theirId).emit('their users reordered', theirChats, theirId);
   });
   socket.on('like post', (post) =>
     socket.in(post.postedBy).emit('post liked', post)

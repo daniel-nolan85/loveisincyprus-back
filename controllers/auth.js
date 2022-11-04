@@ -860,19 +860,19 @@ exports.recentOrders = async (req, res) => {
   }
 };
 
-exports.searchPosts = async (req, res) => {
-  const { query } = req.params;
+// exports.searchPosts = async (req, res) => {
+//   const { query } = req.params;
 
-  if (!query) return;
-  try {
-    const post = await Post.find({
-      $or: [{ content: { $regex: query, $options: 'i' } }],
-    }).populate('postedBy', '_id name email profileImage');
-    res.json(post);
-  } catch (err) {
-    console.log('searchPosts => ', err);
-  }
-};
+//   if (!query) return;
+//   try {
+//     const post = await Post.find({
+//       $or: [{ content: { $regex: query, $options: 'i' } }],
+//     }).populate('postedBy', '_id name email profileImage');
+//     res.json(post);
+//   } catch (err) {
+//     console.log('searchPosts => ', err);
+//   }
+// };
 
 // exports.searchAdmin = async (req, res) => {
 //   const { query } = req.params;

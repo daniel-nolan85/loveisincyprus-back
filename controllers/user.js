@@ -287,8 +287,12 @@ exports.createOrder = async (req, res) => {
     from: 'customercare@loveisincyprus.com',
     to: user.email,
     subject: 'Order confirmation from Love is in Cyprus',
+    // html: `<h1>Order confirmation</h1>`,
     html: `
       <h3 style="margin-bottom: 5px;">Thanks for your recent order</h3>
+      <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${
+        newOrder._id
+      }</span></p>
       <p style="margin-bottom: 5px;">Your payment has been successfully authorised and we will soon dispatch the following items:</p>
       <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
         <thead>
@@ -313,10 +317,14 @@ exports.createOrder = async (req, res) => {
         newOrder.deliveryFee &&
         'Delivery fee: €' + newOrder.deliveryFee.toFixed(2)
       }</p>
-      <h3 style="margin-bottom: 15px;">${
+      <h3 style="margin-bottom: 5px;">${
         'Total: €' + newOrder.paymentIntent.amount
       }</h3>
-      <h3>We'll let you know when your order has been dispatched</h3>
+
+      <p style="font-size: 18px; margin-bottom: 5px;">The status of your order is currently <span style="font-weight: bold;">${
+        newOrder.orderStatus
+      }</span>. We'll continue to notify you as this updates.</p>
+      <h3>Thank you for shopping with us</h3>
     `,
   };
 
@@ -1513,21 +1521,21 @@ exports.optInOrOut = async (req, res) => {
 exports.newMessageCount = async (req, res) => {
   console.log('newMessageCount controller response => ', req.body);
   const user = await User.findByIdAndUpdate(
-    req.body.user._id,
-    { $addToSet: { messages: req.body.message } },
+    req.body._id,
+    { $addToSet: { messages: { sender: req.body.message.sender._id } } },
     { new: true }
-  );
+  ).select('messages');
   res.json(user);
 };
 
-exports.resetMessageCount = async (req, res) => {
-  const user = await User.findByIdAndUpdate(
-    req.body.user._id,
-    { $set: { messages: [] } },
-    { new: true }
-  );
-  res.json(user);
-};
+// exports.resetMessageCount = async (req, res) => {
+//   const user = await User.findByIdAndUpdate(
+//     req.body.user._id,
+//     { $set: { messages: [] } },
+//     { new: true }
+//   );
+//   res.json(user);
+// };
 
 exports.newNotificationCount = async (req, res) => {
   console.log('newNotificationCount controller response => ', req.body);

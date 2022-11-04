@@ -52,13 +52,36 @@ exports.fetchChats = async (req, res) => {
 
   try {
     Chat.find({ users: { $elemMatch: { $eq: _id } } })
-      .populate('users', '_id name email username profileImage')
+      .populate('users', '_id name email username profileImage messages')
       .populate('latestMessage')
       .sort({ updatedAt: -1 })
       .then(async (results) => {
         results = await User.populate(results, {
           path: 'latestMessage.sender',
-          select: 'name username email profileImage',
+          select: 'name username email profileImage messages',
+        });
+        res.status(200).send(results);
+      });
+  } catch (err) {
+    res.status(400);
+    throw new Error(err.message);
+  }
+};
+
+exports.fetchTheirChats = async (req, res) => {
+  console.log('fetchTheirChats controller response => ', req.body);
+
+  const { theirId } = req.body;
+
+  try {
+    Chat.find({ users: { $elemMatch: { $eq: theirId } } })
+      .populate('users', '_id name email username profileImage messages')
+      .populate('latestMessage')
+      .sort({ updatedAt: -1 })
+      .then(async (results) => {
+        results = await User.populate(results, {
+          path: 'latestMessage.sender',
+          select: 'name username email profileImage messages',
         });
         res.status(200).send(results);
       });
@@ -76,7 +99,9 @@ exports.sendMessage = async (req, res) => {
     console.log('Invalid data passed into this request');
     return res.sendStatus(400);
   }
-  const sender = await User.findOne({ _id });
+  const sender = await User.findOne({ _id }).select(
+    '_id name username email profileImage'
+  );
   const chat = await Chat.findOne({ _id: chatId });
   var newMessage = {
     sender,
@@ -97,18 +122,19 @@ exports.sendMessage = async (req, res) => {
     });
     const receiver = chat.users.find((u) => u._id !== _id);
     console.log('receiver => ', receiver);
-    const notifyReceiver = await User.findByIdAndUpdate(
-      { _id: receiver._id },
-      {
-        $push: {
-          messages: message,
-        },
-      },
-      { new: true }
-    );
+    // const notifyReceiver = await User.findByIdAndUpdate(
+    //   { _id: receiver._id },
+    //   {
+    //     $push: {
+    //       messages: message,
+    //     },
+    //   },
+    //   { new: true }
+    // ).select('messages');
 
     const updateLatest = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
+      read: false,
     });
     // console.log('message ==> ', message);
     res.json(message);
@@ -140,7 +166,9 @@ exports.massMail = async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' }).select(
+    '_id name username email profileImage'
+  );
   const userIds = [];
   const chats = [];
 
@@ -183,16 +211,27 @@ exports.massMail = async (req, res) => {
 
 exports.chatMatches = async (req, res) => {
   try {
-    const user = await User.findById(req.body._id);
+    const user = await User.findById(req.body._id).select('matches');
     const matches = await User.find({ _id: user.matches })
-      .select('_id name email username profileImage')
+      .select('_id name email username profileImage messages')
       .exec();
     const admin = await User.findById('621f58d359389f13dcc05a71')
-      .select('_id name email username profileImage')
+      .select('_id name email username profileImage messages')
       .exec();
     const usersToChat = matches.concat(admin);
     res.json(usersToChat);
   } catch (err) {
     console.log('userMatches => ', err);
   }
+};
+
+exports.markRead = async (req, res) => {
+  console.log('markRead controller response => ', req.body);
+  const { _id, u } = req.body;
+  const markAsRead = await User.findOneAndUpdate(
+    { _id },
+    { $pull: { messages: { sender: u._id } } },
+    { new: true }
+  ).select('messages');
+  res.json(markAsRead);
 };
