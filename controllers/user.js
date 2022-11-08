@@ -436,7 +436,10 @@ exports.addPoints = async (req, res) => {
         },
       ],
     });
-    if (reason === 'login' && recentLogIn.length > 0) return;
+    if (reason === 'login' && recentLogIn.length > 0) {
+      res.json({ ok: true });
+      return;
+    }
 
     if (reason === 'new visitor') {
       const awardOtherUserPoints = await User.findOneAndUpdate(
@@ -445,20 +448,22 @@ exports.addPoints = async (req, res) => {
           $push: { pointsGained: { amount: number, reason } },
         },
         { new: true }
-      ).exec();
+      )
+        .select('_id')
+        .exec();
       res.json(awardOtherUserPoints);
       return;
     }
 
     if (reason === 'verified') {
-      const newlyVerified = await user
-        .findByIdAndUpdate(
-          { _id: otherUser._id },
-          {
-            $push: { pointsGained: { amount: number, reason } },
-          },
-          { new: true }
-        )
+      const newlyVerified = await User.findByIdAndUpdate(
+        { _id: otherUser._id },
+        {
+          $push: { pointsGained: { amount: number, reason } },
+        },
+        { new: true }
+      )
+        .select('_id')
         .exec();
       res.json(newlyVerified);
       return;
@@ -470,7 +475,9 @@ exports.addPoints = async (req, res) => {
         $push: { pointsGained: { amount: number, reason } },
       },
       { new: true }
-    ).exec();
+    )
+      .select('_id')
+      .exec();
     res.json(awardPoints);
   } catch (err) {
     console.log(err);

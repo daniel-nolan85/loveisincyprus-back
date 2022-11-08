@@ -82,7 +82,9 @@ exports.createUser = async (req, res) => {
         },
       },
       { new: true }
-    ).select('messages, newNotifs');
+    ).select(
+      '_id membership messages newNotifs name email following followers matches profileImage username'
+    );
     res.json(notifyReceiver);
 
     // console.log('notifyReceiver => ', notifyReceiver);
@@ -93,9 +95,13 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
+  console.log('loginUser controller response => ', req.body);
   const { mobile } = req.body;
-  const user = await User.findOne({ mobile }).select(
-    '_id membership messages newNotifs name email following followers matches'
+  const user = await User.findOneAndUpdate(
+    { mobile },
+    { lastLogin: new Date(Date.now()) }
+  ).select(
+    '_id membership messages newNotifs name email following followers matches profileImage username'
   );
 
   if (
@@ -123,7 +129,7 @@ exports.loginUser = async (req, res) => {
           { new: true }
         )
           .select(
-            '_id membership messages newNotifs name email following followers matches'
+            '_id membership messages newNotifs name email following followers matches profileImage username'
           )
           .exec();
 
@@ -144,7 +150,7 @@ exports.loginUser = async (req, res) => {
       { new: true }
     )
       .select(
-        '_id membership messages newNotifs name email following followers matches'
+        '_id membership messages newNotifs name email following followers matches profileImage username'
       )
       .exec();
     res.json(trialEnded);
@@ -746,7 +752,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id name email username profileImage'
+      '_id name email username profileImage about coverImage createdAt following verified clearPhoto membership lastLogin'
     );
     res.json(thisUser);
   } catch (err) {
