@@ -3,7 +3,7 @@ const { ObjectId } = mongoose.Schema;
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, text: true },
+    name: { type: String, text: true, required: true },
     email: {
       type: String,
       required: true,
@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema(
     username: {
       type: String,
       unique: true,
-      required: true,
       text: true,
     },
     mobile: { type: String, unique: true, required: true },

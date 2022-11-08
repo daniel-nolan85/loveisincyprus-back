@@ -681,8 +681,8 @@ exports.populateNotifications = async (req, res) => {
       return id;
     });
     const posts = await Post.find({ _id: { $in: obj_ids } })
-      .populate('likes', '_id name email profileImage')
-      .populate('comments.postedBy', '_id name email profileImage');
+      .populate('likes', '_id name email profileImage username')
+      .populate('comments.postedBy', '_id name email profileImage username');
 
     res.json(posts);
   } catch (err) {
@@ -722,7 +722,7 @@ exports.acceptInvite = async (req, res) => {
         $pull: { maybe: req.body.user._id, declined: req.body.user._id },
         $addToSet: { accepted: req.body.user._id },
       }
-    ).populate('accepted', '_id name email profileImage');
+    ).populate('accepted', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );
@@ -775,7 +775,7 @@ exports.maybe = async (req, res) => {
         $pull: { accepted: req.body.user._id, declined: req.body.user._id },
         $addToSet: { maybe: req.body.user._id },
       }
-    ).populate('maybe', '_id name email profileImage');
+    ).populate('maybe', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );
@@ -828,7 +828,7 @@ exports.declineInvite = async (req, res) => {
         $pull: { accepted: req.body.user._id, maybe: req.body.user._id },
         $addToSet: { declined: req.body.user._id },
       }
-    ).populate('declined', '_id name email profileImage');
+    ).populate('declined', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );

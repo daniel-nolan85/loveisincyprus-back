@@ -109,12 +109,15 @@ exports.fetchEvent = async (req, res) => {
   console.log('fetchEvent controller response => ', req.body);
   res.json(
     await Event.findById(req.body.params.eventId)
-      .populate('accepted', '_id name email profileImage')
-      .populate('maybe', '_id name email profileImage')
-      .populate('declined', '_id name email profileImage')
-      .populate('post.postedBy', '_id name email profileImage')
-      .populate('post.likes', '_id name email profileImage')
-      .populate('post.comments.postedBy', '_id name email profileImage')
+      .populate('accepted', '_id name email profileImage username')
+      .populate('maybe', '_id name email profileImage username')
+      .populate('declined', '_id name email profileImage username')
+      .populate('post.postedBy', '_id name email profileImage username')
+      .populate('post.likes', '_id name email profileImage username')
+      .populate(
+        'post.comments.postedBy',
+        '_id name email profileImage username'
+      )
       .exec()
   );
 };
@@ -180,8 +183,11 @@ exports.likeEventPost = async (req, res) => {
         { new: true }
       )
         .populate('notif')
-        .populate('notif.likes', '_id name email profileImage')
-        .populate('notif.comments.postedBy', '_id name email profileImage');
+        .populate('notif.likes', '_id name email profileImage username')
+        .populate(
+          'notif.comments.postedBy',
+          '_id name email profileImage username'
+        );
     }
     res.json(eventPost);
   } catch (err) {
@@ -447,7 +453,7 @@ exports.acceptEventInvite = async (req, res) => {
         $pull: { maybe: req.body.user._id, declined: req.body.user._id },
         $addToSet: { accepted: req.body.user._id },
       }
-    ).populate('accepted', '_id name email profileImage');
+    ).populate('accepted', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );
@@ -488,7 +494,7 @@ exports.maybeEventInvite = async (req, res) => {
         $pull: { accepted: req.body.user._id, declined: req.body.user._id },
         $addToSet: { maybe: req.body.user._id },
       }
-    ).populate('maybe', '_id name email profileImage');
+    ).populate('maybe', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );
@@ -532,7 +538,7 @@ exports.declineEventInvite = async (req, res) => {
         $pull: { accepted: req.body.user._id, maybe: req.body.user._id },
         $addToSet: { declined: req.body.user._id },
       }
-    ).populate('declined', '_id name email profileImage');
+    ).populate('declined', '_id name email profileImage username');
     const smallUser = await User.findById({ _id: req.body.user._id }).select(
       '_id name email username profileImage'
     );

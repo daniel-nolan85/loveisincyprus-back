@@ -63,9 +63,9 @@ exports.postsByUser = async (req, res) => {
   try {
     const posts = await Post.find({ postedBy: user })
       // .skip((currentPage - 1) * perPage)
-      .populate('postedBy', '_id name profileImage email')
-      .populate('comments.postedBy', '_id name email profileImage')
-      .populate('likes', '_id name email profileImage')
+      .populate('postedBy', '_id name profileImage email username')
+      .populate('comments.postedBy', '_id name email profileImage username')
+      .populate('likes', '_id name email profileImage username')
       .sort({ createdAt: -1 })
       .limit(currentPage * perPage);
     // const posts = await Post.find()
@@ -84,7 +84,7 @@ exports.userPost = async (req, res) => {
     // const post = await Post.findById(req.params._id);
     const post = await Post.findById(req.params.postId).populate(
       'comments.postedBy',
-      '_id name email profileImage'
+      '_id name email profileImage username'
     );
     res.json(post);
   } catch (err) {
@@ -158,9 +158,9 @@ exports.newsFeed = async (req, res) => {
 
     const posts = await Post.find({ postedBy: { $in: following } })
       // .skip((currentPage - 1) * perPage)
-      .populate('postedBy', '_id name email profileImage')
-      .populate('comments.postedBy', '_id name email profileImage')
-      .populate('likes', '_id name email profileImage')
+      .populate('postedBy', '_id name email profileImage username')
+      .populate('comments.postedBy', '_id name email profileImage username')
+      .populate('likes', '_id name email profileImage username')
       .sort({
         createdAt: -1,
       })
@@ -182,8 +182,8 @@ exports.likePost = async (req, res) => {
       },
       { new: true }
     )
-      .populate('likes', '_id name email profileImage')
-      .populate('comments.postedBy', '_id name email profileImage');
+      .populate('likes', '_id name email profileImage username')
+      .populate('comments.postedBy', '_id name email profileImage username');
 
     if (post.postedBy != req.body.user._id) {
       const notify = await User.findByIdAndUpdate(
@@ -199,8 +199,11 @@ exports.likePost = async (req, res) => {
         { new: true }
       )
         .populate('notif')
-        .populate('notif.likes', '_id name email profileImage')
-        .populate('notif.comments.postedBy', '_id name email profileImage');
+        .populate('notif.likes', '_id name email profileImage username')
+        .populate(
+          'notif.comments.postedBy',
+          '_id name email profileImage username'
+        );
     }
     res.json(post);
   } catch (err) {
@@ -235,8 +238,8 @@ exports.addComment = async (req, res) => {
       },
       { new: true }
     )
-      .populate('postedBy', '_id name email profileImage')
-      .populate('comments.postedBy', '_id name email profileImage');
+      .populate('postedBy', '_id name email profileImage username')
+      .populate('comments.postedBy', '_id name email profileImage username');
 
     if (post.postedBy._id != user._id) {
       const notify = await User.findByIdAndUpdate(
@@ -342,9 +345,9 @@ exports.thisUsersPosts = async (req, res) => {
     // console.log('this users posts controller response => ', thisUser);
     const posts = await Post.find({ postedBy: thisUser })
       // .skip((currentPage - 1) * perPage)
-      .populate('postedBy', '_id name profileImage email')
-      .populate('comments.postedBy', '_id name email profileImage')
-      .populate('likes', '_id name email profileImage')
+      .populate('postedBy', '_id name profileImage email username')
+      .populate('comments.postedBy', '_id name email profileImage username')
+      .populate('likes', '_id name email profileImage username')
       .sort({ createdAt: -1 })
       .limit(currentPage * perPage);
     // console.log(posts);
@@ -380,8 +383,8 @@ exports.totalPostsByThisUser = async (req, res) => {
 exports.posts = async (req, res) => {
   try {
     const posts = await Post.find()
-      .populate('postedBy', '_id name email profileImage')
-      .populate('comments.postedBy', '_id name email profileImage')
+      .populate('postedBy', '_id name email profileImage username')
+      .populate('comments.postedBy', '_id name email profileImage username')
       .sort({ createdAt: -1 });
     res.json(posts);
   } catch (err) {

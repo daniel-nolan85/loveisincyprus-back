@@ -37,7 +37,7 @@ exports.createUser = async (req, res) => {
   const newUser = await new User({
     name,
     email,
-    username: nanoid(6),
+    // username: nanoid(6),
     mobile,
   }).save();
   console.log('USER CREATED', newUser);
@@ -544,8 +544,8 @@ exports.userFollow = async (req, res) => {
         },
         { new: true }
       )
-        .populate('following', '_id name email profileImage')
-        .populate('followers', '_id name email profileImage');
+        .populate('following', '_id name email profileImage username')
+        .populate('followers', '_id name email profileImage username');
       const otherUser = await User.findByIdAndUpdate(
         req.body.u._id,
         {
@@ -566,8 +566,8 @@ exports.userFollow = async (req, res) => {
         },
         { new: true }
       )
-        .populate('following', '_id name email profileImage')
-        .populate('followers', '_id name email profileImage');
+        .populate('following', '_id name email profileImage username')
+        .populate('followers', '_id name email profileImage username');
       res.json(user);
     }
     const notify = await User.findByIdAndUpdate(
@@ -623,8 +623,8 @@ exports.userUnfollow = async (req, res) => {
         },
         { new: true }
       )
-        .populate('following', '_id name email profileImage')
-        .populate('followers', '_id name email profileImage');
+        .populate('following', '_id name email profileImage username')
+        .populate('followers', '_id name email profileImage username');
       const otherUser = await User.findByIdAndUpdate(
         req.body.u._id,
         {
@@ -645,8 +645,8 @@ exports.userUnfollow = async (req, res) => {
         },
         { new: true }
       )
-        .populate('following', '_id name email profileImage')
-        .populate('followers', '_id name email profileImage');
+        .populate('following', '_id name email profileImage username')
+        .populate('followers', '_id name email profileImage username');
       res.json(user);
     }
   } catch (err) {
@@ -811,7 +811,7 @@ exports.cropProfile = async (req, res) => {
 exports.users = async (req, res) => {
   try {
     const users = await User.find({}).select(
-      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent'
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username'
     );
     console.log(users);
     res.json(users);
@@ -916,7 +916,7 @@ exports.usersToSwipe = async (req, res) => {
     let usersAvailable = total.length - usersUnavailable.length;
     const users = await User.find({ _id: { $nin: usersUnavailable } })
       .limit(usersAvailable)
-      .select('_id name email profileImage age');
+      .select('_id name email profileImage age username');
     // const users = await User.aggregate([
     //   { $match: { _id: { $nin: usersUnavailable } } },
     //   { $sample: { size: usersAvailable } },

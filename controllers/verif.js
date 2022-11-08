@@ -34,7 +34,7 @@ exports.submitVerif = async (req, res) => {
 exports.fetchVerifs = async (req, res) => {
   try {
     const verifs = await Verif.find()
-      .populate('postedBy', '_id name profileImage email')
+      .populate('postedBy', '_id name profileImage email username')
       .sort({ createdAt: -1 });
     res.json(verifs);
   } catch (err) {
