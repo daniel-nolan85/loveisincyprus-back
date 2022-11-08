@@ -1527,11 +1527,9 @@ exports.optInOrOut = async (req, res) => {
 
 exports.newMessageCount = async (req, res) => {
   console.log('newMessageCount controller response => ', req.body);
-  const user = await User.findByIdAndUpdate(
-    req.body._id,
-    { $addToSet: { messages: { sender: req.body.message.sender._id } } },
-    { new: true }
-  ).select('messages');
+  const user = await User.findByIdAndUpdate(req.body._id, { new: true }).select(
+    'messages'
+  );
   res.json(user);
 };
 
@@ -1549,42 +1547,32 @@ exports.newNotificationCount = async (req, res) => {
   const { user, notif, reason, otherUser } = req.body;
 
   if (reason === 'like') {
-    const notify = await User.findByIdAndUpdate(
-      user._id,
-      { $addToSet: { newNotifs: 'Someone liked your post' } },
-      { new: true }
+    const notify = await User.findByIdAndUpdate(user._id, { new: true }).select(
+      'newNotifs'
     );
     res.json(notify);
   }
   if (reason === 'comment') {
-    const notify = await User.findByIdAndUpdate(
-      user._id,
-      { $addToSet: { newNotifs: 'Someone commented on your post' } },
-      { new: true }
+    const notify = await User.findByIdAndUpdate(user._id, { new: true }).select(
+      'newNotifs'
     );
     res.json(notify);
   }
   if (reason === 'follower') {
-    const notify = await User.findByIdAndUpdate(
-      user._id,
-      { $addToSet: { newNotifs: 'Somebody likes you' } },
-      { new: true }
+    const notify = await User.findByIdAndUpdate(user._id, { new: true }).select(
+      'newNotifs'
     );
     res.json(notify);
   }
   if (reason === 'visitor') {
-    const notify = await User.findByIdAndUpdate(
-      user._id,
-      { $addToSet: { newNotifs: 'Somebody visited your profile' } },
-      { new: true }
+    const notify = await User.findByIdAndUpdate(user._id, { new: true }).select(
+      'newNotifs'
     );
     res.json(notify);
   }
   if (reason === 'event') {
-    const notify = await User.findByIdAndUpdate(
-      user._id,
-      { $addToSet: { newNotifs: 'You have been invited to an event' } },
-      { new: true }
+    const notify = await User.findByIdAndUpdate(user._id, { new: true }).select(
+      'newNotifs'
     );
     res.json(notify);
   }

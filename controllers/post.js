@@ -204,6 +204,16 @@ exports.likePost = async (req, res) => {
           'notif.comments.postedBy',
           '_id name email profileImage username'
         );
+
+      const sendNotif = await User.findByIdAndUpdate(
+        post.postedBy,
+        {
+          $addToSet: {
+            newNotifs: { action: 'Someone liked your post', id: post._id },
+          },
+        },
+        { new: true }
+      );
     }
     res.json(post);
   } catch (err) {
@@ -254,6 +264,18 @@ exports.addComment = async (req, res) => {
         },
         { new: true }
       ).populate('notif');
+      const sendNotif = await User.findByIdAndUpdate(
+        post.postedBy,
+        {
+          $addToSet: {
+            newNotifs: {
+              action: 'Someone commented on your post',
+              id: post._id,
+            },
+          },
+        },
+        { new: true }
+      );
     }
     res.json(post);
     console.log('post ==> ', post);

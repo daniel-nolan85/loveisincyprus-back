@@ -92,7 +92,7 @@ exports.fetchTheirChats = async (req, res) => {
 };
 
 exports.sendMessage = async (req, res) => {
-  // console.log('sendMessage controller response => ', req.body);
+  console.log('sendMessage controller response => ', req.body);
   const { _id, content, chatId } = req.body;
 
   if (!content || !chatId) {
@@ -120,8 +120,9 @@ exports.sendMessage = async (req, res) => {
       path: 'chat.users',
       select: 'name username email profileImage',
     });
-    const receiver = chat.users.find((u) => u._id !== _id);
+    const receiver = chat.users.find((u) => u._id != _id);
     console.log('receiver => ', receiver);
+    console.log('chat => ', chat);
     // const notifyReceiver = await User.findByIdAndUpdate(
     //   { _id: receiver._id },
     //   {
@@ -131,6 +132,11 @@ exports.sendMessage = async (req, res) => {
     //   },
     //   { new: true }
     // ).select('messages');
+    const sendNotif = await User.findByIdAndUpdate(
+      receiver._id,
+      { $push: { messages: { sender: _id } } },
+      { new: true }
+    );
 
     const updateLatest = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,

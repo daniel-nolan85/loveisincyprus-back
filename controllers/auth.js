@@ -588,6 +588,18 @@ exports.userFollow = async (req, res) => {
       },
       { new: true }
     );
+    const sendNotif = await User.findByIdAndUpdate(
+      req.body.u._id,
+      {
+        $addToSet: {
+          newNotifs: {
+            action: 'Somebody likes you',
+            id: req.body.user._id,
+          },
+        },
+      },
+      { new: true }
+    );
   } catch (err) {
     console.log('userFollow => ', err);
   }
@@ -959,6 +971,18 @@ exports.fetchVisitor = async (req, res) => {
               profileImage: req.body.user.profileImage,
             },
             action: 'user visited you',
+          },
+        },
+      },
+      { new: true }
+    );
+    const sendNotif = await User.findByIdAndUpdate(
+      req.body.userId,
+      {
+        $addToSet: {
+          newNotifs: {
+            action: 'Somebody visited your profile',
+            id: req.body.user._id,
           },
         },
       },

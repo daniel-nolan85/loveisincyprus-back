@@ -25,6 +25,18 @@ exports.create = async (req, res) => {
       },
       { new: true }
     ).populate('notif');
+    const sendNotif = await User.updateMany(
+      { _id: { $in: req.body.invitees } },
+      {
+        $addToSet: {
+          newNotifs: {
+            action: 'You have been invited to an event',
+            id: newEvent._id,
+          },
+        },
+      },
+      { new: true }
+    );
 
     res.json(newEvent);
   } catch (err) {
@@ -416,10 +428,10 @@ exports.updateEventComment = async (req, res) => {
 
 // remove user notifications
 // exports.expiredEvent = async (req, res) => {
-//   // console.log('expiredEvent controller response => ', req.body);
+//   console.log('expiredEvent controller response => ', req.body);
 //   const expired = await User.findByIdAndUpdate(
 //     { _id: req.body.user._id },
-//     { $pull: { notifications: { new: false } } }
+//     { $pull: { notifications: { new: true } } }
 //   );
 //   res.json(expired);
 // };

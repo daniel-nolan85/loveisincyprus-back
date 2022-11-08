@@ -153,7 +153,7 @@ const userSchema = new mongoose.Schema(
       default: 'false',
     },
     messages: [{ sender: String }],
-    newNotifs: [{ type: String }],
+    newNotifs: [{ action: String, id: String }],
     membership: {
       paid: { type: Boolean, default: false },
       startDate: { type: Date },
