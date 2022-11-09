@@ -5,6 +5,7 @@ const Chat = require('../models/chat');
 const Message = require('../models/message');
 const Event = require('../models/event');
 const Order = require('../models/order');
+const Blocked = require('../models/blocked');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
@@ -28,6 +29,20 @@ cloudinary.config({
 exports.userExists = async (req, res) => {
   const { mobile } = req.params;
   const user = await User.find({ mobile }).select('_id');
+  res.json(user);
+};
+
+exports.userPermitted = async (req, res) => {
+  const { mobile } = req.params;
+  const user = await User.find({ mobile }).select(
+    'username name profileImage _id userStatus'
+  );
+  res.json(user);
+};
+
+exports.userBlocked = async (req, res) => {
+  const { mobile } = req.params;
+  const user = await Blocked.find({ mobile });
   res.json(user);
 };
 
@@ -823,7 +838,7 @@ exports.cropProfile = async (req, res) => {
 exports.users = async (req, res) => {
   try {
     const users = await User.find({}).select(
-      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username'
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile'
     );
     console.log(users);
     res.json(users);
@@ -832,7 +847,25 @@ exports.users = async (req, res) => {
   }
 };
 
+exports.suspendUser = async (req, res) => {
+  console.log('suspendUser controller response => ', req.body);
+  const { _id, endDate, reason } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(
+      _id,
+      {
+        userStatus: { suspended: true, until: endDate, reason },
+      },
+      { new: true }
+    ).select('userStatus');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.deleteUser = async (req, res) => {
+  console.log('deleteUser controller respponse => ', req.body);
   try {
     const { u } = req.body;
     const user = await User.findByIdAndDelete(u._id);
@@ -846,11 +879,39 @@ exports.deleteUser = async (req, res) => {
     const matches = await User.updateMany({ $pull: { matches: u._id } });
     const visitors = await User.updateMany({ $pull: { visitors: u._id } });
     // const invitees = await Event.updateMany({
-    //   $pull: { 'invitees._id': u._id },
+    //   $pull: { 'invitees.$._id': u._id },
     // });
     const accepted = await Event.updateMany({ $pull: { accepted: u._id } });
     const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
     const declined = await Event.updateMany({ $pull: { declined: u._id } });
+    const chats = await Chat.deleteMany({ users: { $in: [u._id] } });
+    const blocked = await new Blocked({ mobile: u.mobile }).save();
+    res.json({ ok: true });
+  } catch (err) {
+    console.log('deleteUser => ', err);
+  }
+};
+
+exports.deleteSelf = async (req, res) => {
+  try {
+    const { user } = req.body;
+    const self = await User.findByIdAndDelete(user._id);
+    const posts = await Post.deleteMany({ postedBy: user._id });
+    const comments = await Post.updateMany({
+      $pull: { comments: { postedBy: user._id } },
+    });
+    const likes = await Post.updateMany({ $pull: { likes: user._id } });
+    const followers = await User.updateMany({ $pull: { followers: user._id } });
+    const following = await User.updateMany({ $pull: { following: user._id } });
+    const matches = await User.updateMany({ $pull: { matches: user._id } });
+    const visitors = await User.updateMany({ $pull: { visitors: user._id } });
+    // const invitees = await Event.updateMany({
+    //   $pull: { 'invitees.$._id': u._id },
+    // });
+    const accepted = await Event.updateMany({ $pull: { accepted: user._id } });
+    const maybe = await Event.updateMany({ $pull: { maybe: user._id } });
+    const declined = await Event.updateMany({ $pull: { declined: user._id } });
+    const chats = await Chat.deleteMany({ users: { $in: [user._id] } });
     res.json({ ok: true });
   } catch (err) {
     console.log('deleteUser => ', err);

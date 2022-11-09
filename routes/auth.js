@@ -15,6 +15,8 @@ const {
 const {
   // createOrUpdateUser,
   userExists,
+  userPermitted,
+  userBlocked,
   createUser,
   loginUser,
   currentUser,
@@ -41,7 +43,9 @@ const {
   fetchWhitelist,
   //admin
   users,
+  suspendUser,
   deleteUser,
+  deleteSelf,
   recentUsers,
   recentOrders,
   // searchPosts,
@@ -61,6 +65,8 @@ const {
 // routes
 // router.post('/create-or-update-user', authCheck, createOrUpdateUser);
 router.get('/user-exists/:mobile', userExists);
+router.get('/user-permitted/:mobile', userPermitted);
+router.get('/user-blocked/:mobile', userBlocked);
 router.post('/create-user', authCheck, createUser);
 router.post('/login-user', authCheck, loginUser);
 router.put('/profile-update', authCheck, profileUpdate);
@@ -96,7 +102,9 @@ router.get('/fetch-whitelist', fetchWhitelist);
 
 // admin
 router.post('/users', authCheck, adminCheck, users);
+router.put('/admin/suspend-user/:userId', authCheck, adminCheck, suspendUser);
 router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
+router.put('/delete-self/:userId', authCheck, deleteSelf);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
 router.post('/recent-orders', authCheck, adminCheck, recentOrders);
 // router.post('/admin/search-posts/:query', authCheck, adminCheck, searchPosts);

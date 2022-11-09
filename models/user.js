@@ -176,6 +176,11 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     lastLogin: { type: Date },
+    userStatus: {
+      suspended: { type: Boolean, default: false },
+      until: Date,
+      reason: String,
+    },
   },
   { timestamps: true }
 );
