@@ -57,6 +57,8 @@ const {
   removeUserFromAdmin,
   addUserToFeaturedMembers,
   removeUserFromFeaturedMembers,
+  addUserToEventsEligible,
+  removeUserFromEventsEligible,
   fetchFeaturedMembers,
   removeExpiredFeatures,
   dailyMatches,
@@ -137,6 +139,18 @@ router.put(
   authCheck,
   adminCheck,
   removeUserFromFeaturedMembers
+);
+router.put(
+  '/admin/add-user-to-events-eligible',
+  authCheck,
+  adminCheck,
+  addUserToEventsEligible
+);
+router.put(
+  '/admin/remove-user-from-events-eligible',
+  authCheck,
+  adminCheck,
+  removeUserFromEventsEligible
 );
 router.get('/fetch-featured-members', fetchFeaturedMembers);
 router.put('/remove-expired-features', removeExpiredFeatures);

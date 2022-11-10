@@ -779,7 +779,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id name email username profileImage about coverImage createdAt following verified clearPhoto membership lastLogin'
+      '_id username about name email profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin'
     );
     res.json(thisUser);
   } catch (err) {
@@ -838,7 +838,7 @@ exports.cropProfile = async (req, res) => {
 exports.users = async (req, res) => {
   try {
     const users = await User.find({}).select(
-      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile'
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible'
     );
     console.log(users);
     res.json(users);
@@ -1277,6 +1277,34 @@ exports.removeUserFromFeaturedMembers = async (req, res) => {
       { new: true }
     ).select('featuredMember');
     res.json(unMakeFeaturedMember);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.addUserToEventsEligible = async (req, res) => {
+  // console.log('addUserToFeaturedMembers controller response => ', req.body);
+  try {
+    const makeEventsEligible = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { eventsEligible: true },
+      { new: true }
+    ).select('eventsEligible');
+    res.json(makeEventsEligible);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.removeUserFromEventsEligible = async (req, res) => {
+  // console.log('removeUserFromFeaturedMembers controller response => ', req.body);
+  try {
+    const unMakeEventsEligible = await User.findByIdAndUpdate(
+      req.body.u._id,
+      { eventsEligible: false },
+      { new: true }
+    ).select('eventsEligible');
+    res.json(unMakeEventsEligible);
   } catch (err) {
     console.log(err);
   }

@@ -612,3 +612,15 @@ exports.removeUserEvent = async (req, res) => {
   // console.log('updateNotification => ', updateNotification);
   res.json(updateNotification);
 };
+
+exports.fetchEventUsers = async (req, res) => {
+  try {
+    const users = await User.find({ eventsEligible: true }).select(
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible'
+    );
+    console.log(users);
+    res.json(users);
+  } catch (err) {
+    console.log('users => ', err);
+  }
+};

@@ -34,6 +34,7 @@ const {
   maybeEventInvite,
   declineEventInvite,
   removeUserEvent,
+  fetchEventUsers,
 } = require('../controllers/event');
 
 // routes
@@ -79,5 +80,6 @@ router.post('/accept-event-invite', authCheck, acceptEventInvite);
 router.post('/maybe-event-invite', authCheck, maybeEventInvite);
 router.post('/decline-event-invite', authCheck, declineEventInvite);
 router.put('/remove-user-event', authCheck, removeUserEvent);
+router.post('/event-users', authCheck, fetchEventUsers);
 
 module.exports = router;

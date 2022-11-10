@@ -47,3 +47,13 @@ exports.deleteAfterUse = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.deleteExpiredCoupon = async (req, res) => {
+  try {
+    res.json(
+      await Coupon.deleteMany({ expiry: { $lte: new Date(Date.now()) } })
+    );
+  } catch (err) {
+    console.log(err);
+  }
+};

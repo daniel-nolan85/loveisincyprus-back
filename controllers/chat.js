@@ -140,7 +140,6 @@ exports.sendMessage = async (req, res) => {
 
     const updateLatest = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
-      read: false,
     });
     // console.log('message ==> ', message);
     res.json(message);

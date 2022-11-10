@@ -566,6 +566,11 @@ exports.spentPoints = async (req, res) => {
         path: 'chat.users',
         select: 'name username email profileImage',
       });
+      const sendNotif = await User.findByIdAndUpdate(
+        _id,
+        { $push: { messages: { sender: sender._id } } },
+        { new: true }
+      );
 
       await Chat.findByIdAndUpdate(chat._id, {
         latestMessage: message,
@@ -614,6 +619,11 @@ exports.spentPoints = async (req, res) => {
         path: 'chat.users',
         select: 'name username email profileImage',
       });
+      const sendNotif = await User.findByIdAndUpdate(
+        _id,
+        { $push: { messages: { sender: sender._id } } },
+        { new: true }
+      );
 
       await Chat.findByIdAndUpdate(chat._id, {
         latestMessage: message,
@@ -1654,4 +1664,17 @@ exports.fetchProducts = async (req, res) => {
     .populate('products.product')
     .exec();
   res.json(products);
+};
+
+exports.expiredSuspension = async (req, res) => {
+  const users = await User.updateMany(
+    {
+      'userStatus.until': { $lte: new Date(Date.now()) },
+    },
+    {
+      userStatus: { suspended: false, until: '', reason: '' },
+    },
+    { new: true }
+  ).select('userStatus');
+  res.json(users);
 };

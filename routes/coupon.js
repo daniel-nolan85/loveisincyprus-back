@@ -12,6 +12,7 @@ const {
   remove,
   update,
   deleteAfterUse,
+  deleteExpiredCoupon,
 } = require('../controllers/coupon');
 
 // routes
@@ -20,5 +21,6 @@ router.get('/coupons', list);
 router.delete('/coupon/:couponId', authCheck, adminCheck, remove);
 router.put('/coupon/:couponId', authCheck, adminCheck, update);
 router.delete('/delete-coupon/:couponId', authCheck, deleteAfterUse);
+router.delete('/delete-expired-coupon', deleteExpiredCoupon);
 
 module.exports = router;
