@@ -864,6 +864,23 @@ exports.suspendUser = async (req, res) => {
   }
 };
 
+exports.revokeUser = async (req, res) => {
+  console.log('revokeUser controller response => ', req.body);
+  const { _id } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(
+      _id,
+      {
+        userStatus: { suspended: false, until: '', reason: '' },
+      },
+      { new: true }
+    ).select('userStatus');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.deleteUser = async (req, res) => {
   console.log('deleteUser controller response => ', req.body);
   try {

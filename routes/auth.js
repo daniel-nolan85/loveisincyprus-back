@@ -44,6 +44,7 @@ const {
   //admin
   users,
   suspendUser,
+  revokeUser,
   deleteUser,
   deleteSelf,
   recentUsers,
@@ -103,6 +104,12 @@ router.get('/fetch-whitelist', fetchWhitelist);
 // admin
 router.post('/users', authCheck, adminCheck, users);
 router.put('/admin/suspend-user/:userId', authCheck, adminCheck, suspendUser);
+router.put(
+  '/admin/revoke-suspension/:userId',
+  authCheck,
+  adminCheck,
+  revokeUser
+);
 router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
 router.put('/delete-self/:userId', authCheck, deleteSelf);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
