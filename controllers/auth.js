@@ -865,7 +865,7 @@ exports.suspendUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  console.log('deleteUser controller respponse => ', req.body);
+  console.log('deleteUser controller response => ', req.body);
   try {
     const { u } = req.body;
     const user = await User.findByIdAndDelete(u._id);

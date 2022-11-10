@@ -28,10 +28,12 @@ const postSchema = new mongoose.Schema(
           url: String,
           pulic_id: String,
         },
+        reported: { type: Boolean, default: false },
       },
     ],
+    reported: { type: Boolean, default: false },
   },
   { timestamps: true }
-)
+);
 
 module.exports = mongoose.model('Post', postSchema);

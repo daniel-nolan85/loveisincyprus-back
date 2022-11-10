@@ -2,6 +2,7 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const Message = require('../models/message');
 const Ad = require('../models/ad');
+const Post = require('../models/post');
 const nodemailer = require('nodemailer');
 
 exports.orders = async (req, res) => {
@@ -157,6 +158,57 @@ exports.fetchNewVerifs = async (req, res) => {
   try {
     const pending = await User.find({ verified: 'pending' }).select('_id');
     res.json(pending);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchReportedContent = async (req, res) => {
+  try {
+    const posts = await Post.find({ reported: true }).select('_id');
+    const comments = await Post.aggregate([
+      { $unwind: '$comments' },
+      { $match: { 'comments.reported': true } },
+      { $project: { 'comments._id': 1 } },
+    ]);
+    const content = posts.concat(comments);
+    console.log('content => ', content);
+    res.json({ posts, comments, content });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.approveComment = async (req, res) => {
+  try {
+    const { postId, comment } = req.body;
+    console.log('reportComment controller response', postId, comment);
+    const post = await Post.findOneAndUpdate(
+      {
+        _id: postId,
+        'comments._id': comment._id,
+      },
+      {
+        $set: { 'comments.$.reported': false },
+      },
+      { new: true }
+    );
+    console.log('post => ', post);
+    res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.approvePost = async (req, res) => {
+  try {
+    const post = await Post.findByIdAndUpdate(
+      req.params.postId,
+      { reported: false },
+      { new: true }
+    );
+
+    res.json(post);
   } catch (err) {
     console.log(err);
   }

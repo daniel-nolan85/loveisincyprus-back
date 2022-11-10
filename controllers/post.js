@@ -147,6 +147,20 @@ exports.deletePost = async (req, res) => {
   }
 };
 
+exports.reportPost = async (req, res) => {
+  try {
+    const post = await Post.findByIdAndUpdate(
+      req.params.postId,
+      { reported: true },
+      { new: true }
+    );
+
+    res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.newsFeed = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id);
@@ -248,8 +262,11 @@ exports.addComment = async (req, res) => {
       },
       { new: true }
     )
-      .populate('postedBy', '_id name email profileImage username')
-      .populate('comments.postedBy', '_id name email profileImage username');
+      .populate('postedBy', '_id name email profileImage username mobile')
+      .populate(
+        'comments.postedBy',
+        '_id name email profileImage username mobile'
+      );
 
     if (post.postedBy._id != user._id) {
       const notify = await User.findByIdAndUpdate(
@@ -341,6 +358,27 @@ exports.updateComment = async (req, res) => {
   try {
     const comment = await Post.updateOne(query, updateComment);
     res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.reportComment = async (req, res) => {
+  try {
+    const { postId, comment } = req.body;
+    console.log('reportComment controller response', postId, comment);
+    const post = await Post.findOneAndUpdate(
+      {
+        _id: postId,
+        'comments._id': comment._id,
+      },
+      {
+        $set: { 'comments.$.reported': true },
+      },
+      { new: true }
+    );
+    console.log('post => ', post);
+    res.json(post);
   } catch (err) {
     console.log(err);
   }
@@ -440,6 +478,31 @@ exports.followersPosts = async (req, res) => {
     const posts = await Post.find({ postedBy: { $in: following } });
     const total = posts.length;
     res.json(total);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchReportedPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ reported: true })
+      .populate('postedBy', '_id name email profileImage username mobile')
+      .sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchReportedComments = async (req, res) => {
+  try {
+    const posts = await Post.find({ 'comments.reported': true })
+      .populate(
+        'comments.postedBy',
+        '_id name email profileImage username mobile'
+      )
+      .sort({ createdAt: -1 });
+    res.json(posts);
   } catch (err) {
     console.log(err);
   }

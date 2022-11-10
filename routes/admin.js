@@ -13,6 +13,9 @@ const {
   incomeTaken,
   fetchNewAds,
   fetchNewVerifs,
+  fetchReportedContent,
+  approveComment,
+  approvePost,
 } = require('../controllers/admin');
 
 // routes
@@ -23,5 +26,8 @@ router.get('/total-messages', totalMessages);
 router.get('/income-taken', incomeTaken);
 router.get('/fetch-new-ads', fetchNewAds);
 router.get('/fetch-new-verifs', fetchNewVerifs);
+router.get('/fetch-reported-content', fetchReportedContent);
+router.put('/admin-approve-comment', authCheck, adminCheck, approveComment);
+router.put('/approve-post/:postId', authCheck, adminCheck, approvePost);
 
 module.exports = router;
