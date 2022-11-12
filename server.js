@@ -78,6 +78,12 @@ io.on('connection', (socket) => {
     });
     // console.log('newMessageReceived => ', newMessageReceived);
   });
+  socket.on('new mass mail', (newMessageReceived) => {
+    console.log('newMessageReceived => ', newMessageReceived);
+    var chat = newMessageReceived.chat;
+    if (!chat.users) return console.log('chat.users not defined');
+    socket.broadcast.emit('mass mail received', newMessageReceived);
+  });
   socket.on('reorder users', (chats, _id, theirChats, theirId) => {
     console.log('chats => ', chats);
     console.log('_id => ', _id);

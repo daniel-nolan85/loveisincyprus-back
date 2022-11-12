@@ -207,6 +207,12 @@ exports.massMail = async (req, res) => {
       select: 'name username email profileImage',
     });
 
+    const sendNotif = await User.updateMany(
+      { _id: { $in: userIds } },
+      { $push: { messages: { sender: sender._id } } }
+      // { new: true }
+    );
+
     await Chat.findByIdAndUpdate(chats[i]._id, {
       latestMessage: message,
     });
