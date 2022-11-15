@@ -2,19 +2,28 @@ const Verif = require('../models/verif');
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
+const cloudinary = require('cloudinary');
+const nodemailer = require('nodemailer');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
 exports.submitVerif = async (req, res) => {
   console.log('submitVerif controller response => ', req.body);
   const { verifImg, user } = req.body;
 
   try {
-    if (!verifImg.url) {
+    if (!verifImg) {
       res.json({
         error: 'Image is required',
       });
     } else {
+      const result = await cloudinary.uploader.upload(req.body.verifImg);
       const verif = new Verif({
-        image: verifImg,
+        image: result.secure_url,
         postedBy: user,
       });
       const userStatus = await User.findByIdAndUpdate(
@@ -78,6 +87,11 @@ exports.disapproveVerif = async (req, res) => {
       path: 'chat.users',
       select: 'name username email profileImage',
     });
+    const sendNotif = await User.findByIdAndUpdate(
+      verif.postedBy._id,
+      { $push: { messages: { sender: sender._id } } },
+      { new: true }
+    );
 
     await Chat.findByIdAndUpdate(chat._id, {
       latestMessage: message,
@@ -128,6 +142,12 @@ exports.approveVerif = async (req, res) => {
       path: 'chat.users',
       select: 'name username email profileImage',
     });
+
+    const sendNotif = await User.findByIdAndUpdate(
+      verif.postedBy._id,
+      { $push: { messages: { sender: sender._id } } },
+      { new: true }
+    );
 
     await Chat.findByIdAndUpdate(chat._id, {
       latestMessage: message,

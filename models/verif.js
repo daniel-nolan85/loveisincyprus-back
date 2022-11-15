@@ -7,10 +7,7 @@ const verifSchema = new mongoose.Schema(
       type: ObjectId,
       ref: 'User',
     },
-    image: {
-      url: String,
-      pulic_id: String,
-    },
+    image: String,
   },
   { timestamps: true }
 );
