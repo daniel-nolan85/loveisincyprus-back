@@ -33,6 +33,7 @@ const {
   // cropImage,
   cropCover,
   cropProfile,
+  liveProfilePic,
   nineMatches,
   usersToSwipe,
   leftSwipe,
@@ -94,6 +95,7 @@ router.post('/user/:userId', authCheck, userProfile);
 // router.post('/crop-image', authCheck, cropImage);
 router.post('/crop-cover', authCheck, cropCover);
 router.post('/crop-profile', authCheck, cropProfile);
+router.post('/live-profile-pic', authCheck, liveProfilePic);
 router.post('/nine-matches', authCheck, nineMatches);
 router.post('/users-to-swipe', authCheck, usersToSwipe);
 router.post('/left-swipe', authCheck, leftSwipe);

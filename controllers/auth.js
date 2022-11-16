@@ -835,6 +835,30 @@ exports.cropProfile = async (req, res) => {
   }
 };
 
+exports.liveProfilePic = async (req, res) => {
+  console.log('liveProfilePic controller response => ', req.body);
+  try {
+    if (req.body.url) {
+      const result = await cloudinary.uploader.upload(req.body.url);
+      const user = await User.findByIdAndUpdate(
+        req.body.user._id,
+        {
+          $push: {
+            profilePhotos: result.secure_url,
+          },
+        },
+        { new: true }
+      ).select('profilePhotos');
+      res.json({
+        url: result.secure_url,
+        public_id: result.public_id,
+      });
+    }
+  } catch (err) {
+    console.log('cropProfile => ', err);
+  }
+};
+
 exports.users = async (req, res) => {
   try {
     const users = await User.find({}).select(
