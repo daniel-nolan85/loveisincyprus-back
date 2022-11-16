@@ -16,6 +16,7 @@ const {
   fetchReportedContent,
   approveComment,
   approvePost,
+  approveMessage,
 } = require('../controllers/admin');
 
 // routes
@@ -29,5 +30,11 @@ router.get('/fetch-new-verifs', fetchNewVerifs);
 router.get('/fetch-reported-content', fetchReportedContent);
 router.put('/admin-approve-comment', authCheck, adminCheck, approveComment);
 router.put('/approve-post/:postId', authCheck, adminCheck, approvePost);
+router.put(
+  '/approve-message/:messageId',
+  authCheck,
+  adminCheck,
+  approveMessage
+);
 
 module.exports = router;

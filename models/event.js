@@ -53,6 +53,7 @@ const eventSchema = new mongoose.Schema(
             },
           },
         ],
+        created: { type: Date, default: Date.now },
       },
     ],
     invitees: [{ type: Object, ref: 'User' }],

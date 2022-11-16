@@ -246,3 +246,52 @@ exports.markRead = async (req, res) => {
   ).select('messages');
   res.json(markAsRead);
 };
+
+exports.reportMessage = async (req, res) => {
+  try {
+    const message = await Message.findByIdAndUpdate(
+      req.params.messageId,
+      { reported: true },
+      { new: true }
+    );
+
+    res.json(message);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchReportedMessages = async (req, res) => {
+  try {
+    const messages = await Message.find({ reported: true })
+      .populate('sender', '_id name email profileImage username mobile')
+      .sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.deleteMessage = async (req, res) => {
+  try {
+    const message = await Message.findByIdAndDelete(req.params.messageId);
+    // remove the image from cloudinary
+    // if (post.image) {
+    //   const image = await cloudinary.uploader.destroy(post.image);
+    //   const user = await User.findByIdAndUpdate(
+    //     req.body.post.postedBy._id,
+    //     {
+    //       $pull: {
+    //         uploadedPhotos: post.image.url,
+    //       },
+    //     },
+    //     {
+    //       new: true,
+    //     }
+    //   );
+    // }
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
+};

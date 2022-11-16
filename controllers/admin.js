@@ -171,9 +171,10 @@ exports.fetchReportedContent = async (req, res) => {
       { $match: { 'comments.reported': true } },
       { $project: { 'comments._id': 1 } },
     ]);
-    const content = posts.concat(comments);
+    const messages = await Message.find({ reported: true }).select('_id');
+    const content = posts.concat(comments, messages);
     console.log('content => ', content);
-    res.json({ posts, comments, content });
+    res.json({ posts, comments, messages, content });
   } catch (err) {
     console.log(err);
   }
@@ -209,6 +210,20 @@ exports.approvePost = async (req, res) => {
     );
 
     res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.approveMessage = async (req, res) => {
+  try {
+    const message = await Message.findByIdAndUpdate(
+      req.params.messageId,
+      { reported: false },
+      { new: true }
+    );
+
+    res.json(message);
   } catch (err) {
     console.log(err);
   }

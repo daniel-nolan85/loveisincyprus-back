@@ -6,6 +6,7 @@ const Message = require('../models/message');
 const Event = require('../models/event');
 const Order = require('../models/order');
 const Blocked = require('../models/blocked');
+const Verif = require('../models/verif');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
@@ -926,6 +927,7 @@ exports.deleteUser = async (req, res) => {
     const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
     const declined = await Event.updateMany({ $pull: { declined: u._id } });
     const chats = await Chat.deleteMany({ users: { $in: [u._id] } });
+    const verifs = await Verif.remove({ postedBy: u._id });
     const blocked = await new Blocked({ mobile: u.mobile }).save();
     res.json({ ok: true });
   } catch (err) {
@@ -953,6 +955,7 @@ exports.deleteSelf = async (req, res) => {
     const maybe = await Event.updateMany({ $pull: { maybe: user._id } });
     const declined = await Event.updateMany({ $pull: { declined: user._id } });
     const chats = await Chat.deleteMany({ users: { $in: [user._id] } });
+    const verifs = await Verif.remove({ postedBy: user._id });
     res.json({ ok: true });
   } catch (err) {
     console.log('deleteUser => ', err);

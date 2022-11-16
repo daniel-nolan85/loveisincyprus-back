@@ -505,6 +505,9 @@ exports.removePoints = async (req, res) => {
 exports.spentPoints = async (req, res) => {
   console.log('spentPoints controller response => ', req.body);
   const { number, reason, _id, couponName } = req.body;
+  var expired = new Date();
+  expired.setDate(expired.getDate() + 3);
+
   if (reason === 'featured') {
     const addToFeatured = await User.findByIdAndUpdate(
       { _id },
@@ -538,10 +541,10 @@ exports.spentPoints = async (req, res) => {
       { new: true }
     ).exec();
 
-    const content = `Thanks for purchasing a 5% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
+    const content = `Thanks for purchasing a 5% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it during online checkout before ${expired}.`;
     const createCoupon = await new Coupon({
       name: couponName,
-      expiry: new Date(Date.now() + 14 * 24 * 3600 * 1000),
+      expiry: new Date(Date.now() + 3 * 24 * 3600 * 1000),
       discount: 5,
     }).save();
 
@@ -591,7 +594,7 @@ exports.spentPoints = async (req, res) => {
       { new: true }
     ).exec();
 
-    const content = `Thanks for purchasing a 10% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it when you check out your next order.`;
+    const content = `Thanks for purchasing a 10% coupon. Your coupon name is ${couponName}. Please keep this name safe and use it during online checkout before ${expired}.`;
     const createCoupon = await new Coupon({
       name: couponName,
       expiry: new Date(Date.now() + 14 * 24 * 3600 * 1000),
