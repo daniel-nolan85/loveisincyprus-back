@@ -5,7 +5,7 @@ const Message = require('../models/message');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  // console.log('submitAd controller response => ', req.body);
+  console.log('submitAd controller response => ', req.body);
   const { content, image, duration, demographic, contactInfo, accountInfo } =
     req.body;
   if (demographic.length === 0) {
