@@ -228,3 +228,156 @@ exports.approveMessage = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.setPreferences = async (req, res) => {
+  console.log('setPreferences controller response => ', req.body);
+  const { preferences, secondaryAdmin } = req.body;
+  try {
+    if (preferences.includes('verified')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canVerify: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canVerify: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('reported')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canReported: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canReported: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('posts')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canPosts: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canPosts: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('users')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canUsers: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canUsers: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('mail')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canMassMail: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canMassMail: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('events')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canEvents: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canEvents: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('orders')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canOrders: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canOrders: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('products')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canProducts: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canProducts: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('categories')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canCategories: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canCategories: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('subs')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canSubs: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canSubs: false },
+        { new: true }
+      );
+    }
+    if (preferences.includes('coupon')) {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canCoupon: true },
+        { new: true }
+      );
+    } else {
+      const user = await User.findByIdAndUpdate(
+        { _id: secondaryAdmin._id },
+        { canCoupon: false },
+        { new: true }
+      );
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
+};

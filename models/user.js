@@ -181,6 +181,50 @@ const userSchema = new mongoose.Schema(
       until: Date,
       reason: String,
     },
+    canVerify: {
+      type: Boolean,
+      default: false,
+    },
+    canReported: {
+      type: Boolean,
+      default: false,
+    },
+    canPosts: {
+      type: Boolean,
+      default: false,
+    },
+    canUsers: {
+      type: Boolean,
+      default: false,
+    },
+    canMassMail: {
+      type: Boolean,
+      default: false,
+    },
+    canEvents: {
+      type: Boolean,
+      default: false,
+    },
+    canOrders: {
+      type: Boolean,
+      default: false,
+    },
+    canProducts: {
+      type: Boolean,
+      default: false,
+    },
+    canCategories: {
+      type: Boolean,
+      default: false,
+    },
+    canSubs: {
+      type: Boolean,
+      default: false,
+    },
+    canCoupon: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

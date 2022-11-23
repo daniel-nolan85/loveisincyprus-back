@@ -117,7 +117,7 @@ exports.loginUser = async (req, res) => {
     { mobile },
     { lastLogin: new Date(Date.now()) }
   ).select(
-    '_id membership messages newNotifs name email following followers matches profileImage username'
+    '_id membership messages newNotifs name email following followers matches profileImage username role'
   );
 
   if (
@@ -145,7 +145,7 @@ exports.loginUser = async (req, res) => {
           { new: true }
         )
           .select(
-            '_id membership messages newNotifs name email following followers matches profileImage username'
+            '_id membership messages newNotifs name email following followers matches profileImage username role'
           )
           .exec();
 
@@ -166,7 +166,7 @@ exports.loginUser = async (req, res) => {
       { new: true }
     )
       .select(
-        '_id membership messages newNotifs name email following followers matches profileImage username'
+        '_id membership messages newNotifs name email following followers matches profileImage username role'
       )
       .exec();
     res.json(trialEnded);
@@ -863,7 +863,7 @@ exports.liveProfilePic = async (req, res) => {
 exports.users = async (req, res) => {
   try {
     const users = await User.find({}).select(
-      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible'
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
     );
     console.log(users);
     res.json(users);
@@ -1258,7 +1258,7 @@ exports.addUserToAdmin = async (req, res) => {
   try {
     const makeAdmin = await User.findByIdAndUpdate(
       req.body.u._id,
-      { role: 'admin' },
+      { role: 'secondary-admin' },
       { new: true }
     ).select('role');
     res.json(makeAdmin);

@@ -20,7 +20,7 @@ exports.adminCheck = async (req, res, next) => {
     mobile: req.user.phone_number,
   }).exec();
 
-  if (adminUser.role !== 'admin') {
+  if (adminUser.role === 'subscriber') {
     res.status(403).json({
       err: 'Admin resource. Access denied',
     });

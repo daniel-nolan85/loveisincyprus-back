@@ -17,6 +17,7 @@ const {
   approveComment,
   approvePost,
   approveMessage,
+  setPreferences,
 } = require('../controllers/admin');
 
 // routes
@@ -36,5 +37,6 @@ router.put(
   adminCheck,
   approveMessage
 );
+router.put('/set-preferences', authCheck, adminCheck, setPreferences);
 
 module.exports = router;
