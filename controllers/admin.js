@@ -3,6 +3,7 @@ const User = require('../models/user');
 const Message = require('../models/message');
 const Ad = require('../models/ad');
 const Post = require('../models/post');
+const Product = require('../models/product');
 const nodemailer = require('nodemailer');
 
 exports.orders = async (req, res) => {
@@ -173,7 +174,7 @@ exports.fetchReportedContent = async (req, res) => {
     ]);
     const messages = await Message.find({ reported: true }).select('_id');
     const content = posts.concat(comments, messages);
-    console.log('content => ', content);
+    // console.log('content => ', content);
     res.json({ posts, comments, messages, content });
   } catch (err) {
     console.log(err);
@@ -377,6 +378,15 @@ exports.setPreferences = async (req, res) => {
       );
     }
     res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchProductsForReview = async (req, res) => {
+  try {
+    const products = await Product.find({ approved: false }).select('_id');
+    res.json(products);
   } catch (err) {
     console.log(err);
   }

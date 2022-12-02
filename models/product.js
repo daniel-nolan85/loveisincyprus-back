@@ -63,6 +63,10 @@ const productSchema = new mongoose.Schema(
       minlength: [1, 'Weight is too short'],
       maxlength: [50, 'Weight is too long'],
     },
+    approved: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

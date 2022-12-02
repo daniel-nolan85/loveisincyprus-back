@@ -4,7 +4,7 @@ const slugify = require('slugify');
 
 exports.create = async (req, res) => {
   try {
-    // console.log('create product controller response => ', req.body);
+    console.log('create product controller response => ', req.body);
     req.body.slug = slugify(req.body.title);
     const newProduct = await new Product(req.body).save();
     res.json(newProduct);
@@ -23,7 +23,7 @@ exports.productsCount = async (req, res) => {
 };
 
 exports.listAll = async (req, res) => {
-  const products = await Product.find({})
+  const products = await Product.find({ approved: true })
     .limit(parseInt(req.params.count))
     .populate('category')
     .populate('subs')
@@ -89,7 +89,7 @@ exports.list = async (req, res) => {
     const { sort, order, page } = req.body;
     const currentPage = page || 1;
     const perPage = 3;
-    const products = await Product.find({})
+    const products = await Product.find({ approved: true })
       .skip((currentPage - 1) * perPage)
       .populate('category')
       .populate('subs')
@@ -246,5 +246,44 @@ exports.searchFilters = async (req, res) => {
   if (sub) {
     console.log('sub => ', sub);
     await handleSub(req, res, sub);
+  }
+};
+
+exports.fetchProductsToReview = async (req, res) => {
+  try {
+    const products = await Product.find({ approved: false })
+      .populate('category', '_id name slug')
+      .populate('subs', '_id name slug')
+      .populate('postedBy', '_id name')
+      .sort({
+        createdAt: -1,
+      });
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.approveProduct = async (req, res) => {
+  console.log('approveProduct controller response => ', req.body);
+  const { product } = req.body;
+  const approveProduct = await Product.findByIdAndUpdate(
+    product._id,
+    { approved: true },
+    { new: true }
+  ).exec();
+  res.json(approveProduct);
+};
+
+exports.disapproveProduct = async (req, res) => {
+  console.log('disapproveProduct controller response => ', req.params);
+  try {
+    const product = await Product.findOneAndRemove({
+      slug: req.params.slug,
+    }).exec();
+    res.json(product);
+  } catch {
+    console.log(err);
+    return res.status(400).send('Delete product failed');
   }
 };

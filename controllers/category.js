@@ -24,7 +24,9 @@ exports.list = async (req, res) => {
 
 exports.read = async (req, res) => {
   let category = await Category.findOne({ slug: req.params.slug }).exec();
-  const products = await Product.find({ category }).populate('category').exec();
+  const products = await Product.find({ approved: true, category })
+    .populate('category')
+    .exec();
   res.json({ category, products });
 };
 

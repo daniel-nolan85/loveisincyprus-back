@@ -17,6 +17,9 @@ const {
   productStar,
   listRelated,
   searchFilters,
+  fetchProductsToReview,
+  disapproveProduct,
+  approveProduct,
 } = require('../controllers/product');
 
 // routes
@@ -30,5 +33,13 @@ router.post('/products', list);
 router.put('/product/star/:productId', authCheck, productStar);
 router.get('/product/related/:productId', listRelated);
 router.post('/search/filters', searchFilters);
+router.post('/fetch-products-to-review', fetchProductsToReview);
+router.delete(
+  '/disapprove-product/:slug',
+  authCheck,
+  adminCheck,
+  disapproveProduct
+);
+router.put('/approve-product', authCheck, adminCheck, approveProduct);
 
 module.exports = router;
