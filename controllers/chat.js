@@ -93,7 +93,7 @@ exports.fetchTheirChats = async (req, res) => {
 
 exports.sendMessage = async (req, res) => {
   console.log('sendMessage controller response => ', req.body);
-  const { _id, content, chatId } = req.body;
+  const { _id, content, chatId, image } = req.body;
 
   if (!content || !chatId) {
     console.log('Invalid data passed into this request');
@@ -107,6 +107,7 @@ exports.sendMessage = async (req, res) => {
     sender,
     content,
     chat,
+    image,
   };
 
   try {
@@ -164,7 +165,7 @@ exports.allMessages = async (req, res) => {
 
 exports.massMail = async (req, res) => {
   // console.log('massMail controller response => ', req.body);
-  const { content, selected } = req.body;
+  const { image, content, selected } = req.body;
 
   if (!content || selected.length < 1) {
     console.log('Invalid data passed into this request');
@@ -195,6 +196,7 @@ exports.massMail = async (req, res) => {
       sender,
       content,
       chat: chats[i],
+      image,
     };
     var message = await Message.create(newMessage);
     message = await message.populate(

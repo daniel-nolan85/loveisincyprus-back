@@ -7,6 +7,10 @@ const messageSchema = new mongoose.Schema(
     content: { type: String, trim: true },
     chat: { type: ObjectId, ref: 'Chat' },
     reported: { type: Boolean, default: false },
+    image: {
+      url: String,
+      pulic_id: String,
+    },
   },
   { timestamps: true }
 );
