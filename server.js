@@ -6,6 +6,7 @@ const { readdirSync } = require('fs');
 require('dotenv').config();
 const Chat = require('./models/chat');
 const User = require('./models/user');
+const rateLimit = require('express-rate-limit');
 
 // app
 const app = express();
@@ -21,11 +22,20 @@ mongoose
   .then(() => console.log('DB CONNECTED'))
   .catch((err) => console.log(`DB CONNECTION ERR ${err}`));
 
+// rate limit
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 150 requests per `window` (here, per 15 minutes)
+  message: 'Too many requests', // message to send
+});
+
 // middleware
 app.use(morgan('dev'));
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '2mb' }));
+// app.use(express.json({ limit: '50mb' }));
 // app.use(express.urlencoded({ limit: '50mb' }));
 app.use(cors());
+app.use(limiter);
 
 // routes middleware
 readdirSync('./routes').map((r) => app.use('/api', require(`./routes/${r}`)));

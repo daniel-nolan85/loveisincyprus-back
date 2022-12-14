@@ -10,7 +10,6 @@ const Chat = require('../models/chat');
 const Message = require('../models/message');
 const UserSearch = require('../models/userSearch');
 const axios = require('axios');
-const user = require('../models/user');
 
 exports.recaptcha = async (req, res) => {
   // console.log('recaptcha controller response => ', req.body);
@@ -1680,4 +1679,278 @@ exports.expiredSuspension = async (req, res) => {
     { new: true }
   ).select('userStatus');
   res.json(users);
+};
+
+exports.highCompats = async (req, res) => {
+  const { user } = req.body;
+  const range = (min, max) =>
+    [...Array(max - min + 1).keys()].map((i) => i + min);
+  let compatibility = {
+    points: 0,
+  };
+  let highCompats = [];
+  let veryHighCompats = [];
+  let superCompats = [];
+
+  const users = await User.find();
+  users.map((u) => {
+    if (u.genderWanted && user.gender && u.genderWanted == user.gender) {
+      compatibility.genderTheyWant = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.gender && user.genderWanted && u.gender == user.genderWanted) {
+      compatibility.genderYouWant = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.location && user.location && u.location == user.location) {
+      compatibility.location = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (
+      u.location &&
+      user.location &&
+      u.location != user.location &&
+      u.relocate == 'abroad'
+    ) {
+      compatibility.theyWillRelocate = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (
+      u.location &&
+      user.location &&
+      u.location != user.location &&
+      u.relocate == 'country'
+    ) {
+      compatibility.theyWillRelocate = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (
+      u.location &&
+      user.location &&
+      u.location != user.location &&
+      user.relocate == 'abroad'
+    ) {
+      compatibility.youWillRelocate = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (
+      u.location &&
+      user.location &&
+      u.location != user.location &&
+      user.relocate == 'country'
+    ) {
+      compatibility.youWillRelocate = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.relWanted && user.relWanted && u.relWanted == user.relWanted) {
+      compatibility.relWanted = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.language && user.language && u.language == user.language) {
+      compatibility.language = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.drinks && user.drinks && u.drinks == user.drinks) {
+      compatibility.drinks = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.smokes && user.smokes && u.smokes == user.smokes) {
+      compatibility.smokes = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.education && user.education && u.education == user.education) {
+      compatibility.education = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.occupation && user.occupation && u.occupation == user.occupation) {
+      compatibility.occupation = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.politics && user.politics && u.politics == user.politics) {
+      compatibility.politics = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.religion && user.religion && u.religion == user.religion) {
+      compatibility.religion = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.foods && user.foods && u.foods == user.foods) {
+      compatibility.foods = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.livesWith && user.livesWith && u.livesWith == user.livesWith) {
+      compatibility.livesWith = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.roleInLife && user.roleInLife && u.roleInLife == user.roleInLife) {
+      compatibility.roleInLife = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.managesEdu && user.managesEdu && u.managesEdu == user.managesEdu) {
+      compatibility.managesEdu = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.relocate && user.relocate && u.relocate == user.relocate) {
+      compatibility.relocate = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.sexLikes && user.sexLikes && u.sexLikes == user.sexLikes) {
+      compatibility.sexLikes = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (
+      u.sexFrequency &&
+      user.sexFrequency &&
+      u.sexFrequency == user.sexFrequency
+    ) {
+      compatibility.sexFrequency = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.loves && user.loves) {
+      let commonLoves = u.loves.filter((x) => user.loves.includes(x));
+      compatibility.loves = commonLoves;
+      compatibility.points = compatibility.points + commonLoves.length * 5;
+    }
+    if (u.hates && user.hates) {
+      let commonHates = u.hates.filter((x) => user.hates.includes(x));
+      compatibility.hates = commonHates;
+      compatibility.points = compatibility.points + commonHates.length * 5;
+    }
+    if (u.pets && user.pets) {
+      let commonPets = u.pets.filter((x) => user.pets.includes(x));
+      compatibility.pets = commonPets;
+      compatibility.points = compatibility.points + commonPets.length * 5;
+    }
+    if (u.interests && user.interests) {
+      let commonInterests = u.interests.filter((x) =>
+        user.interests.includes(x)
+      );
+      compatibility.interests = commonInterests;
+      compatibility.points = compatibility.points + commonInterests.length * 5;
+    }
+    if (u.music && user.music) {
+      let commonMusic = u.music.filter((x) => user.music.includes(x));
+      compatibility.music = commonMusic;
+      compatibility.points = compatibility.points + commonMusic.length * 5;
+    }
+    if (u.books && user.books) {
+      let commonBooks = u.books.filter((x) => user.books.includes(x));
+      compatibility.books = commonBooks;
+      compatibility.points = compatibility.points + commonBooks.length * 5;
+    }
+    if (u.films && user.films) {
+      let commonFilms = u.films.filter((x) => user.films.includes(x));
+      compatibility.films = commonFilms;
+      compatibility.points = compatibility.points + commonFilms.length * 5;
+    }
+    if (u.sports && user.sports) {
+      let commonSports = u.sports.filter((x) => user.sports.includes(x));
+      compatibility.sports = commonSports;
+      compatibility.points = compatibility.points + commonSports.length * 5;
+    }
+    if (u.hobbies && user.hobbies) {
+      let commonHobbies = u.hobbies.filter((x) => user.hobbies.includes(x));
+      compatibility.hobbies = commonHobbies;
+      compatibility.points = compatibility.points + commonHobbies.length * 5;
+    }
+    if (u.traits && user.traits) {
+      let commonTraits = u.traits.filter((x) => user.traits.includes(x));
+      compatibility.traits = commonTraits;
+      compatibility.points = compatibility.points + commonTraits.length * 5;
+    }
+    if (u.treatSelf && user.treatSelf) {
+      let commonTreatSelf = u.treatSelf.filter((x) =>
+        user.treatSelf.includes(x)
+      );
+      compatibility.treatSelf = commonTreatSelf;
+      compatibility.points = compatibility.points + commonTreatSelf.length * 5;
+    }
+    if (u.age && user.ageOfPartner && user.ageOfPartner !== 'Over 80') {
+      const start = parseInt(user.ageOfPartner.split('-')[0]);
+      const end = parseInt(user.ageOfPartner.split('-')[1]);
+      let ageYouWant = range(start, end);
+      if (ageYouWant.includes(u.age)) {
+        compatibility.ageYouWant = true;
+        compatibility.points = compatibility.points + 5;
+      }
+    }
+    if (
+      u.age &&
+      user.ageOfPartner &&
+      user.ageOfPartner === 'Over 80' &&
+      u.age > 79
+    ) {
+      compatibility.ageYouWant = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (user.age && u.ageOfPartner && u.ageOfPartner !== 'Over 80') {
+      const start = parseInt(u.ageOfPartner.split('-')[0]);
+      const end = parseInt(u.ageOfPartner.split('-')[1]);
+      let ageTheyWant = range(start, end);
+      if (ageTheyWant.includes(u.age)) {
+        compatibility.ageTheyWant = true;
+        compatibility.points = compatibility.points + 5;
+      }
+    }
+    if (
+      user.age &&
+      u.ageOfPartner &&
+      u.ageOfPartner === 'Over 80' &&
+      user.age > 79
+    ) {
+      compatibility.ageTheyWant = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (compatibility.points > 60 && compatibility.points <= 75) {
+      const user = {
+        username: u.username,
+        name: u.name,
+        _id: u._id,
+        profileImage: u.profileImage,
+        email: u.email,
+      };
+      highCompats.push(user);
+    }
+    if (compatibility.points > 75 && compatibility.points <= 100) {
+      const user = {
+        username: u.username,
+        name: u.name,
+        _id: u._id,
+        profileImage: u.profileImage,
+        email: u.email,
+      };
+      veryHighCompats.push(user);
+    }
+    if (compatibility.points > 100) {
+      const user = {
+        username: u.username,
+        name: u.name,
+        _id: u._id,
+        profileImage: u.profileImage,
+        email: u.email,
+      };
+      superCompats.push(user);
+    }
+  });
+  res.json({ highCompats, veryHighCompats, superCompats });
+  // console.log('highCompats => ', highCompats);
+  // console.log('veryHighCompats => ', veryHighCompats);
+  // console.log('superCompats => ', superCompats);
+};
+
+exports.updateAge = async (req, res) => {
+  if (req.body.user.birthday) {
+    function calculate_age(dob) {
+      var diff_ms = Date.now() - dob.getTime();
+      var age_dt = new Date(diff_ms);
+      return Math.abs(age_dt.getUTCFullYear() - 1970);
+    }
+    age = calculate_age(new Date(req.body.user.birthday));
+    const updateAge = await User.findOneAndUpdate(
+      { _id: req.body.user._id },
+      { age }
+    );
+    res.json(updateAge);
+  }
+  console.log(req.body.user.age);
 };

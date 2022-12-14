@@ -2,7 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 // middleware
-const { authCheck, adminCheck } = require('../middleware/auth');
+const {
+  authCheck,
+  adminCheck,
+  subscriberCheck,
+} = require('../middleware/auth');
 
 // controllers
 const {
@@ -51,6 +55,8 @@ const {
   totalUsers,
   fetchProducts,
   expiredSuspension,
+  highCompats,
+  updateAge,
 } = require('../controllers/user');
 
 // routes
@@ -99,5 +105,7 @@ router.put('/clear-profile-image', authCheck, clearProfileImage);
 router.get('/total-users', totalUsers);
 router.post('/fetch-products', fetchProducts);
 router.put('/expired-suspension', expiredSuspension);
+router.post('/high-compat-users', authCheck, subscriberCheck, highCompats);
+router.put('/update-age', updateAge);
 
 module.exports = router;
