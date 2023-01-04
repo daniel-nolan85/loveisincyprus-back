@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Post = require('../models/post');
 const Location = require('../models/location');
+const CallingCode = require('../models/callingCode');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const Event = require('../models/event');
@@ -45,6 +46,43 @@ exports.userBlocked = async (req, res) => {
   const { mobile } = req.params;
   const user = await Blocked.find({ mobile });
   res.json(user);
+};
+
+exports.callingCode = async (req, res) => {
+  const { mobile } = req.params;
+  const callingCode1 = mobile.slice(0, 5);
+  const callingCode2 = mobile.slice(0, 4);
+  const callingCode3 = mobile.slice(0, 3);
+  const callingCode4 = mobile.slice(0, 2);
+
+  const allCodes = await CallingCode.find({});
+
+  var code1 = allCodes.some((c) => c.callingCode === callingCode1);
+  var code2 = allCodes.some((c) => c.callingCode === callingCode2);
+  var code3 = allCodes.some((c) => c.callingCode === callingCode3);
+  var code4 = allCodes.some((c) => c.callingCode === callingCode4);
+
+  if (code1) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode1,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code2) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode2,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code3) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode3,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code4) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode4,
+    }).select('permitted');
+    return res.json(country);
+  } else return res.json({ permitted: 'false' });
 };
 
 exports.createUser = async (req, res) => {
@@ -1250,6 +1288,55 @@ exports.fetchWhitelist = async (req, res) => {
     res.json(whitelist);
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.fetchCodes = async (req, res) => {
+  try {
+    const codes = await CallingCode.find().sort({ country: 1 });
+    res.json(codes);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.handlePermitted = async (req, res) => {
+  console.log('handlePermitted controller response => ', req.body);
+  const _id = req.body.c._id;
+  const permitted = req.body.c.permitted;
+  if (permitted === 'false') {
+    const code = await CallingCode.updateOne(
+      {
+        _id,
+      },
+      { $set: { permitted: 'true' } }
+    );
+    res.json({ ok: true });
+  } else {
+    const code = await CallingCode.updateOne(
+      {
+        _id,
+      },
+      { $set: { permitted: 'false' } }
+    );
+    res.json({ ok: true });
+  }
+};
+
+exports.searchCodes = async (req, res) => {
+  const { query } = req.body;
+  if (!query) {
+    const code = await CallingCode.find({});
+    res.json(code);
+  } else {
+    const code = await CallingCode.find({
+      $or: [
+        { country: { $regex: query, $options: 'i' } },
+        { callingCode: { $regex: query, $options: 'i' } },
+        { permitted: { $regex: query, $options: 'i' } },
+      ],
+    });
+    res.json(code);
   }
 };
 

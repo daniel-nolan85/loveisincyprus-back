@@ -17,6 +17,7 @@ const {
   userExists,
   userPermitted,
   userBlocked,
+  callingCode,
   createUser,
   loginUser,
   currentUser,
@@ -54,6 +55,9 @@ const {
   fetchLocations,
   handleWhitelist,
   searchLocations,
+  searchCodes,
+  fetchCodes,
+  handlePermitted,
   addUserToAdmin,
   removeUserFromAdmin,
   addUserToFeaturedMembers,
@@ -71,6 +75,7 @@ const {
 router.get('/user-exists/:mobile', userExists);
 router.get('/user-permitted/:mobile', userPermitted);
 router.get('/user-blocked/:mobile', userBlocked);
+router.get('/calling-code/:mobile', callingCode);
 router.post('/create-user', authCheck, createUser);
 router.post('/login-user', authCheck, loginUser);
 router.put('/profile-update', authCheck, profileUpdate);
@@ -123,6 +128,9 @@ router.post('/recent-orders', authCheck, adminCheck, recentOrders);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
 router.post('/admin/fetch-locations', authCheck, adminCheck, fetchLocations);
 router.post('/admin/handle-whitelist', authCheck, adminCheck, handleWhitelist);
+router.post('/admin/search-codes', authCheck, adminCheck, searchCodes);
+router.post('/admin/fetch-codes', authCheck, adminCheck, fetchCodes);
+router.post('/admin/handle-permitted', authCheck, adminCheck, handlePermitted);
 router.put('/admin/add-user-to-admin', authCheck, adminCheck, addUserToAdmin);
 router.put(
   '/admin/remove-user-from-admin',
