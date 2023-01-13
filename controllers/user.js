@@ -35,7 +35,7 @@ exports.contactFormEmail = (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: ']De*5YrqW62Dr4',
+      pass: '4DaNLoV7!',
     },
     secure: true,
   });
@@ -277,7 +277,7 @@ exports.createOrder = async (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: ']De*5YrqW62Dr4',
+      pass: '4DaNLoV7!',
     },
     secure: true,
   });

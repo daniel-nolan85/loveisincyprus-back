@@ -447,9 +447,8 @@ exports.updateEventComment = async (req, res) => {
 
 exports.expiredEvent = async (req, res) => {
   const expired = await User.updateMany(
-    { 'events.when': { $lte: new Date() } },
-    { 'events.$.expired': true },
-    { multi: true }
+    { 'events.when': { $lte: new Date(Date.now()) } },
+    { 'events.$[].expired': true }
   );
   res.json(expired);
 };
@@ -622,5 +621,19 @@ exports.fetchEventUsers = async (req, res) => {
     res.json(users);
   } catch (err) {
     console.log('users => ', err);
+  }
+};
+
+exports.numUpcomingEvents = async (req, res) => {
+  const { _id } = req.body;
+  try {
+    const user = await User.findById({ _id });
+    const events = user.events;
+    const upcoming = [];
+    events.map((e) => e.expired === false && upcoming.push(e._id));
+    const numOfUpcoming = upcoming.length;
+    res.json(numOfUpcoming);
+  } catch (err) {
+    console.log(err);
   }
 };
