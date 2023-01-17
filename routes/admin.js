@@ -19,6 +19,7 @@ const {
   approveMessage,
   setPreferences,
   fetchProductsForReview,
+  fetchNewOrders,
 } = require('../controllers/admin');
 
 // routes
@@ -40,5 +41,6 @@ router.put(
 );
 router.put('/set-preferences', authCheck, adminCheck, setPreferences);
 router.get('/fetch-products-for-review', fetchProductsForReview);
+router.get('/fetch-new-orders', fetchNewOrders);
 
 module.exports = router;

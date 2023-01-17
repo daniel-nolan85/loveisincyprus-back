@@ -391,3 +391,14 @@ exports.fetchProductsForReview = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.fetchNewOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ orderStatus: 'Not Processed' }).select(
+      '_id'
+    );
+    res.json(orders);
+  } catch (err) {
+    console.log(err);
+  }
+};
