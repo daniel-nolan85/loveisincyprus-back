@@ -49,7 +49,6 @@ const userSchema = new mongoose.Schema(
     },
     address: [{ type: Object }],
     wishlist: [{ type: ObjectId, ref: 'Product' }],
-    // points: { type: Number, awarded: { type: Date, default: Date.now } },
     pointsGained: [
       {
         amount: Number,
@@ -73,7 +72,6 @@ const userSchema = new mongoose.Schema(
     ],
     notifications: [
       {
-        // notif: { type: ObjectId, ref: 'Post' },
         notif: {},
         action: String,
         occurred: { type: Date, default: Date.now },

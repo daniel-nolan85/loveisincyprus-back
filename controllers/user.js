@@ -12,7 +12,6 @@ const UserSearch = require('../models/userSearch');
 const axios = require('axios');
 
 exports.recaptcha = async (req, res) => {
-  // console.log('recaptcha controller response => ', req.body);
   const { secret, token } = req.body;
 
   await axios
@@ -65,45 +64,9 @@ exports.contactFormEmail = (req, res) => {
   });
 
   transporter.close();
-
-  // let transporter = nodemailer.createTransport({
-  //   service: 'gmail',
-  //   port: 465,
-  //   auth: {
-  //     user: 'loveisincyprus@gmail.com',
-  //     pass: 'revamp22',
-  //   },
-  //   secure: true,
-  // });
-
-  // let mailOptions = {
-  //   from: email,
-  //   to: 'loveisincyprus@gmail.com',
-  //   subject: subject,
-  //   html: `
-  //     <h3>Information</h3>
-  //     <ul>
-  //     <li>Name: ${name}</li>
-  //     <li>Email: ${email}</li>
-  //     </ul>
-
-  //     <h3>Message</h3>
-  //     <p>${message}</p>
-  //     `,
-  // };
-
-  // transporter.sendMail(mailOptions, (err, response) => {
-  //   if (err) {
-  //     res.send(err);
-  //   } else {
-  //     res.send('Success');
-  //   }
-  // });
-  // transporter.close();
 };
 
 exports.usersPhotos = async (req, res) => {
-  // console.log('usersPhotos controller response => ', req.body);
   try {
     const photos = [];
     const user = await User.findById(req.body.userId);
@@ -123,7 +86,6 @@ exports.usersPhotos = async (req, res) => {
 };
 
 exports.visitorPhotos = async (req, res) => {
-  // console.log('visitorPhotos controller response => ', req.body);
   try {
     const photos = [];
     const user = await User.findById(req.body.user._id);
@@ -138,7 +100,6 @@ exports.visitorPhotos = async (req, res) => {
     }
     let merged = [].concat.apply([], photos);
     let total = merged.length;
-    // console.log('visitorPhotos controller response => ', merged);
 
     res.json(total);
   } catch (err) {
@@ -154,7 +115,6 @@ exports.userCart = async (req, res) => {
 
   if (cartExistByThisUser) {
     cartExistByThisUser.remove();
-    console.log('removed old cart');
   }
   for (let i = 0; i < cart.length; i++) {
     let object = {};
@@ -166,20 +126,17 @@ exports.userCart = async (req, res) => {
     object.price = productFromDb.price;
     products.push(object);
   }
-  console.log('products', products);
 
   let cartTotal = 0;
   for (let i = 0; i < products.length; i++) {
     cartTotal = cartTotal + products[i].price * products[i].count;
   }
-  console.log('cartTotal', cartTotal);
 
   let newcart = await new Cart({
     products,
     cartTotal,
     orderedBy: user._id,
   }).save();
-  console.log('newcart', newcart);
 
   res.json({ ok: true });
 };
@@ -201,7 +158,6 @@ exports.emptyCart = async (req, res) => {
 };
 
 exports.saveAddress = async (req, res) => {
-  console.log('saveAddress controller response => ', req.body);
   const userAddress = await User.findOneAndUpdate(
     { mobile: req.user.phone_number },
     { $addToSet: { address: req.body.address } }
@@ -211,19 +167,16 @@ exports.saveAddress = async (req, res) => {
 
 exports.applyCouponToUserCart = async (req, res) => {
   const { coupon } = req.body;
-  console.log('applyCouponToUserCart controller response', coupon);
   const validCoupon = await Coupon.findOne({ name: coupon }).exec();
   if (validCoupon === null) {
     return res.json({
       err: 'Invalid coupon',
     });
   }
-  console.log('VALID COUPON', validCoupon);
   const user = await User.findOne({ mobile: req.user.phone_number }).exec();
   let { products, cartTotal } = await Cart.findOne({ orderedBy: user._id })
     .populate('products.product', '_id title price')
     .exec();
-  console.log('cartTotal', cartTotal, 'discount', validCoupon.discount);
 
   let totalAfterDiscount = (
     cartTotal -
@@ -239,7 +192,6 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  console.log('createOrder controller response => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
   const user = await User.findOne({ mobile: req.user.phone_number })
@@ -259,9 +211,6 @@ exports.createOrder = async (req, res) => {
   })
     .populate('products.product', 'title')
     .save();
-
-  console.log('products => ', products);
-  console.log('user => ', user);
 
   const listItems = products.map((p) => {
     return `
@@ -286,7 +235,6 @@ exports.createOrder = async (req, res) => {
     from: 'customercare@loveisincyprus.com',
     to: user.email,
     subject: 'Order confirmation from Love is in Cyprus',
-    // html: `<h1>Order confirmation</h1>`,
     html: `
       <h3 style="margin-bottom: 5px;">Thanks for your recent order</h3>
       <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${
@@ -346,9 +294,7 @@ exports.createOrder = async (req, res) => {
   });
 
   let updated = await Product.bulkWrite(bulkOption, {});
-  console.log('product quantity-- and sold ++', updated);
 
-  console.log('new order saved', newOrder);
   res.json(newOrder);
 };
 
@@ -397,12 +343,6 @@ exports.getUserPointsTotal = async (req, res) => {
   const numberSpent = await User.findOne({
     mobile: req.user.phone_number,
   }).select('pointsSpent');
-  // numberToAdd.pointsGained.reduce((accumulator, object) => {
-  //   return accumulator + object.amount;
-  // }, 0);
-  // numberToRemove.pointsLost.reduce((accumulator, object) => {
-  //   return accumulator + object.amount;
-  // }, 0);
   const total =
     numberToAdd.pointsGained.reduce((accumulator, object) => {
       return accumulator + object.amount;
@@ -413,15 +353,11 @@ exports.getUserPointsTotal = async (req, res) => {
     numberSpent.pointsSpent.reduce((accumulator, object) => {
       return accumulator + object.amount;
     }, 0);
-  // console.log('getUserPoints controller response => ', numberToAdd);
-  // console.log('getUserPoints controller response => ', numberToRemove);
-  // console.log('getUserPoints controller response => ', total);
+
   res.json(total);
 };
 
 exports.addPoints = async (req, res) => {
-  console.log('addPoints controller response => ', req.body);
-  // console.log('addPoints controller response => ', req.user);
   try {
     const { number, reason, otherUser } = req.body;
     const recentLogIn = await User.find({
@@ -484,8 +420,6 @@ exports.addPoints = async (req, res) => {
 };
 
 exports.removePoints = async (req, res) => {
-  // console.log('addPoints controller response => ', req.body);
-  // console.log('addPoints controller response => ', req.user);
   try {
     const { number, reason } = req.body;
     const removePoints = await User.findOneAndUpdate(
@@ -502,7 +436,6 @@ exports.removePoints = async (req, res) => {
 };
 
 exports.spentPoints = async (req, res) => {
-  console.log('spentPoints controller response => ', req.body);
   const { number, reason, _id, couponName } = req.body;
   var expired = new Date();
   expired.setDate(expired.getDate() + 3);
@@ -643,7 +576,6 @@ exports.getUserPointsGainedData = async (req, res) => {
     .select('pointsGained')
     .populate('pointsGained')
     .exec();
-  // console.log('getUserPointsData total controller response => ', data);
   res.json(data);
 };
 
@@ -652,7 +584,6 @@ exports.getUserPointsLostData = async (req, res) => {
     .select('pointsLost')
     .populate('pointsLost')
     .exec();
-  // console.log('getUserPointsData total controller response => ', data);
   res.json(data);
 };
 
@@ -661,12 +592,10 @@ exports.getUserPointsSpentData = async (req, res) => {
     .select('pointsSpent')
     .populate('pointsSpent')
     .exec();
-  // console.log('getUserPointsData total controller response => ', data);
   res.json(data);
 };
 
 exports.fetchNotifications = async (req, res) => {
-  // console.log('fetchNotifications controller response => ', req.body);
   try {
     const notifications = await User.findOne({ _id: req.body.user._id }).select(
       'notifications'
@@ -703,7 +632,6 @@ exports.populateNotifications = async (req, res) => {
 };
 
 exports.markNotifAsRead = async (req, res) => {
-  // console.log('markNotifAsRead controller response => ', req.body);
   const notif = await User.findOneAndUpdate(
     { mobile: req.user.phone_number, 'notifications._id': req.body.n._id },
     { $set: { 'notifications.$.new': 'false' } }
@@ -712,7 +640,6 @@ exports.markNotifAsRead = async (req, res) => {
 };
 
 exports.acceptInvite = async (req, res) => {
-  console.log('acceptInvite controller response => ', req.body);
   try {
     const existingInvite = await User.findOne({
       _id: req.body.user._id,
@@ -765,7 +692,6 @@ exports.acceptInvite = async (req, res) => {
 };
 
 exports.maybe = async (req, res) => {
-  console.log('maybe controller response => ', req.body);
   try {
     const existingInvite = await User.findOne({
       _id: req.body.user._id,
@@ -818,7 +744,6 @@ exports.maybe = async (req, res) => {
 };
 
 exports.declineInvite = async (req, res) => {
-  console.log('declineInvite controller response => ', req.body);
   try {
     const existingInvite = await User.findOne({
       _id: req.body.user._id,
@@ -869,43 +794,6 @@ exports.declineInvite = async (req, res) => {
     console.log(err);
   }
 };
-
-// exports.deleteNotification = async (req, res) => {
-//   const n = req.body.n.notif;
-//   console.log('deleteNotification controller response => ', n);
-//   try {
-//     const notification = await User.findOneAndUpdate(
-//       { mobile: req.user.phone_number },
-//       {
-//         $pull: {
-//           notifications: { notif: n._id },
-//         },
-//       }
-//     ).exec();
-//     res.json({ ok: true });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
-// exports.searchMatches = async (req, res) => {
-//   console.log('searchMatches controller response => ', req.body);
-//   const search = req.query.search
-//     ? {
-//         $or: [
-//           { name: { $regex: req.query.search, $options: 'i' } },
-//           { username: { $regex: req.query.search, $options: 'i' } },
-//           { email: { $regex: req.query.search, $options: 'i' } },
-//         ],
-//       }
-//     : {};
-//   console.log(search);
-
-//   const matches = await User.find(search).find({
-//     _id: { $ne: req.body.user._id },
-//   });
-//   res.send(matches);
-// };
 
 exports.listAll = async (req, res) => {
   const users = await User.find({})
@@ -1005,7 +893,6 @@ exports.searchFilters = async (req, res) => {
 };
 
 exports.saveSearch = async (req, res) => {
-  console.log('saveSearch controller response => ', req.body);
   const { searchName, unique } = req.body;
 
   try {
@@ -1025,16 +912,12 @@ exports.saveSearch = async (req, res) => {
 };
 
 exports.analyseUsers = async (req, res) => {
-  console.log('analyseUsers controller response => ', req.body);
   const { u, user } = req.body;
-  console.log('u.genderWanted => ', u.genderWanted);
-  console.log('user.gender => ', user.gender);
 
   let compatibility = {
     points: 0,
   };
 
-  // if (u.genderWanted == user.gender) compatibility = compatibility + 5;
   if (u.genderWanted && user.gender && u.genderWanted == user.gender) {
     compatibility.genderTheyWant = true;
     compatibility.points = compatibility.points + 5;
@@ -1227,12 +1110,9 @@ exports.analyseUsers = async (req, res) => {
   }
 
   if (user.age && u.ageOfPartner && u.ageOfPartner !== 'Over 80') {
-    console.log('age');
     const start = parseInt(u.ageOfPartner.split('-')[0]);
     const end = parseInt(u.ageOfPartner.split('-')[1]);
     let ageTheyWant = range(start, end);
-    console.log(user.age);
-    console.log(ageTheyWant);
     if (ageTheyWant.includes(u.age)) {
       compatibility.ageTheyWant = true;
       compatibility.points = compatibility.points + 5;
@@ -1249,13 +1129,10 @@ exports.analyseUsers = async (req, res) => {
     compatibility.points = compatibility.points + 5;
   }
 
-  console.log('compatibility => ', compatibility);
-
   res.json(compatibility);
 };
 
 exports.progressCompletion = async (req, res) => {
-  console.log('progressCompletion => ', req.body);
   const { user } = req.body;
   let completion = {
     percentage: 0,
@@ -1519,7 +1396,6 @@ exports.progressCompletion = async (req, res) => {
 };
 
 exports.optInOrOut = async (req, res) => {
-  console.log('optInOrOut controller response => ', req.body);
   if (req.body.user.optIn) {
     const optOut = await User.findByIdAndUpdate(
       req.body.user._id,
@@ -1538,24 +1414,13 @@ exports.optInOrOut = async (req, res) => {
 };
 
 exports.newMessageCount = async (req, res) => {
-  console.log('newMessageCount controller response => ', req.body);
   const user = await User.findByIdAndUpdate(req.body._id, { new: true }).select(
     'messages'
   );
   res.json(user);
 };
 
-// exports.resetMessageCount = async (req, res) => {
-//   const user = await User.findByIdAndUpdate(
-//     req.body.user._id,
-//     { $set: { messages: [] } },
-//     { new: true }
-//   );
-//   res.json(user);
-// };
-
 exports.newNotificationCount = async (req, res) => {
-  console.log('newNotificationCount controller response => ', req.body);
   const { user, notif, reason, otherUser } = req.body;
 
   if (reason === 'like') {
@@ -1628,7 +1493,6 @@ exports.expiredMembership = async (req, res) => {
 };
 
 exports.clearProfileImage = async (req, res) => {
-  console.log('clearProfileImage controller response => ', req.body);
   const { faces, user } = req.body;
   if (faces.length > 0) {
     const clearImage = await User.findByIdAndUpdate(
@@ -1661,7 +1525,6 @@ exports.totalUsers = async (req, res) => {
 };
 
 exports.fetchProducts = async (req, res) => {
-  console.log('fetchProducts controller response => ', req.body);
   const products = await Order.findById({ _id: req.body._id })
     .populate('products.product')
     .exec();
@@ -1933,9 +1796,6 @@ exports.highCompats = async (req, res) => {
     }
   });
   res.json({ highCompats, veryHighCompats, superCompats });
-  // console.log('highCompats => ', highCompats);
-  // console.log('veryHighCompats => ', veryHighCompats);
-  // console.log('superCompats => ', superCompats);
 };
 
 exports.updateAge = async (req, res) => {
@@ -1952,5 +1812,4 @@ exports.updateAge = async (req, res) => {
     );
     res.json(updateAge);
   }
-  console.log(req.body.user.age);
 };

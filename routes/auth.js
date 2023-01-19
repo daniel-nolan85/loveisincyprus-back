@@ -13,7 +13,6 @@ const {
 
 // controllers
 const {
-  // createOrUpdateUser,
   userExists,
   userPermitted,
   userBlocked,
@@ -31,7 +30,6 @@ const {
   userVisitors,
   searchUser,
   userProfile,
-  // cropImage,
   cropCover,
   cropProfile,
   liveProfilePic,
@@ -43,7 +41,7 @@ const {
   ninePhotos,
   usersNinePhotos,
   fetchWhitelist,
-  //admin
+  // admin
   users,
   suspendUser,
   revokeUser,
@@ -51,7 +49,6 @@ const {
   deleteSelf,
   recentUsers,
   recentOrders,
-  // searchPosts,
   fetchLocations,
   handleWhitelist,
   searchLocations,
@@ -71,7 +68,6 @@ const {
 } = require('../controllers/auth');
 
 // routes
-// router.post('/create-or-update-user', authCheck, createOrUpdateUser);
 router.get('/user-exists/:mobile', userExists);
 router.get('/user-permitted/:mobile', userPermitted);
 router.get('/user-blocked/:mobile', userBlocked);
@@ -97,7 +93,6 @@ router.post('/my-matches', authCheck, userMatches);
 router.post('/my-visitors', authCheck, userVisitors);
 router.post('/search-user/:query', authCheck, searchUser);
 router.post('/user/:userId', authCheck, userProfile);
-// router.post('/crop-image', authCheck, cropImage);
 router.post('/crop-cover', authCheck, cropCover);
 router.post('/crop-profile', authCheck, cropProfile);
 router.post('/live-profile-pic', authCheck, liveProfilePic);
@@ -123,8 +118,6 @@ router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
 router.put('/delete-self/:userId', authCheck, deleteSelf);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
 router.post('/recent-orders', authCheck, adminCheck, recentOrders);
-// router.post('/admin/search-posts/:query', authCheck, adminCheck, searchPosts);
-// router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
 router.post('/admin/fetch-locations', authCheck, adminCheck, fetchLocations);
 router.post('/admin/handle-whitelist', authCheck, adminCheck, handleWhitelist);

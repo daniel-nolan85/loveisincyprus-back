@@ -1,12 +1,10 @@
 const Ip = require('../models/ip');
 
 exports.fetchIps = async (req, res) => {
-  console.log('fetchIps controller response => ', req.body);
   res.json(await Ip.find({}).exec());
 };
 
 exports.removeIp = async (req, res) => {
-  console.log('removeIp controller response => ', req.body);
   try {
     res.json(await Ip.findByIdAndDelete(req.params.ipId).exec());
   } catch (err) {
@@ -15,7 +13,6 @@ exports.removeIp = async (req, res) => {
 };
 
 exports.banIp = async (req, res) => {
-  console.log('banIp controller response => ', req.body);
   const { ip, city, country, postal, region, timezone } = req.body.ip;
 
   try {

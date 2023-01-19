@@ -46,15 +46,6 @@ exports.update = async (req, res) => {
   }
 };
 
-// exports.remove = async (req, res) => {
-//   try {
-//     res.json(await Category.findOneAndDelete({ slug: req.params.slug }));
-//   } catch (err) {
-//     console.log(err);
-//     res.status(400).send('Delete category failed');
-//   }
-// };
-
 exports.remove = async (req, res) => {
   try {
     const foundCat = await Category.findOne({ slug: req.params.slug });

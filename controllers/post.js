@@ -9,7 +9,6 @@ cloudinary.config({
 });
 
 exports.createPost = async (req, res) => {
-  // console.log('createPost controller response => ', req.body);
   const { content, image, user } = req.body;
 
   try {
@@ -55,24 +54,16 @@ exports.uploadImage = async (req, res) => {
 
 exports.postsByUser = async (req, res) => {
   const { user } = req.body;
-  // console.log(user);
-
   const currentPage = req.params.page || 1;
   const perPage = 10;
 
   try {
     const posts = await Post.find({ postedBy: user })
-      // .skip((currentPage - 1) * perPage)
       .populate('postedBy', '_id name profileImage email username')
       .populate('comments.postedBy', '_id name email profileImage username')
       .populate('likes', '_id name email profileImage username')
       .sort({ createdAt: -1 })
       .limit(currentPage * perPage);
-    // const posts = await Post.find()
-    //   .populate('postedBy', '_id name image email')
-    //   .sort({ createdAt: -1 })
-    //   .limit(10);
-    // console.log(posts);
     res.json(posts);
   } catch (err) {
     console.log(err);
@@ -81,7 +72,6 @@ exports.postsByUser = async (req, res) => {
 
 exports.userPost = async (req, res) => {
   try {
-    // const post = await Post.findById(req.params._id);
     const post = await Post.findById(req.params.postId).populate(
       'comments.postedBy',
       '_id name email profileImage username'
@@ -92,19 +82,7 @@ exports.userPost = async (req, res) => {
   }
 };
 
-// exports.updatePost = async (req, res) => {
-//   try {
-//     const post = await Post.findByIdAndUpdate(req.params.postId, req.body, {
-//       new: true,
-//     });
-//     res.json(post);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 exports.updatePost = async (req, res) => {
-  console.log('updatePost controller response => ', req.body);
   try {
     const update = {};
 
@@ -126,7 +104,6 @@ exports.updatePost = async (req, res) => {
 exports.deletePost = async (req, res) => {
   try {
     const post = await Post.findByIdAndDelete(req.params.postId);
-    // remove the image from cloudinary
     if (post.image) {
       const image = await cloudinary.uploader.destroy(post.image);
       const user = await User.findByIdAndUpdate(
@@ -171,7 +148,6 @@ exports.newsFeed = async (req, res) => {
     const perPage = 10;
 
     const posts = await Post.find({ postedBy: { $in: following } })
-      // .skip((currentPage - 1) * perPage)
       .populate('postedBy', '_id name email profileImage username')
       .populate('comments.postedBy', '_id name email profileImage username')
       .populate('likes', '_id name email profileImage username')
@@ -180,14 +156,12 @@ exports.newsFeed = async (req, res) => {
       })
       .limit(currentPage * perPage);
     res.json(posts);
-    // console.log(posts);
   } catch (err) {
     console.log(err);
   }
 };
 
 exports.likePost = async (req, res) => {
-  console.log('like post controller response => ', req.body);
   try {
     const post = await Post.findByIdAndUpdate(
       req.body._id,
@@ -236,7 +210,6 @@ exports.likePost = async (req, res) => {
 };
 
 exports.unlikePost = async (req, res) => {
-  // console.log('unlike post controller response => ', req.body);
   try {
     const post = await Post.findByIdAndUpdate(
       req.body._id,
@@ -252,7 +225,6 @@ exports.unlikePost = async (req, res) => {
 };
 
 exports.addComment = async (req, res) => {
-  // console.log('add comment controller response => ', req.body);
   try {
     const { postId, comment, image, user } = req.body;
     const post = await Post.findByIdAndUpdate(
@@ -295,8 +267,6 @@ exports.addComment = async (req, res) => {
       );
     }
     res.json(post);
-    console.log('post ==> ', post);
-    console.log('user ==> ', user);
   } catch (err) {
     console.log(err);
   }
@@ -305,8 +275,6 @@ exports.addComment = async (req, res) => {
 exports.removeComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    console.log('removeComment controller response', postId, comment);
-
     const post = await Post.findByIdAndUpdate(
       postId,
       {
@@ -321,8 +289,6 @@ exports.removeComment = async (req, res) => {
 };
 
 exports.updateComment = async (req, res) => {
-  // console.log('updateComment controller response => ', req.body);
-
   let text;
   if (req.body.text) {
     text = req.body.text;
@@ -338,8 +304,6 @@ exports.updateComment = async (req, res) => {
   } else {
     image = '';
   }
-
-  console.log('image => ', image);
 
   const query = { _id: req.body.postId, 'comments._id': req.body.comment._id };
   const updateComment = !image
@@ -366,7 +330,6 @@ exports.updateComment = async (req, res) => {
 exports.reportComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    console.log('reportComment controller response', postId, comment);
     const post = await Post.findOneAndUpdate(
       {
         _id: postId,
@@ -377,7 +340,6 @@ exports.reportComment = async (req, res) => {
       },
       { new: true }
     );
-    console.log('post => ', post);
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -394,7 +356,6 @@ exports.totalPosts = async (req, res) => {
 };
 
 exports.thisUsersPosts = async (req, res) => {
-  // console.log('this users posts controller response => ', req.body);
   const { userId } = req.body;
 
   const currentPage = req.params.page || 1;
@@ -402,15 +363,12 @@ exports.thisUsersPosts = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId);
-    // console.log('this users posts controller response => ', thisUser);
     const posts = await Post.find({ postedBy: thisUser })
-      // .skip((currentPage - 1) * perPage)
       .populate('postedBy', '_id name profileImage email username')
       .populate('comments.postedBy', '_id name email profileImage username')
       .populate('likes', '_id name email profileImage username')
       .sort({ createdAt: -1 })
       .limit(currentPage * perPage);
-    // console.log(posts);
     res.json(posts);
   } catch (err) {
     console.log(err);
@@ -428,7 +386,6 @@ exports.totalPostsByUser = async (req, res) => {
 };
 
 exports.totalPostsByThisUser = async (req, res) => {
-  // console.log('totalPostsByUser controller response => ', req.body);
   try {
     const { userId } = req.body;
     const thisUser = await User.findById(userId);
@@ -455,7 +412,6 @@ exports.posts = async (req, res) => {
 exports.adminRemoveComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    // console.log('adminRemoveComment controller response', postId, commentId);
     const post = await Post.findByIdAndUpdate(
       postId,
       {
@@ -470,7 +426,6 @@ exports.adminRemoveComment = async (req, res) => {
 };
 
 exports.followersPosts = async (req, res) => {
-  // console.log('followersPosts controller response => ', req.body);
   try {
     const { user } = req.body;
     const following = user.following;

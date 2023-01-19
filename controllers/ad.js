@@ -1,15 +1,10 @@
 const Ad = require('../models/ad');
-const User = require('../models/user');
-const Chat = require('../models/chat');
-const Message = require('../models/message');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  console.log('submitAd controller response => ', req.body);
   const { content, image, duration, demographic, contactInfo, accountInfo } =
     req.body;
   if (demographic.length === 0) {
-    console.log('empty');
     demographic.push('everyone');
   }
   try {
@@ -67,7 +62,6 @@ exports.fetchApprovedAds = async (req, res) => {
 };
 
 exports.disapproveAd = async (req, res) => {
-  console.log('disapproveAd controller response => ', req.body);
   const { ad, reason } = req.body;
   const rejectAd = await Ad.findByIdAndUpdate(
     ad._id,
@@ -116,7 +110,6 @@ exports.disapproveAd = async (req, res) => {
 };
 
 exports.approveAd = async (req, res) => {
-  // console.log('approveAd controller response => ', req.body);
   const { ad } = req.body;
   const approveAd = await Ad.findByIdAndUpdate(
     ad._id,
@@ -163,7 +156,6 @@ exports.approveAd = async (req, res) => {
 };
 
 exports.handleExpiredAds = async (req, res) => {
-  console.log('handleExpiredAds');
   const ids = [];
   const expiredOneDay = await Ad.find({
     $and: [

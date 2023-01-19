@@ -91,11 +91,8 @@ exports.createUser = async (req, res) => {
   const newUser = await new User({
     name,
     email,
-    // username: nanoid(6),
     mobile,
   }).save();
-  console.log('USER CREATED', newUser);
-  // res.json(newUser);
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' }).select(
     'name username email profileImage'
@@ -140,8 +137,6 @@ exports.createUser = async (req, res) => {
       '_id membership messages newNotifs name email following followers matches profileImage username'
     );
     res.json(notifyReceiver);
-
-    // console.log('notifyReceiver => ', notifyReceiver);
   } catch (err) {
     res.status(400);
     throw new Error(err.message);
@@ -149,7 +144,6 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  console.log('loginUser controller response => ', req.body);
   const { mobile } = req.body;
   const user = await User.findOneAndUpdate(
     { mobile },
@@ -173,7 +167,6 @@ exports.loginUser = async (req, res) => {
     client
       .call(refund)
       .then(async (response) => {
-        console.log('refund => ', refund);
         const subscriptionUnpaid = await User.findByIdAndUpdate(
           { _id: user._id },
           {
@@ -209,103 +202,11 @@ exports.loginUser = async (req, res) => {
       .exec();
     res.json(trialEnded);
   } else if (user) {
-    console.log('USER LOGGED IN', user);
     res.json(user);
   } else {
     return res.status(400).send('User not found');
   }
 };
-
-// exports.createOrUpdateUser = async (req, res) => {
-//   const { name, email, mobile } = req.body;
-//   const content = 'Welcome to LoveIsInCyprus!';
-//   const user = await User.findOne({ phone_number });
-
-//   if (
-//     user &&
-//     user.membership.paid &&
-//     user.membership.trialPeriod &&
-//     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
-//   ) {
-//     const refund = new Refund({
-//       amount: user.membership.cost,
-//       description: 'User did not make use of their subscription',
-//       id: user.membership.cardinityId,
-//     });
-
-//     client
-//       .call(refund)
-//       .then(async (response) => {
-//         console.log('refund => ', refund);
-//         const subscriptionUnpaid = await User.findByIdAndUpdate(
-//           { _id: user._id },
-//           {
-//             'membership.paid': false,
-//             'membership.trialPeriod': false,
-//           },
-//           { new: true }
-//         ).exec();
-
-//         res.json(subscriptionUnpaid);
-//       })
-//       .catch((err) => {
-//         console.log(err);
-//       });
-//   } else if (
-//     user &&
-//     user.membership.paid &&
-//     user.membership.trialPeriod &&
-//     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 > Date.now()
-//   ) {
-//     const trialEnded = await User.findByIdAndUpdate(
-//       { _id: user._id },
-//       { 'membership.trialPeriod': false },
-//       { new: true }
-//     ).exec();
-//     res.json(trialEnded);
-//   } else if (user) {
-//     console.log('USER LOGGED IN', user);
-//     res.json(user);
-//   } else {
-//     const newUser = await new User({
-//       name,
-//       email,
-//       username: nanoid(6),
-//       mobile,
-//     }).save();
-//     console.log('USER CREATED', newUser);
-//     res.json(newUser);
-
-//     const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
-//     const chat = await new Chat({
-//       users: [sender._id, newUser._id],
-//     }).save();
-
-//     var newMessage = {
-//       sender,
-//       content,
-//       chat,
-//     };
-//     try {
-//       var message = await Message.create(newMessage);
-//       message = await message.populate(
-//         'sender',
-//         'name username email profileImage'
-//       );
-//       message = await message.populate('chat');
-//       message = await User.populate(message, {
-//         path: 'chat.users',
-//         select: 'name username email profileImage',
-//       });
-//       await Chat.findOneAndUpdate(chat, {
-//         latestMessage: message,
-//       });
-//     } catch (err) {
-//       res.status(400);
-//       throw new Error(err.message);
-//     }
-//   }
-// };
 
 exports.currentUser = async (req, res) => {
   User.findOne({ mobile: req.user.phone_number }).exec((err, user) => {
@@ -315,7 +216,6 @@ exports.currentUser = async (req, res) => {
 };
 
 exports.profileUpdate = async (req, res) => {
-  console.log('profileUpdate controller response', req.body);
   try {
     const data = {};
 
@@ -523,28 +423,11 @@ exports.profileUpdate = async (req, res) => {
   }
 };
 
-// exports.cropProfile = async (req, res) => {
-//   try {
-//     console.log('cropProfile controller response => ', req.body);
-//     let user = await User.findByIdAndUpdate(
-//       req.body.user._id,
-//       { profileImage: req.body.profileImage },
-//       {
-//         new: true,
-//       }
-//     );
-//     res.json(user);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 exports.findUsers = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id).select('_id following');
     let following = user.following;
     following.push(user._id);
-    // const users = await User.find({ _id: { $nin: following } }).limit(1);
     const users = await User.aggregate([
       { $match: { _id: { $nin: following } } },
       { $sample: { size: 5 } },
@@ -563,25 +446,6 @@ exports.findUsers = async (req, res) => {
     console.log('findUsers => ', err);
   }
 };
-
-// exports.userFollow = async (req, res) => {
-//   console.log('user follow controller response => ', req.body);
-
-//   try {
-//     const user = await User.findByIdAndUpdate(
-//       req.body.user._id,
-//       {
-//         $addToSet: {
-//           following: req.body.u._id,
-//         },
-//       },
-//       { new: true }
-//     );
-//     res.json(user);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
 
 exports.userFollow = async (req, res) => {
   try {
@@ -659,21 +523,6 @@ exports.userFollow = async (req, res) => {
   }
 };
 
-// exports.userUnfollow = async (req, res) => {
-//   try {
-//     const user = await User.findByIdAndUpdate(
-//       req.body.user._id,
-//       {
-//         $pull: { following: req.body.u._id },
-//       },
-//       { new: true }
-//     );
-//     res.json(user);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 exports.userUnfollow = async (req, res) => {
   try {
     const check = await User.findById(req.body.u._id).select('following');
@@ -750,7 +599,6 @@ exports.userMatches = async (req, res) => {
     const matches = await User.find({ _id: user.matches })
       .select('_id name email username profileImage')
       .exec();
-    console.log('matches => ', matches);
     res.json(matches);
   } catch (err) {
     console.log('userMatches => ', err);
@@ -770,11 +618,9 @@ exports.userVisitors = async (req, res) => {
 };
 
 exports.nineMatches = async (req, res) => {
-  // console.log('nineMatches controller response', req.body);
   try {
     const user = await User.findById(req.body.user._id).select('matches');
     let matches = user.matches;
-    // const matches = await User.find({ _id: user.matches });
     const users = await User.aggregate([
       { $match: { _id: { $in: matches } } },
       { $sample: { size: 9 } },
@@ -788,7 +634,6 @@ exports.nineMatches = async (req, res) => {
         },
       },
     ]);
-    // console.log('ninematches controller response', users);
     res.json(users);
   } catch (err) {
     console.log('nineMatches => ', err);
@@ -827,7 +672,6 @@ exports.userProfile = async (req, res) => {
 };
 
 exports.cropCover = async (req, res) => {
-  // console.log('cropCover controller response => ', req.body);
   try {
     if (req.body.croppedCover !== null) {
       const result = await cloudinary.uploader.upload(req.body.croppedCover);
@@ -851,7 +695,6 @@ exports.cropCover = async (req, res) => {
 };
 
 exports.cropProfile = async (req, res) => {
-  // console.log('cropProfile controller response => ', req.body);
   try {
     if (req.body.croppedProfile) {
       const result = await cloudinary.uploader.upload(req.body.croppedProfile);
@@ -875,7 +718,6 @@ exports.cropProfile = async (req, res) => {
 };
 
 exports.liveProfilePic = async (req, res) => {
-  console.log('liveProfilePic controller response => ', req.body);
   try {
     if (req.body.url) {
       const result = await cloudinary.uploader.upload(req.body.url);
@@ -903,7 +745,6 @@ exports.users = async (req, res) => {
     const users = await User.find({}).select(
       '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
     );
-    console.log(users);
     res.json(users);
   } catch (err) {
     console.log('users => ', err);
@@ -911,7 +752,6 @@ exports.users = async (req, res) => {
 };
 
 exports.suspendUser = async (req, res) => {
-  console.log('suspendUser controller response => ', req.body);
   const { _id, endDate, reason } = req.body;
   try {
     const user = await User.findByIdAndUpdate(
@@ -928,7 +768,6 @@ exports.suspendUser = async (req, res) => {
 };
 
 exports.revokeUser = async (req, res) => {
-  console.log('revokeUser controller response => ', req.body);
   const { _id } = req.body;
   try {
     const user = await User.findByIdAndUpdate(
@@ -945,7 +784,6 @@ exports.revokeUser = async (req, res) => {
 };
 
 exports.deleteUser = async (req, res) => {
-  console.log('deleteUser controller response => ', req.body);
   try {
     const { u } = req.body;
     const user = await User.findByIdAndDelete(u._id);
@@ -958,9 +796,6 @@ exports.deleteUser = async (req, res) => {
     const following = await User.updateMany({ $pull: { following: u._id } });
     const matches = await User.updateMany({ $pull: { matches: u._id } });
     const visitors = await User.updateMany({ $pull: { visitors: u._id } });
-    // const invitees = await Event.updateMany({
-    //   $pull: { 'invitees.$._id': u._id },
-    // });
     const accepted = await Event.updateMany({ $pull: { accepted: u._id } });
     const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
     const declined = await Event.updateMany({ $pull: { declined: u._id } });
@@ -986,9 +821,6 @@ exports.deleteSelf = async (req, res) => {
     const following = await User.updateMany({ $pull: { following: user._id } });
     const matches = await User.updateMany({ $pull: { matches: user._id } });
     const visitors = await User.updateMany({ $pull: { visitors: user._id } });
-    // const invitees = await Event.updateMany({
-    //   $pull: { 'invitees.$._id': u._id },
-    // });
     const accepted = await Event.updateMany({ $pull: { accepted: user._id } });
     const maybe = await Event.updateMany({ $pull: { maybe: user._id } });
     const declined = await Event.updateMany({ $pull: { declined: user._id } });
@@ -1021,44 +853,8 @@ exports.recentOrders = async (req, res) => {
   }
 };
 
-// exports.searchPosts = async (req, res) => {
-//   const { query } = req.params;
-
-//   if (!query) return;
-//   try {
-//     const post = await Post.find({
-//       $or: [{ content: { $regex: query, $options: 'i' } }],
-//     }).populate('postedBy', '_id name email profileImage');
-//     res.json(post);
-//   } catch (err) {
-//     console.log('searchPosts => ', err);
-//   }
-// };
-
-// exports.searchAdmin = async (req, res) => {
-//   const { query } = req.params;
-
-//   if (!query) return;
-//   try {
-//     const user = await User.find({
-//       $or: [
-//         { email: { $regex: query, $options: 'i' } },
-//         { name: { $regex: query, $options: 'i' } },
-//         { username: { $regex: query, $options: 'i' } },
-//       ],
-//     }).select('_id name email username profileImage');
-//     const post = await Post.find({
-//       $or: [{ content: { $regex: query, $options: 'i' } }],
-//     });
-//     res.json({ user, post });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 exports.usersToSwipe = async (req, res) => {
   try {
-    // let usersUnavailable = [];
     const user = await User.findById(req.body.user._id).select(
       '_id nopes following'
     );
@@ -1072,10 +868,6 @@ exports.usersToSwipe = async (req, res) => {
     const users = await User.find({ _id: { $nin: usersUnavailable } })
       .limit(usersAvailable)
       .select('_id name email profileImage age username');
-    // const users = await User.aggregate([
-    //   { $match: { _id: { $nin: usersUnavailable } } },
-    //   { $sample: { size: usersAvailable } },
-    // ]);
     res.json(users);
   } catch (err) {
     console.log('usersToSwipe => ', err);
@@ -1083,8 +875,6 @@ exports.usersToSwipe = async (req, res) => {
 };
 
 exports.leftSwipe = async (req, res) => {
-  // console.log('leftSwipe controller response => ', req.body);
-
   const user = await User.findByIdAndUpdate(req.body.user._id, {
     $addToSet: {
       nopes: req.body.u._id,
@@ -1094,7 +884,6 @@ exports.leftSwipe = async (req, res) => {
 };
 
 exports.fetchVisitor = async (req, res) => {
-  console.log('fetchVisitor controller response => ', req.body);
   const user = await User.findByIdAndUpdate(req.body.userId, {
     $addToSet: {
       visitors: req.body.user._id,
@@ -1136,11 +925,9 @@ exports.fetchVisitor = async (req, res) => {
 };
 
 exports.nineVisitors = async (req, res) => {
-  // console.log('nineVisitors controller response', req.body);
   try {
     const user = await User.findById(req.body.user._id).select('visitors');
     let visitors = user.visitors;
-    // const followers = await User.find({ _id: user.followers });
     const users = await User.aggregate([
       { $match: { _id: { $in: visitors } } },
       { $sample: { size: 9 } },
@@ -1154,7 +941,6 @@ exports.nineVisitors = async (req, res) => {
         },
       },
     ]);
-    // console.log('ninefollowers controller response', users);
     res.json(users);
   } catch (err) {
     console.log('nineVisitors => ', err);
@@ -1162,7 +948,6 @@ exports.nineVisitors = async (req, res) => {
 };
 
 exports.ninePhotos = async (req, res) => {
-  // console.log('ninePhotos controller response', req.body);
   try {
     const user = await User.findById(req.body.user._id).select(
       'profilePhotos coverPhotos uploadedPhotos'
@@ -1186,7 +971,6 @@ exports.ninePhotos = async (req, res) => {
 };
 
 exports.usersNinePhotos = async (req, res) => {
-  // console.log('usersNinePhotos controller response', req.body);
   try {
     const user = await User.findById(req.body.userId).select(
       'profilePhotos coverPhotos uploadedPhotos'
@@ -1219,7 +1003,6 @@ exports.fetchLocations = async (req, res) => {
 };
 
 exports.handleWhitelist = async (req, res) => {
-  console.log('handleWhitelist controller response => ', req.body);
   const _id = req.body.l._id;
   const whitelist = req.body.l.whitelist;
 
@@ -1241,26 +1024,6 @@ exports.handleWhitelist = async (req, res) => {
     res.json({ ok: true });
   }
 };
-
-// exports.handleWhitelist = async (req, res) => {
-//   console.log('handleWhitelist controller response => ', req.body);
-//   const country = req.body.data[0];
-//   const countryCode = req.body.data[1];
-//   const whitelist = req.body.data[2];
-
-//   const location = await Location.findOne({ country });
-//   if (location) {
-//     const blacklist = await Location.deleteOne({ country: location.country });
-//     res.json(location);
-//   } else {
-//     const newLocation = await new Location({
-//       country,
-//       countryCode,
-//       whitelist,
-//     }).save();
-//     res.json(newLocation);
-//   }
-// };
 
 exports.searchLocations = async (req, res) => {
   const { query } = req.body;
@@ -1301,7 +1064,6 @@ exports.fetchCodes = async (req, res) => {
 };
 
 exports.handlePermitted = async (req, res) => {
-  console.log('handlePermitted controller response => ', req.body);
   const _id = req.body.c._id;
   const permitted = req.body.c.permitted;
   if (permitted === 'false') {
@@ -1341,7 +1103,6 @@ exports.searchCodes = async (req, res) => {
 };
 
 exports.addUserToAdmin = async (req, res) => {
-  // console.log('addUserToAdmin controller response => ', req.body);
   try {
     const makeAdmin = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -1355,7 +1116,6 @@ exports.addUserToAdmin = async (req, res) => {
 };
 
 exports.removeUserFromAdmin = async (req, res) => {
-  // console.log('removeUserFromAdmin controller response => ', req.body);
   try {
     const makeSubscriber = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -1369,7 +1129,6 @@ exports.removeUserFromAdmin = async (req, res) => {
 };
 
 exports.addUserToFeaturedMembers = async (req, res) => {
-  // console.log('addUserToFeaturedMembers controller response => ', req.body);
   try {
     const makeFeaturedMember = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -1383,7 +1142,6 @@ exports.addUserToFeaturedMembers = async (req, res) => {
 };
 
 exports.removeUserFromFeaturedMembers = async (req, res) => {
-  // console.log('removeUserFromFeaturedMembers controller response => ', req.body);
   try {
     const unMakeFeaturedMember = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -1397,7 +1155,6 @@ exports.removeUserFromFeaturedMembers = async (req, res) => {
 };
 
 exports.addUserToEventsEligible = async (req, res) => {
-  // console.log('addUserToFeaturedMembers controller response => ', req.body);
   try {
     const makeEventsEligible = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -1411,7 +1168,6 @@ exports.addUserToEventsEligible = async (req, res) => {
 };
 
 exports.removeUserFromEventsEligible = async (req, res) => {
-  // console.log('removeUserFromFeaturedMembers controller response => ', req.body);
   try {
     const unMakeEventsEligible = await User.findByIdAndUpdate(
       req.body.u._id,

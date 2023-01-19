@@ -3,12 +3,9 @@ const Chat = require('../models/chat');
 const Message = require('../models/message');
 
 exports.accessChat = async (req, res) => {
-  //   console.log('accessChat controller response => ', req.body);
-
   const { _id, u } = req.body;
 
   if (!_id) {
-    console.log('User Id param not sent with this request');
     return res.sendStatus(400);
   }
   let isChat = await Chat.find({
@@ -46,8 +43,6 @@ exports.accessChat = async (req, res) => {
 };
 
 exports.fetchChats = async (req, res) => {
-  //   console.log('fetchChats controller response => ', req.body);
-
   const { _id } = req.body;
 
   try {
@@ -69,8 +64,6 @@ exports.fetchChats = async (req, res) => {
 };
 
 exports.fetchTheirChats = async (req, res) => {
-  console.log('fetchTheirChats controller response => ', req.body);
-
   const { theirId } = req.body;
 
   try {
@@ -92,11 +85,9 @@ exports.fetchTheirChats = async (req, res) => {
 };
 
 exports.sendMessage = async (req, res) => {
-  console.log('sendMessage controller response => ', req.body);
   const { _id, content, chatId, image } = req.body;
 
   if (!content || !chatId) {
-    console.log('Invalid data passed into this request');
     return res.sendStatus(400);
   }
   const sender = await User.findOne({ _id }).select(
@@ -122,17 +113,7 @@ exports.sendMessage = async (req, res) => {
       select: 'name username email profileImage',
     });
     const receiver = chat.users.find((u) => u._id != _id);
-    console.log('receiver => ', receiver);
-    console.log('chat => ', chat);
-    // const notifyReceiver = await User.findByIdAndUpdate(
-    //   { _id: receiver._id },
-    //   {
-    //     $push: {
-    //       messages: message,
-    //     },
-    //   },
-    //   { new: true }
-    // ).select('messages');
+
     const sendNotif = await User.findByIdAndUpdate(
       receiver._id,
       { $push: { messages: { sender: _id } } },
@@ -142,7 +123,6 @@ exports.sendMessage = async (req, res) => {
     const updateLatest = await Chat.findByIdAndUpdate(chatId, {
       latestMessage: message,
     });
-    // console.log('message ==> ', message);
     res.json(message);
   } catch (err) {
     res.status(400);
@@ -155,7 +135,6 @@ exports.allMessages = async (req, res) => {
     const messages = await Message.find({ chat: req.params.chatId })
       .populate('sender', 'name username email profileImage')
       .populate('chat');
-    // console.log('messages => ', messages);
     res.json(messages);
   } catch (err) {
     res.status(400);
@@ -164,11 +143,9 @@ exports.allMessages = async (req, res) => {
 };
 
 exports.massMail = async (req, res) => {
-  // console.log('massMail controller response => ', req.body);
   const { image, content, selected } = req.body;
 
   if (!content || selected.length < 1) {
-    console.log('Invalid data passed into this request');
     return res.sendStatus(400);
   }
 
@@ -188,8 +165,6 @@ exports.massMail = async (req, res) => {
     });
     chats.push(chat);
   }
-  // console.log('userIds => ', userIds);
-  // console.log('chats => ', chats);
 
   for (var i = 0; i < chats.length; i++) {
     var newMessage = {
@@ -212,7 +187,6 @@ exports.massMail = async (req, res) => {
     const sendNotif = await User.updateMany(
       { _id: { $in: userIds } },
       { $push: { messages: { sender: sender._id } } }
-      // { new: true }
     );
 
     await Chat.findByIdAndUpdate(chats[i]._id, {
@@ -239,7 +213,6 @@ exports.chatMatches = async (req, res) => {
 };
 
 exports.markRead = async (req, res) => {
-  console.log('markRead controller response => ', req.body);
   const { _id, u } = req.body;
   const markAsRead = await User.findOneAndUpdate(
     { _id },
@@ -277,21 +250,6 @@ exports.fetchReportedMessages = async (req, res) => {
 exports.deleteMessage = async (req, res) => {
   try {
     const message = await Message.findByIdAndDelete(req.params.messageId);
-    // remove the image from cloudinary
-    // if (post.image) {
-    //   const image = await cloudinary.uploader.destroy(post.image);
-    //   const user = await User.findByIdAndUpdate(
-    //     req.body.post.postedBy._id,
-    //     {
-    //       $pull: {
-    //         uploadedPhotos: post.image.url,
-    //       },
-    //     },
-    //     {
-    //       new: true,
-    //     }
-    //   );
-    // }
     res.json({ ok: true });
   } catch (err) {
     console.log(err);

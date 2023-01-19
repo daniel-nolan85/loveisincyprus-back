@@ -4,13 +4,11 @@ const slugify = require('slugify');
 
 exports.create = async (req, res) => {
   try {
-    console.log('create product controller response => ', req.body);
     req.body.slug = slugify(req.body.title);
     const newProduct = await new Product(req.body).save();
     res.json(newProduct);
   } catch (err) {
     console.log(err);
-    // res.status(400).send('Create product failed');
     res.status(400).json({
       err: err.message,
     });
@@ -69,21 +67,6 @@ exports.update = async (req, res) => {
   }
 };
 
-// exports.list = async (req, res) => {
-//   try {
-//     const { sort, order, limit } = req.body;
-//     const products = await Product.find({})
-//       .populate('category')
-//       .populate('subs')
-//       .sort([[sort, order]])
-//       .limit(limit)
-//       .exec();
-//     res.json(products);
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };
-
 exports.list = async (req, res) => {
   try {
     const { sort, order, page } = req.body;
@@ -117,7 +100,6 @@ exports.productStar = async (req, res) => {
       },
       { new: true }
     ).exec();
-    console.log('ratingAdded => ', ratingAdded);
     res.json(ratingAdded);
   } else {
     const ratingUpdated = await Product.updateOne(
@@ -127,7 +109,6 @@ exports.productStar = async (req, res) => {
       { $set: { 'ratings.$.star': star } },
       { new: true }
     ).exec();
-    console.log('ratingUpdated => ', ratingUpdated);
     res.json(ratingUpdated);
   }
 };
@@ -228,23 +209,18 @@ exports.searchFilters = async (req, res) => {
   const { query, price, stars, category, sub } = req.body;
 
   if (query) {
-    console.log('query', query);
     await handleQuery(req, res, query);
   }
   if (price !== undefined) {
-    console.log('price => ', price);
     await handlePrice(req, res, price);
   }
   if (stars) {
-    console.log('stars => ', stars);
     await handleStar(req, res, stars);
   }
   if (category) {
-    console.log('category => ', category);
     await handleCategory(req, res, category);
   }
   if (sub) {
-    console.log('sub => ', sub);
     await handleSub(req, res, sub);
   }
 };
@@ -265,7 +241,6 @@ exports.fetchProductsToReview = async (req, res) => {
 };
 
 exports.approveProduct = async (req, res) => {
-  console.log('approveProduct controller response => ', req.body);
   const { product } = req.body;
   const approveProduct = await Product.findByIdAndUpdate(
     product._id,
@@ -276,7 +251,6 @@ exports.approveProduct = async (req, res) => {
 };
 
 exports.disapproveProduct = async (req, res) => {
-  console.log('disapproveProduct controller response => ', req.params);
   try {
     const product = await Product.findOneAndRemove({
       slug: req.params.slug,

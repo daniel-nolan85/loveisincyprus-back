@@ -3,7 +3,6 @@ const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const cloudinary = require('cloudinary');
-const nodemailer = require('nodemailer');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -12,7 +11,6 @@ cloudinary.config({
 });
 
 exports.submitVerif = async (req, res) => {
-  console.log('submitVerif controller response => ', req.body);
   const { verifImg, user } = req.body;
 
   try {
@@ -52,7 +50,6 @@ exports.fetchVerifs = async (req, res) => {
 };
 
 exports.disapproveVerif = async (req, res) => {
-  console.log('disapproveVerif controller response => ', req.body);
   const { verif, reason } = req.body;
   const userStatus = await User.findByIdAndUpdate(
     verif.postedBy._id,
@@ -104,7 +101,6 @@ exports.disapproveVerif = async (req, res) => {
 };
 
 exports.approveVerif = async (req, res) => {
-  //   console.log('approveVerif controller response => ', req.body);
   const { verif } = req.body;
   const userStatus = await User.findByIdAndUpdate(
     verif.postedBy._id,
@@ -127,9 +123,6 @@ exports.approveVerif = async (req, res) => {
     content,
     chat,
   };
-
-  console.log('verif => ', verif);
-  console.log('chat => ', chat);
 
   try {
     var message = await Message.create(newMessage);

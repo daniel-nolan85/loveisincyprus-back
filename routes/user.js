@@ -37,8 +37,6 @@ const {
   acceptInvite,
   maybe,
   declineInvite,
-  // deleteNotification,
-  // searchMatches,
   listAll,
   searchFilters,
   saveSearch,
@@ -46,7 +44,6 @@ const {
   progressCompletion,
   optInOrOut,
   newMessageCount,
-  // resetMessageCount,
   newNotificationCount,
   resetNotificationCount,
   fetchUserSearches,
@@ -87,8 +84,6 @@ router.post('/mark-notif-as-read', authCheck, markNotifAsRead);
 router.post('/accept-invite', authCheck, acceptInvite);
 router.post('/maybe', authCheck, maybe);
 router.post('/decline-invite', authCheck, declineInvite);
-// router.put('/delete-notification', authCheck, deleteNotification);
-// router.get('/search-matches', authCheck, searchMatches);
 router.get('/fetch-users/:count', authCheck, listAll);
 router.post('/fetch-users/filters', authCheck, searchFilters);
 router.post('/save-search', authCheck, adminCheck, saveSearch);
@@ -96,7 +91,6 @@ router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
 router.put('/new-message-count', newMessageCount);
-// router.put('/reset-message-count', authCheck, resetMessageCount);
 router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
 router.get('/fetch-user-searches', fetchUserSearches);

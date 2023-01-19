@@ -1,7 +1,5 @@
 const User = require('../models/user');
 const Cart = require('../models/cart');
-const Product = require('../models/product');
-const Coupon = require('../models/coupon');
 const Ad = require('../models/ad');
 const Cardinity = require('cardinity-nodejs');
 const nodemailer = require('nodemailer');
@@ -45,9 +43,6 @@ exports.createPayment = async (req, res) => {
   const payable = parseFloat((req.body.payable / 100).toFixed(2));
   const amount = (payable + deliveryFee).toFixed(2).toString();
   const { userAgent } = req.body;
-  console.log('deliveryFee => ', deliveryFee);
-  console.log('payable => ', payable);
-  console.log('amount => ', amount);
 
   const purchase = new Payment({
     amount,
@@ -77,18 +72,14 @@ exports.createPayment = async (req, res) => {
   });
 
   if (purchase.errors) {
-    console.log('purchase.errors', purchase.errors);
     res.send(purchase.errors);
   } else {
     client
       .call(purchase)
       .then((response) => {
         if (response.status == 'approved') {
-          console.log(response.status);
           res.send(response);
         } else if (response.status == 'pending') {
-          // handle 3D secure flow
-          console.log('pending', response.status);
           if (response.authorization_information) {
             var form_url = response.authorization_information.url;
             var inputs =
@@ -111,7 +102,6 @@ exports.createPayment = async (req, res) => {
             '<title>3-D Secure Example</title>' +
             '<script type="text/javascript">' +
             +'function OnLoadEvent(){' +
-            // Make the form post as soon as it has been loaded.
             +'document.ThreeDForm.submit();' +
             +'}' +
             '</script>' +
@@ -142,7 +132,6 @@ exports.createPayment = async (req, res) => {
 };
 
 exports.createAdPayment = async (req, res) => {
-  console.log('createAdPayment controller response => ', req.body);
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
   const { payable, userAgent, _id } = req.body;
 
@@ -174,18 +163,14 @@ exports.createAdPayment = async (req, res) => {
   });
 
   if (purchase.errors) {
-    console.log('purchase.errors', purchase.errors);
     res.send(purchase.errors);
   } else {
     client
       .call(purchase)
       .then((response) => {
         if (response.status == 'approved') {
-          console.log(response.status);
           res.send(response);
         } else if (response.status == 'pending') {
-          // handle 3D secure flow
-          console.log('pending', response.status);
           if (response.authorization_information) {
             var form_url = response.authorization_information.url;
             var inputs =
@@ -208,7 +193,6 @@ exports.createAdPayment = async (req, res) => {
             '<title>3-D Secure Example</title>' +
             '<script type="text/javascript">' +
             +'function OnLoadEvent(){' +
-            // Make the form post as soon as it has been loaded.
             +'document.ThreeDForm.submit();' +
             +'}' +
             '</script>' +
@@ -275,7 +259,6 @@ exports.createMembershipPayment = async (req, res) => {
   });
 
   if (purchase.errors) {
-    console.log('purchase.errors', purchase.errors);
     res.send(purchase.errors);
   } else {
     client
@@ -298,7 +281,6 @@ exports.createMembershipPayment = async (req, res) => {
             'bankDetails.cvc': cvc,
           }).select('membership bankDetails email');
           if (existingBank) {
-            // return res.json(existingBank);
             const amendMembership = await User.findByIdAndUpdate(
               { _id: user._id },
               {
@@ -419,7 +401,6 @@ exports.createMembershipPayment = async (req, res) => {
             transporter.close();
           }
         } else if (response.status == 'pending') {
-          console.log('pending', response.status);
           if (response.authorization_information) {
             var form_url = response.authorization_information.url;
             var inputs =
@@ -472,7 +453,6 @@ exports.createMembershipPayment = async (req, res) => {
 };
 
 exports.refundSubscription = async (req, res) => {
-  console.log('refundSubscription => ', req.body);
   const refund = new Refund({
     amount: req.body.user.membership.cost,
     description:

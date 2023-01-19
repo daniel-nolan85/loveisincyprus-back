@@ -26,7 +26,6 @@ exports.remove = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log('update controller response => ', req.body);
   try {
     const { name, discount, expiry } = req.body.coupon;
     res.json(

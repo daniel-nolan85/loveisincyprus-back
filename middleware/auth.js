@@ -30,7 +30,6 @@ exports.adminCheck = async (req, res, next) => {
 };
 
 exports.subscriberCheck = async (req, res, next) => {
-  // console.log('subscriberCheck middleware => ', req.user);
   const subscriber = await User.findOne({
     mobile: req.user.phone_number,
   }).exec();
@@ -45,9 +44,7 @@ exports.subscriberCheck = async (req, res, next) => {
 };
 
 exports.eligibleForRefund = async (req, res, next) => {
-  console.log('eligibleForRefund middleware => ', req.user);
   const eligible = await User.findOne({ mobile: req.user.phone_number }).exec();
-  console.log(eligible);
 
   if (eligible.membership.trialPeriod === false) {
     res.status(403).json({
@@ -59,7 +56,6 @@ exports.eligibleForRefund = async (req, res, next) => {
 };
 
 exports.addFollower = async (req, res, next) => {
-  // console.log('add follower middleware response => ', req.body);
   try {
     const user = await User.findByIdAndUpdate(
       req.body.u._id,
@@ -75,7 +71,6 @@ exports.addFollower = async (req, res, next) => {
 };
 
 exports.removeFollower = async (req, res, next) => {
-  // console.log('removefollower req.body => ', req.body);
   try {
     const user = await User.findByIdAndUpdate(
       req.body.u._id,

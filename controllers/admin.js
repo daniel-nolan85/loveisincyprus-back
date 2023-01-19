@@ -15,7 +15,6 @@ exports.orders = async (req, res) => {
 };
 
 exports.orderStatus = async (req, res) => {
-  console.log('orderStatus controller response => ', req.body);
   const { orderId, orderStatus } = req.body;
 
   let updated = await Order.findByIdAndUpdate(
@@ -25,12 +24,10 @@ exports.orderStatus = async (req, res) => {
   )
     .populate('products.product', 'title')
     .exec();
-  console.log('updated => ', updated);
 
   res.json(updated);
 
   const email = await User.findById(updated.orderedBy).select('email');
-  console.log('email => ', email);
 
   const listItems = updated.products.map((p) => {
     return `
@@ -174,7 +171,6 @@ exports.fetchReportedContent = async (req, res) => {
     ]);
     const messages = await Message.find({ reported: true }).select('_id');
     const content = posts.concat(comments, messages);
-    // console.log('content => ', content);
     res.json({ posts, comments, messages, content });
   } catch (err) {
     console.log(err);
@@ -184,7 +180,6 @@ exports.fetchReportedContent = async (req, res) => {
 exports.approveComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    console.log('reportComment controller response', postId, comment);
     const post = await Post.findOneAndUpdate(
       {
         _id: postId,
@@ -195,7 +190,6 @@ exports.approveComment = async (req, res) => {
       },
       { new: true }
     );
-    console.log('post => ', post);
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -231,7 +225,6 @@ exports.approveMessage = async (req, res) => {
 };
 
 exports.setPreferences = async (req, res) => {
-  console.log('setPreferences controller response => ', req.body);
   const { preferences, secondaryAdmin } = req.body;
   try {
     if (preferences.includes('verified')) {

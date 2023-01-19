@@ -17,7 +17,6 @@ exports.canEditDeletePost = async (req, res, next) => {
 };
 
 exports.canEditDeleteEventPost = async (req, res, next) => {
-  console.log('canEditDeleteEventPost middleware response => ', req.body);
   const { _id, post } = req.body;
 
   try {
@@ -32,11 +31,9 @@ exports.canEditDeleteEventPost = async (req, res, next) => {
 };
 
 exports.canDeleteComment = async (req, res, next) => {
-  console.log('canDeleteComment middleware response = > ', req.body);
   try {
     const { _id } = req.body;
     const post = await Post.findById(req.body.postId);
-    // console.log('post => ', post.postedBy);
     if (_id != post.postedBy && _id != req.body.comment.postedBy._id) {
       return res.status(400).send('Unauthorized');
     } else {
@@ -48,7 +45,6 @@ exports.canDeleteComment = async (req, res, next) => {
 };
 
 exports.canEditComment = async (req, res, next) => {
-  console.log('canEditComment middleware response = > ', req.body);
   try {
     if (req.body._id != req.body.comment.postedBy._id) {
       return res.status(400).send('Unauthorized');
@@ -61,7 +57,6 @@ exports.canEditComment = async (req, res, next) => {
 };
 
 exports.canDeleteEventComment = async (req, res, next) => {
-  console.log('canDeleteEventComment middleware response = > ', req.body);
   try {
     const { _id, postId } = req.body;
     if (_id != req.body.comment.postedBy._id) {

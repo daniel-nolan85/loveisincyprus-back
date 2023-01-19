@@ -9,7 +9,6 @@ cloudinary.config({
 });
 
 exports.create = async (req, res) => {
-  // console.log('create event controller response => ', req.body);
   try {
     const newEvent = await new Event(req.body).save();
 
@@ -57,7 +56,6 @@ exports.read = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  console.log('update event controller response => ', req.body);
   const { name, location, when, notes, invitees } = req.body;
   try {
     const updated = await Event.findOneAndUpdate(
@@ -73,7 +71,6 @@ exports.update = async (req, res) => {
 };
 
 exports.cancel = async (req, res) => {
-  console.log('event cancel controller response => ', req.params);
   try {
     res.json(
       await Event.findOneAndUpdate(
@@ -89,7 +86,6 @@ exports.cancel = async (req, res) => {
 };
 
 exports.fetchUserEvents = async (req, res) => {
-  console.log('fetchUserEvents controller response => ', req.body);
   res.json(
     await Event.find({
       invitees: { $elemMatch: { _id: req.body._id } },
@@ -98,7 +94,6 @@ exports.fetchUserEvents = async (req, res) => {
 };
 
 exports.fetchPrevEvents = async (req, res) => {
-  console.log('fetchPrevEvents controller response => ', req.body);
   res.json(
     await Event.find({
       invitees: { $elemMatch: { _id: req.body._id } },
@@ -108,7 +103,6 @@ exports.fetchPrevEvents = async (req, res) => {
 };
 
 exports.fetchComingEvents = async (req, res) => {
-  console.log('fetchComingEvents controller response => ', req.body);
   res.json(
     await Event.find({
       invitees: { $elemMatch: { _id: req.body._id } },
@@ -118,7 +112,6 @@ exports.fetchComingEvents = async (req, res) => {
 };
 
 exports.fetchEvent = async (req, res) => {
-  console.log('fetchEvent controller response => ', req.body);
   res.json(
     await Event.findById(req.body.params.eventId)
       .populate('accepted', '_id name email profileImage username')
@@ -135,7 +128,6 @@ exports.fetchEvent = async (req, res) => {
 };
 
 exports.createEventPost = async (req, res) => {
-  console.log('createEventPost controller response => ', req.body);
   const { content, image, user, event } = req.body;
 
   try {
@@ -171,7 +163,6 @@ exports.createEventPost = async (req, res) => {
 };
 
 exports.likeEventPost = async (req, res) => {
-  // console.log('likeEventPost controller response => ', req.body);
   try {
     const eventPost = await Event.findOneAndUpdate(
       { 'post._id': req.body._id },
@@ -208,7 +199,6 @@ exports.likeEventPost = async (req, res) => {
 };
 
 exports.unlikeEventPost = async (req, res) => {
-  // console.log('unlike post controller response => ', req.body);
   try {
     const eventPost = await Event.findOneAndUpdate(
       { 'post._id': req.body._id },
@@ -224,8 +214,6 @@ exports.unlikeEventPost = async (req, res) => {
 };
 
 exports.updateEventPost = async (req, res) => {
-  console.log('updateEventPost controller response => ', req.body);
-
   let content;
   if (req.body.content) {
     content = req.body.content;
@@ -270,7 +258,6 @@ exports.updateEventPost = async (req, res) => {
 };
 
 exports.deleteEventPost = async (req, res) => {
-  console.log('deleteEventPost controller response => ', req.body);
   try {
     if (req.body.post.image) {
       const image = await cloudinary.uploader.destroy(req.body.post.image);
@@ -306,8 +293,6 @@ exports.deleteEventPost = async (req, res) => {
 exports.removeEventComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    console.log('removeComment controller response', postId, comment);
-
     const eventPost = await Event.findOneAndUpdate(
       { 'post._id': postId },
       {
@@ -324,7 +309,6 @@ exports.removeEventComment = async (req, res) => {
 };
 
 exports.addEventComment = async (req, res) => {
-  console.log('add comment controller response => ', req.body);
   try {
     const { postId, comment, image, user } = req.body;
     const eventPost = await Event.findOneAndUpdate(
@@ -360,8 +344,6 @@ exports.addEventComment = async (req, res) => {
 exports.removeEventComment = async (req, res) => {
   try {
     const { postId, comment } = req.body;
-    console.log('removeComment controller response', postId, comment);
-
     const eventPost = await Event.findOneAndUpdate(
       { 'post._id': postId },
       {
@@ -378,8 +360,6 @@ exports.removeEventComment = async (req, res) => {
 };
 
 exports.updateEventComment = async (req, res) => {
-  console.log('updateComment controller response => ', req.body);
-
   let text;
   if (req.body.text) {
     text = req.body.text;
@@ -426,25 +406,6 @@ exports.updateEventComment = async (req, res) => {
   }
 };
 
-// remove user notifications
-// exports.expiredEvent = async (req, res) => {
-//   console.log('expiredEvent controller response => ', req.body);
-//   const expired = await User.findByIdAndUpdate(
-//     { _id: req.body.user._id },
-//     { $pull: { notifications: { new: true } } }
-//   );
-//   res.json(expired);
-// };
-
-// remove user events
-// exports.expiredEvent = async (req, res) => {
-//   const expired = await User.findByIdAndUpdate(
-//     { _id: req.body.user._id },
-//     { $pull: { events: { cancelled: false } } }
-//   );
-//   res.json(expired);
-// };
-
 exports.expiredEvent = async (req, res) => {
   const expired = await User.updateMany(
     { 'events.when': { $lte: new Date(Date.now()) } },
@@ -454,7 +415,6 @@ exports.expiredEvent = async (req, res) => {
 };
 
 exports.acceptEventInvite = async (req, res) => {
-  console.log('acceptEventInvite controller response => ', req.body);
   try {
     const event = await Event.findOneAndUpdate(
       {
@@ -495,7 +455,6 @@ exports.acceptEventInvite = async (req, res) => {
 };
 
 exports.maybeEventInvite = async (req, res) => {
-  console.log('maybe controller response => ', req.body);
   try {
     const event = await Event.findOneAndUpdate(
       {
@@ -536,10 +495,7 @@ exports.maybeEventInvite = async (req, res) => {
 };
 
 exports.declineEventInvite = async (req, res) => {
-  console.log('declineInvite controller response body => ', req.body);
-  console.log('declineInvite controller response user => ', req.user);
   const id = req.body.post._id;
-  // console.log('id => ', id);
   try {
     const event = await Event.findOneAndUpdate(
       {
@@ -556,7 +512,6 @@ exports.declineEventInvite = async (req, res) => {
     const notification = await User.findOneAndUpdate(
       {
         mobile: req.user.phone_number,
-        // 'notifications.notif': { $elemMatch: { _id: req.body.post._id } },
         'notifications.notif.createdAt': new Date(req.body.post.createdAt),
       },
       {
@@ -567,7 +522,6 @@ exports.declineEventInvite = async (req, res) => {
         $addToSet: { 'notifications.$.notif.declined': smallUser },
       }
     );
-    // console.log('notification => ', notification);
     const isGoing = await User.findOneAndUpdate(
       {
         mobile: req.user.phone_number,
@@ -582,7 +536,6 @@ exports.declineEventInvite = async (req, res) => {
 };
 
 exports.removeUserEvent = async (req, res) => {
-  console.log('removeUserEvent controller response => ', req.body);
   const { _id, event } = req.body;
   const removeEvent = await User.findByIdAndUpdate(
     { _id },
@@ -608,7 +561,6 @@ exports.removeUserEvent = async (req, res) => {
       },
     }
   );
-  // console.log('updateNotification => ', updateNotification);
   res.json(updateNotification);
 };
 
@@ -617,7 +569,6 @@ exports.fetchEventUsers = async (req, res) => {
     const users = await User.find({ eventsEligible: true }).select(
       '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible'
     );
-    console.log(users);
     res.json(users);
   } catch (err) {
     console.log('users => ', err);
