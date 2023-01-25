@@ -1764,7 +1764,8 @@ exports.highCompats = async (req, res) => {
       compatibility.ageTheyWant = true;
       compatibility.points = compatibility.points + 5;
     }
-    if (compatibility.points > 60 && compatibility.points <= 75) {
+    if (compatibility.points > 0 && compatibility.points <= 10) {
+      // if (compatibility.points > 60 && compatibility.points <= 75) {
       const user = {
         username: u.username,
         name: u.name,
@@ -1774,7 +1775,8 @@ exports.highCompats = async (req, res) => {
       };
       highCompats.push(user);
     }
-    if (compatibility.points > 75 && compatibility.points <= 100) {
+    if (compatibility.points > 11 && compatibility.points <= 20) {
+      // if (compatibility.points > 75 && compatibility.points <= 100) {
       const user = {
         username: u.username,
         name: u.name,
@@ -1784,7 +1786,8 @@ exports.highCompats = async (req, res) => {
       };
       veryHighCompats.push(user);
     }
-    if (compatibility.points > 100) {
+    if (compatibility.points > 21) {
+      // if (compatibility.points > 101) {
       const user = {
         username: u.username,
         name: u.name,

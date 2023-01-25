@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       index: true,
+      unique: true,
       text: true,
     },
     username: {
@@ -16,6 +17,9 @@ const userSchema = new mongoose.Schema(
       text: true,
     },
     mobile: { type: String, unique: true, required: true },
+    secondMobile: { type: String, unique: true },
+    statement: String,
+    answer: String,
     role: {
       type: String,
       default: 'subscriber',

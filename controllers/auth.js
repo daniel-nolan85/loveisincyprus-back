@@ -11,8 +11,9 @@ const Verif = require('../models/verif');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
-const user = require('../models/user');
 const Cardinity = require('cardinity-nodejs');
+
+const admin = require('../firebase');
 
 const Client = Cardinity.client();
 const Refund = Cardinity.refund();
@@ -30,21 +31,43 @@ cloudinary.config({
 
 exports.userExists = async (req, res) => {
   const { mobile } = req.params;
-  const user = await User.find({ mobile }).select('_id');
+  const user = await User.find({
+    $or: [{ mobile }, { secondMobile: mobile }],
+  }).select('_id');
+  res.json(user);
+};
+
+exports.secondMobileExists = async (req, res) => {
+  const { secondMobile } = req.params;
+  const user = await User.find({
+    $or: [{ mobile: secondMobile }, { secondMobile }],
+  }).select('_id');
+  res.json(user);
+};
+
+exports.emailExists = async (req, res) => {
+  const { email } = req.params;
+  const user = await User.find({ email }).select('_id');
   res.json(user);
 };
 
 exports.userPermitted = async (req, res) => {
   const { mobile } = req.params;
-  const user = await User.find({ mobile }).select(
-    'username name profileImage _id userStatus'
-  );
+  const user = await User.find({
+    $or: [{ mobile }, { secondMobile: mobile }],
+  }).select('username name profileImage _id userStatus');
   res.json(user);
 };
 
 exports.userBlocked = async (req, res) => {
   const { mobile } = req.params;
   const user = await Blocked.find({ mobile });
+  res.json(user);
+};
+
+exports.secondMobileBlocked = async (req, res) => {
+  const { secondMobile } = req.params;
+  const user = await Blocked.find({ secondMobile });
   res.json(user);
 };
 
@@ -85,13 +108,54 @@ exports.callingCode = async (req, res) => {
   } else return res.json({ permitted: 'false' });
 };
 
+exports.secondMobileCallingCode = async (req, res) => {
+  const { secondMobile } = req.params;
+  const callingCode1 = secondMobile.slice(0, 5);
+  const callingCode2 = secondMobile.slice(0, 4);
+  const callingCode3 = secondMobile.slice(0, 3);
+  const callingCode4 = secondMobile.slice(0, 2);
+
+  const allCodes = await CallingCode.find({});
+
+  var code1 = allCodes.some((c) => c.callingCode === callingCode1);
+  var code2 = allCodes.some((c) => c.callingCode === callingCode2);
+  var code3 = allCodes.some((c) => c.callingCode === callingCode3);
+  var code4 = allCodes.some((c) => c.callingCode === callingCode4);
+
+  if (code1) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode1,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code2) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode2,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code3) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode3,
+    }).select('permitted');
+    return res.json(country);
+  } else if (code4) {
+    const country = await CallingCode.findOne({
+      callingCode: callingCode4,
+    }).select('permitted');
+    return res.json(country);
+  } else return res.json({ permitted: 'false' });
+};
+
 exports.createUser = async (req, res) => {
-  const { name, email, mobile } = req.body;
+  const { name, email, mobile, secondMobile, statement } = req.body;
+  const answer = req.body.answer.toLowerCase();
   const content = 'Welcome to LoveIsInCyprus!';
   const newUser = await new User({
     name,
     email,
     mobile,
+    secondMobile,
+    statement,
+    answer,
   }).save();
 
   const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' }).select(
@@ -208,6 +272,40 @@ exports.loginUser = async (req, res) => {
   }
 };
 
+exports.updateMobileNumbers = async (req, res) => {
+  console.log('updateMobileNumbers controller response => ', req.body);
+  const { email, mobile } = req.body;
+
+  try {
+    const user = await User.findOne({ email, secondMobile: mobile }).select(
+      'mobile'
+    );
+    const updateUser = await User.findOneAndUpdate(
+      { email, secondMobile: mobile },
+      { mobile, secondMobile: '' },
+      { new: true }
+    );
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.updateFirestoreUser = async (req, res) => {
+  console.log('updateFirestoreUser controller response => ', req.body);
+  const { prevMobile, mobile } = req.body;
+  try {
+    const firebaseUser = await admin.auth().getUserByPhoneNumber(prevMobile);
+    console.log(firebaseUser.uid);
+    const updatedUser = await admin.auth().updateUser(firebaseUser.uid, {
+      phoneNumber: mobile,
+    });
+    res.json(updatedUser);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.currentUser = async (req, res) => {
   User.findOne({ mobile: req.user.phone_number }).exec((err, user) => {
     if (err) throw new Error(err);
@@ -227,6 +325,30 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.name) {
       data.name = req.body.name;
+    }
+    if (req.body.updatedMobile) {
+      const firebaseUser = await admin
+        .auth()
+        .getUserByPhoneNumber(req.body.mobile);
+      const updatedUser = await admin.auth().updateUser(firebaseUser.uid, {
+        phoneNumber: req.body.updatedMobile,
+      });
+      console.log('req.user.phone_number => ', req.user.phone_number);
+      req.user.phone_number = req.body.updatedMobile;
+      console.log('req.user.phone_number => ', req.user.phone_number);
+      data.mobile = req.body.updatedMobile;
+    }
+    // if (req.body.mobile) {
+    //   data.mobile = req.body.mobile;
+    // }
+    if (req.body.secondMobile) {
+      data.secondMobile = req.body.secondMobile;
+    }
+    if (req.body.statement) {
+      data.statement = req.body.statement;
+    }
+    if (req.body.answer) {
+      data.answer = req.body.answer;
     }
     if (req.body.email) {
       data.email = req.body.email;
@@ -382,7 +504,7 @@ exports.profileUpdate = async (req, res) => {
     let user = await User.findByIdAndUpdate(req.body.user._id, data, {
       new: true,
     }).select(
-      `username about name email profileImage coverImage gender birthday age location genderWanted relWanted language
+      `username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language
        maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity
        feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency`
@@ -663,7 +785,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id username about name email profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin'
+      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin'
     );
     res.json(thisUser);
   } catch (err) {

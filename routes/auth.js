@@ -14,11 +14,17 @@ const {
 // controllers
 const {
   userExists,
+  secondMobileExists,
+  emailExists,
   userPermitted,
   userBlocked,
+  secondMobileBlocked,
   callingCode,
+  secondMobileCallingCode,
   createUser,
   loginUser,
+  updateMobileNumbers,
+  updateFirestoreUser,
   currentUser,
   profileUpdate,
   findUsers,
@@ -69,11 +75,20 @@ const {
 
 // routes
 router.get('/user-exists/:mobile', userExists);
+router.get('/second-mobile-exists/:secondMobile', secondMobileExists);
+router.get('/email-exists/:email', emailExists);
 router.get('/user-permitted/:mobile', userPermitted);
 router.get('/user-blocked/:mobile', userBlocked);
+router.get('/second-mobile-blocked/:secondMobile', secondMobileBlocked);
 router.get('/calling-code/:mobile', callingCode);
+router.get(
+  '/second-mobile-calling-code/:secondMobile',
+  secondMobileCallingCode
+);
 router.post('/create-user', authCheck, createUser);
 router.post('/login-user', authCheck, loginUser);
+router.put('/update-mobile-numbers', updateMobileNumbers);
+router.put('/update-firestore-user', updateFirestoreUser);
 router.put('/profile-update', authCheck, profileUpdate);
 router.post('/current-user', authCheck, currentUser);
 router.post('/current-admin', authCheck, adminCheck, currentUser);
