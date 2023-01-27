@@ -21,8 +21,10 @@ const {
   secondMobileBlocked,
   callingCode,
   secondMobileCallingCode,
+  checkCredentials,
   createUser,
   loginUser,
+  loginUserWithSecret,
   updateMobileNumbers,
   updateFirestoreUser,
   currentUser,
@@ -85,8 +87,10 @@ router.get(
   '/second-mobile-calling-code/:secondMobile',
   secondMobileCallingCode
 );
+router.get('/check-credentials/:email', checkCredentials);
 router.post('/create-user', authCheck, createUser);
 router.post('/login-user', authCheck, loginUser);
+router.post('/login-user-with-secret', authCheck, loginUserWithSecret);
 router.put('/update-mobile-numbers', updateMobileNumbers);
 router.put('/update-firestore-user', updateFirestoreUser);
 router.put('/profile-update', authCheck, profileUpdate);

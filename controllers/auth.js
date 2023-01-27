@@ -145,9 +145,18 @@ exports.secondMobileCallingCode = async (req, res) => {
   } else return res.json({ permitted: 'false' });
 };
 
+exports.checkCredentials = async (req, res) => {
+  const { email } = req.params;
+  try {
+    const user = await User.findOne({ email }).select('statement answer');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.createUser = async (req, res) => {
-  const { name, email, mobile, secondMobile, statement } = req.body;
-  const answer = req.body.answer.toLowerCase();
+  const { name, email, mobile, secondMobile, statement, answer } = req.body;
   const content = 'Welcome to LoveIsInCyprus!';
   const newUser = await new User({
     name,
@@ -198,7 +207,7 @@ exports.createUser = async (req, res) => {
       },
       { new: true }
     ).select(
-      '_id membership messages newNotifs name email following followers matches profileImage username'
+      '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
     );
     res.json(notifyReceiver);
   } catch (err) {
@@ -208,12 +217,12 @@ exports.createUser = async (req, res) => {
 };
 
 exports.loginUser = async (req, res) => {
-  const { mobile } = req.body;
+  const { mobile, email } = req.body;
   const user = await User.findOneAndUpdate(
-    { mobile },
+    { $or: [{ mobile }, { email }] },
     { lastLogin: new Date(Date.now()) }
   ).select(
-    '_id membership messages newNotifs name email following followers matches profileImage username role'
+    '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
   );
 
   if (
@@ -240,7 +249,7 @@ exports.loginUser = async (req, res) => {
           { new: true }
         )
           .select(
-            '_id membership messages newNotifs name email following followers matches profileImage username role'
+            '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
           )
           .exec();
 
@@ -261,7 +270,73 @@ exports.loginUser = async (req, res) => {
       { new: true }
     )
       .select(
-        '_id membership messages newNotifs name email following followers matches profileImage username role'
+        '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+      )
+      .exec();
+    res.json(trialEnded);
+  } else if (user) {
+    res.json(user);
+  } else {
+    return res.status(400).send('User not found');
+  }
+};
+
+exports.loginUserWithSecret = async (req, res) => {
+  console.log('loginUserWithSecret controller response => ', req.body);
+  const { email } = req.body;
+  const user = await User.findOneAndUpdate(
+    { email },
+    { lastLogin: new Date(Date.now()) }
+  ).select(
+    '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+  );
+
+  if (
+    user &&
+    user.membership.paid &&
+    user.membership.trialPeriod &&
+    user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
+  ) {
+    const refund = new Refund({
+      amount: user.membership.cost,
+      description: 'User did not make use of their subscription',
+      id: user.membership.cardinityId,
+    });
+
+    client
+      .call(refund)
+      .then(async (response) => {
+        const subscriptionUnpaid = await User.findByIdAndUpdate(
+          { _id: user._id },
+          {
+            'membership.paid': false,
+            'membership.trialPeriod': false,
+          },
+          { new: true }
+        )
+          .select(
+            '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+          )
+          .exec();
+
+        res.json(subscriptionUnpaid);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  } else if (
+    user &&
+    user.membership.paid &&
+    user.membership.trialPeriod &&
+    user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 > Date.now()
+  ) {
+    const trialEnded = await User.findByIdAndUpdate(
+      { _id: user._id },
+      { 'membership.trialPeriod': false },
+      { new: true }
+    )
+      .select(
+        '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
       )
       .exec();
     res.json(trialEnded);
@@ -333,14 +408,8 @@ exports.profileUpdate = async (req, res) => {
       const updatedUser = await admin.auth().updateUser(firebaseUser.uid, {
         phoneNumber: req.body.updatedMobile,
       });
-      console.log('req.user.phone_number => ', req.user.phone_number);
-      req.user.phone_number = req.body.updatedMobile;
-      console.log('req.user.phone_number => ', req.user.phone_number);
       data.mobile = req.body.updatedMobile;
     }
-    // if (req.body.mobile) {
-    //   data.mobile = req.body.mobile;
-    // }
     if (req.body.secondMobile) {
       data.secondMobile = req.body.secondMobile;
     }
