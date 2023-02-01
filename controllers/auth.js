@@ -388,6 +388,56 @@ exports.currentUser = async (req, res) => {
   });
 };
 
+exports.checkInfoExists = async (req, res) => {
+  console.log('checkInfoExists controller response => ', req.body);
+  const { _id, mobile, updatedMobile, secondMobile, updatedEmail } = req.body;
+  if (updatedMobile && secondMobile) {
+    const users = await User.find({
+      $or: [
+        { mobile: updatedMobile },
+        { mobile: secondMobile },
+        { secondMobile: updatedMobile },
+        { secondMobile },
+        { email: updatedEmail },
+      ],
+      _id: { $ne: _id },
+    }).select('_id mobile secondMobile email');
+    console.log('users 1 => ', users);
+    res.json(users);
+  } else if (updatedMobile) {
+    const users = await User.find({
+      $or: [
+        { mobile: updatedMobile },
+        { secondMobile: updatedMobile },
+        { email: updatedEmail },
+      ],
+      _id: { $ne: _id },
+    }).select('_id mobile secondMobile email');
+    console.log('users 2 => ', users);
+    res.json(users);
+  } else if (secondMobile) {
+    const users = await User.find({
+      $or: [
+        { mobile },
+        { mobile: secondMobile },
+        { secondMobile },
+        { secondMobile: mobile },
+        { email: updatedEmail },
+      ],
+      _id: { $ne: _id },
+    }).select('_id mobile secondMobile email');
+    console.log('users 3 => ', users);
+    res.json(users);
+  } else {
+    const users = await User.find({
+      $or: [{ mobile }, { secondMobile: mobile }, { email: updatedEmail }],
+      _id: { $ne: _id },
+    }).select('_id mobile secondMobile email');
+    console.log('users => ', users);
+    res.json(users);
+  }
+};
+
 exports.profileUpdate = async (req, res) => {
   try {
     const data = {};
@@ -416,11 +466,17 @@ exports.profileUpdate = async (req, res) => {
     if (req.body.statement) {
       data.statement = req.body.statement;
     }
-    if (req.body.answer) {
-      data.answer = req.body.answer;
+    // if (req.body.answer) {
+    //   data.answer = req.body.answer;
+    // }
+    if (req.body.updatedAnswer) {
+      data.answer = req.body.updatedAnswer;
     }
-    if (req.body.email) {
-      data.email = req.body.email;
+    // if (req.body.email) {
+    //   data.email = req.body.email;
+    // }
+    if (req.body.updatedEmail) {
+      data.email = req.body.updatedEmail;
     }
     if (req.body.profileImage) {
       data.profileImage = req.body.profileImage;
@@ -610,7 +666,6 @@ exports.profileUpdate = async (req, res) => {
     if (err.code == 11000) {
       return res.json({ error: 'This username has already been taken' });
     }
-    console.log('profileUpdate => ', err);
   }
 };
 

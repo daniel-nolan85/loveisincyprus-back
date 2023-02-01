@@ -28,6 +28,7 @@ const {
   updateMobileNumbers,
   updateFirestoreUser,
   currentUser,
+  checkInfoExists,
   profileUpdate,
   findUsers,
   userFollow,
@@ -93,6 +94,7 @@ router.post('/login-user', authCheck, loginUser);
 router.post('/login-user-with-secret', authCheck, loginUserWithSecret);
 router.put('/update-mobile-numbers', updateMobileNumbers);
 router.put('/update-firestore-user', updateFirestoreUser);
+router.post('/check-info-exists', authCheck, checkInfoExists);
 router.put('/profile-update', authCheck, profileUpdate);
 router.post('/current-user', authCheck, currentUser);
 router.post('/current-admin', authCheck, adminCheck, currentUser);
