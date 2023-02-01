@@ -117,6 +117,7 @@ exports.listRelated = async (req, res) => {
   const product = await Product.findById(req.params.productId).exec();
   const related = await Product.find({
     _id: { $ne: product._id },
+    approved: true,
     category: product.category,
   })
     .limit(3)
@@ -128,7 +129,10 @@ exports.listRelated = async (req, res) => {
 };
 
 const handleQuery = async (req, res, query) => {
-  const products = await Product.find({ $text: { $search: query } })
+  const products = await Product.find({
+    approved: true,
+    $text: { $search: query },
+  })
     .populate('category', '_id name')
     .populate('subs', '_id name')
     .populate('postedBy', '_id name')
@@ -139,6 +143,7 @@ const handleQuery = async (req, res, query) => {
 const handlePrice = async (req, res, price) => {
   try {
     const products = await Product.find({
+      approved: true,
       price: { $gte: price[0], $lte: price[1] },
     })
       .populate('category', '_id name')
@@ -164,7 +169,7 @@ const handleStar = async (req, res, stars) => {
     { $match: { floorAverage: stars } },
   ]).exec((err, aggregates) => {
     if (err) console.log('aggregate error => ', err);
-    Product.find({ _id: aggregates })
+    Product.find({ _id: aggregates, approved: true })
       .populate('category', '_id name')
       .populate('subs', '_id name')
       .populate('postedBy', '_id name')
@@ -178,6 +183,7 @@ const handleStar = async (req, res, stars) => {
 const handleCategory = async (req, res, category) => {
   try {
     const products = await Product.find({
+      approved: true,
       category,
     })
       .populate('category', '_id name')
@@ -193,6 +199,7 @@ const handleCategory = async (req, res, category) => {
 const handleSub = async (req, res, sub) => {
   try {
     const products = await Product.find({
+      approved: true,
       subs: sub,
     })
       .populate('category', '_id name')

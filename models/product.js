@@ -24,6 +24,10 @@ const productSchema = new mongoose.Schema(
       maxlength: [5000, 'Description is too long'],
       text: true,
     },
+    more: {
+      type: String,
+      text: true,
+    },
     price: {
       type: Number,
       trim: true,
