@@ -305,13 +305,13 @@ exports.createMembershipPayment = async (req, res) => {
               port: 465,
               auth: {
                 user: 'loveisi3',
-                pass: '4DaNLoV7!',
+                pass: 'nEW!d&Wmp4',
               },
               secure: true,
             });
 
             let mailOptions = {
-              from: 'customercare@loveisincyprus.com',
+              from: 'lovecustomer@loveisincyprus.com',
               to: amendMembership.email,
               subject: 'Thanks for subscribing',
               html: `
@@ -369,13 +369,13 @@ exports.createMembershipPayment = async (req, res) => {
               port: 465,
               auth: {
                 user: 'loveisi3',
-                pass: '4DaNLoV7!',
+                pass: 'nEW!d&Wmp4',
               },
               secure: true,
             });
 
             let mailOptions = {
-              from: 'customercare@loveisincyprus.com',
+              from: 'lovecustomer@loveisincyprus.com',
               to: amendMembership.email,
               subject: 'Thanks for subscribing',
               html: `

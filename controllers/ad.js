@@ -74,7 +74,7 @@ exports.disapproveAd = async (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: '4DaNLoV7!',
+      pass: 'nEW!d&Wmp4',
     },
     secure: true,
   });
@@ -84,7 +84,7 @@ exports.disapproveAd = async (req, res) => {
     : 'Your recent advertisement submission has been rejected.  You have not been charged. Feel free to re-try any time.';
 
   let mailOptions = {
-    from: 'customercare@loveisincyprus.com',
+    from: 'lovecustomer@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
@@ -122,7 +122,7 @@ exports.approveAd = async (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: '4DaNLoV7!',
+      pass: 'nEW!d&Wmp4',
     },
     secure: true,
   });
@@ -130,7 +130,7 @@ exports.approveAd = async (req, res) => {
   const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}.`;
 
   let mailOptions = {
-    from: 'customercare@loveisincyprus.com',
+    from: 'lovecustomer@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `

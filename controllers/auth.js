@@ -167,53 +167,54 @@ exports.createUser = async (req, res) => {
     answer,
   }).save();
 
-  const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' }).select(
-    'name username email profileImage'
-  );
-  const chat = await new Chat({
-    users: [sender._id, newUser._id],
-  }).save();
+  // const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' }).select(
+  //   'name username email profileImage'
+  // );
+  // const chat = await new Chat({
+  //   users: [sender._id, newUser._id],
+  // }).save();
 
-  var newMessage = {
-    sender,
-    content,
-    chat,
-  };
-  try {
-    var message = await Message.create(newMessage);
-    message = await message.populate(
-      'sender',
-      'name username email profileImage'
-    );
-    message = await message.populate('chat');
-    message = await User.populate(message, {
-      path: 'chat.users',
-      select: 'name username email profileImage',
-    });
+  // var newMessage = {
+  //   sender,
+  //   content,
+  //   chat,
+  // };
+  // try {
+  //   var message = await Message.create(newMessage);
+  //   message = await message.populate(
+  //     'sender',
+  //     'name username email profileImage'
+  //   );
+  //   message = await message.populate('chat');
+  //   message = await User.populate(message, {
+  //     path: 'chat.users',
+  //     select: 'name username email profileImage',
+  //   });
 
-    const updateLatest = await Chat.findOneAndUpdate(
-      { _id: chat._id },
-      {
-        latestMessage: message,
-      }
-    );
+  //   const updateLatest = await Chat.findOneAndUpdate(
+  //     { _id: chat._id },
+  //     {
+  //       latestMessage: message,
+  //     }
+  //   );
 
-    const notifyReceiver = await User.findByIdAndUpdate(
-      { _id: newUser._id },
-      {
-        $push: {
-          messages: message,
-        },
-      },
-      { new: true }
-    ).select(
-      '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
-    );
-    res.json(notifyReceiver);
-  } catch (err) {
-    res.status(400);
-    throw new Error(err.message);
-  }
+  //   const notifyReceiver = await User.findByIdAndUpdate(
+  //     { _id: newUser._id },
+  //     {
+  //       $push: {
+  //         messages: message,
+  //       },
+  //     },
+  //     { new: true }
+  //   ).select(
+  //     '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
+  //   );
+  //   res.json(notifyReceiver);
+  // } catch (err) {
+  //   res.status(400);
+  //   throw new Error(err.message);
+  // }
+  res.json(newUser);
 };
 
 exports.loginUser = async (req, res) => {
@@ -1465,7 +1466,7 @@ exports.removeExpiredFeatures = async (req, res) => {
 };
 
 exports.dailyMatches = async (req, res) => {
-  const firstMember = await User.findById('621f58d359389f13dcc05a71').select(
+  const firstMember = await User.findById('63daf9a0a6fba9776c394db5').select(
     '_id createdAt'
   );
   const inception = firstMember.createdAt;
@@ -1488,7 +1489,7 @@ exports.dailyMatches = async (req, res) => {
 };
 
 exports.dailySignups = async (req, res) => {
-  const firstMember = await User.findById('621f58d359389f13dcc05a71').select(
+  const firstMember = await User.findById('63daf9a0a6fba9776c394db5').select(
     '_id createdAt'
   );
   const inception = firstMember.createdAt;

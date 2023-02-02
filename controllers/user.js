@@ -34,14 +34,14 @@ exports.contactFormEmail = (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: '4DaNLoV7!',
+      pass: 'nEW!d&Wmp4',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'customercare@loveisincyprus.com',
-    to: 'customercare@loveisincyprus.com',
+    from: 'lovecustomer@loveisincyprus.com',
+    to: 'lovecustomer@loveisincyprus.com',
     subject: subject,
     html: `
       <h3>Information</h3>
@@ -226,13 +226,13 @@ exports.createOrder = async (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: '4DaNLoV7!',
+      pass: 'nEW!d&Wmp4',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'customercare@loveisincyprus.com',
+    from: 'lovecustomer@loveisincyprus.com',
     to: user.email,
     subject: 'Order confirmation from Love is in Cyprus',
     html: `
@@ -480,7 +480,7 @@ exports.spentPoints = async (req, res) => {
       discount: 5,
     }).save();
 
-    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+    const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
     const chat = await Chat.findOne({
       users: { $size: 2, $all: [sender._id, _id] },
     });
@@ -533,7 +533,7 @@ exports.spentPoints = async (req, res) => {
       discount: 10,
     }).save();
 
-    const sender = await User.findOne({ _id: '621f58d359389f13dcc05a71' });
+    const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
     const chat = await Chat.findOne({
       users: { $size: 2, $all: [sender._id, _id] },
     });

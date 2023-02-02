@@ -43,13 +43,13 @@ exports.orderStatus = async (req, res) => {
     port: 465,
     auth: {
       user: 'loveisi3',
-      pass: '4DaNLoV7!',
+      pass: 'nEW!d&Wmp4',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'customercare@loveisincyprus.com',
+    from: 'lovecustomer@loveisincyprus.com',
     to: email.email,
     subject: 'Order update from Love is in Cyprus',
     html: `
