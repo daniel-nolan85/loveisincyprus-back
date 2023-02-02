@@ -63,7 +63,7 @@ exports.disapproveVerif = async (req, res) => {
     ? `Your recent submission to become verified has been rejected for the following reason: ${reason}. You can re-try any time.`
     : 'Your recent submission to become verified has been rejected. You can re-try any time.';
 
-  const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
+  const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' });
   const chat = await Chat.findOne({
     users: { $size: 2, $all: [sender._id, verif.postedBy._id] },
   });
@@ -114,7 +114,7 @@ exports.approveVerif = async (req, res) => {
 
   const content = `Your recent submission to become verified has been approved. You have been awarded 80 points.`;
 
-  const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
+  const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' });
   const chat = await Chat.findOne({
     users: { $size: 2, $all: [sender._id, verif.postedBy._id] },
   });

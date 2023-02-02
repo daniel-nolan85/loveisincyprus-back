@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       text: true,
     },
     mobile: { type: String, unique: true, required: true },
-    secondMobile: { type: String, unique: true },
+    secondMobile: { type: String },
     statement: String,
     answer: String,
     role: {

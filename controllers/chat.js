@@ -149,7 +149,7 @@ exports.massMail = async (req, res) => {
     return res.sendStatus(400);
   }
 
-  const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' }).select(
+  const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' }).select(
     '_id name username email profileImage'
   );
   const userIds = [];
@@ -202,7 +202,7 @@ exports.chatMatches = async (req, res) => {
     const matches = await User.find({ _id: user.matches })
       .select('_id name email username profileImage messages')
       .exec();
-    const admin = await User.findById('63daf9a0a6fba9776c394db5')
+    const admin = await User.findById('63dc1d2a8eb01e4110743044')
       .select('_id name email username profileImage messages')
       .exec();
     const usersToChat = matches.concat(admin);

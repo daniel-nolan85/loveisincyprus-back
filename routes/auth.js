@@ -14,6 +14,7 @@ const {
 // controllers
 const {
   userExists,
+  usernameExists,
   secondMobileExists,
   emailExists,
   userPermitted,
@@ -78,6 +79,7 @@ const {
 
 // routes
 router.get('/user-exists/:mobile', userExists);
+router.get('/username-exists/:username', usernameExists);
 router.get('/second-mobile-exists/:secondMobile', secondMobileExists);
 router.get('/email-exists/:email', emailExists);
 router.get('/user-permitted/:mobile', userPermitted);

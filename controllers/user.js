@@ -480,7 +480,7 @@ exports.spentPoints = async (req, res) => {
       discount: 5,
     }).save();
 
-    const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
+    const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' });
     const chat = await Chat.findOne({
       users: { $size: 2, $all: [sender._id, _id] },
     });
@@ -533,7 +533,7 @@ exports.spentPoints = async (req, res) => {
       discount: 10,
     }).save();
 
-    const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' });
+    const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' });
     const chat = await Chat.findOne({
       users: { $size: 2, $all: [sender._id, _id] },
     });
@@ -1764,8 +1764,7 @@ exports.highCompats = async (req, res) => {
       compatibility.ageTheyWant = true;
       compatibility.points = compatibility.points + 5;
     }
-    if (compatibility.points > 0 && compatibility.points <= 10) {
-      // if (compatibility.points > 60 && compatibility.points <= 75) {
+    if (compatibility.points > 60 && compatibility.points <= 75) {
       const user = {
         username: u.username,
         name: u.name,
@@ -1775,8 +1774,7 @@ exports.highCompats = async (req, res) => {
       };
       highCompats.push(user);
     }
-    if (compatibility.points > 11 && compatibility.points <= 20) {
-      // if (compatibility.points > 75 && compatibility.points <= 100) {
+    if (compatibility.points > 75 && compatibility.points <= 100) {
       const user = {
         username: u.username,
         name: u.name,
@@ -1786,8 +1784,7 @@ exports.highCompats = async (req, res) => {
       };
       veryHighCompats.push(user);
     }
-    if (compatibility.points > 21) {
-      // if (compatibility.points > 101) {
+    if (compatibility.points > 101) {
       const user = {
         username: u.username,
         name: u.name,

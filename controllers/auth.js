@@ -37,6 +37,12 @@ exports.userExists = async (req, res) => {
   res.json(user);
 };
 
+exports.usernameExists = async (req, res) => {
+  const { username } = req.params;
+  const user = await User.find({ username }).select('_id');
+  res.json(user);
+};
+
 exports.secondMobileExists = async (req, res) => {
   const { secondMobile } = req.params;
   const user = await User.find({
@@ -157,9 +163,11 @@ exports.checkCredentials = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   const { name, email, mobile, secondMobile, statement, answer } = req.body;
-  const content = 'Welcome to LoveIsInCyprus!';
+  const username = req.body.username || nanoid(6);
+  const content = `Hi ${name}, welcome to Love Is In Cyprus! We're so glad to have you here.`;
   const newUser = await new User({
     name,
+    username,
     email,
     mobile,
     secondMobile,
@@ -167,54 +175,53 @@ exports.createUser = async (req, res) => {
     answer,
   }).save();
 
-  // const sender = await User.findOne({ _id: '63daf9a0a6fba9776c394db5' }).select(
-  //   'name username email profileImage'
-  // );
-  // const chat = await new Chat({
-  //   users: [sender._id, newUser._id],
-  // }).save();
+  const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' }).select(
+    'name username email profileImage'
+  );
+  const chat = await new Chat({
+    users: [sender._id, newUser._id],
+  }).save();
 
-  // var newMessage = {
-  //   sender,
-  //   content,
-  //   chat,
-  // };
-  // try {
-  //   var message = await Message.create(newMessage);
-  //   message = await message.populate(
-  //     'sender',
-  //     'name username email profileImage'
-  //   );
-  //   message = await message.populate('chat');
-  //   message = await User.populate(message, {
-  //     path: 'chat.users',
-  //     select: 'name username email profileImage',
-  //   });
+  var newMessage = {
+    sender,
+    content,
+    chat,
+  };
+  try {
+    var message = await Message.create(newMessage);
+    message = await message.populate(
+      'sender',
+      'name username email profileImage'
+    );
+    message = await message.populate('chat');
+    message = await User.populate(message, {
+      path: 'chat.users',
+      select: 'name username email profileImage',
+    });
 
-  //   const updateLatest = await Chat.findOneAndUpdate(
-  //     { _id: chat._id },
-  //     {
-  //       latestMessage: message,
-  //     }
-  //   );
+    const updateLatest = await Chat.findOneAndUpdate(
+      { _id: chat._id },
+      {
+        latestMessage: message,
+      }
+    );
 
-  //   const notifyReceiver = await User.findByIdAndUpdate(
-  //     { _id: newUser._id },
-  //     {
-  //       $push: {
-  //         messages: message,
-  //       },
-  //     },
-  //     { new: true }
-  //   ).select(
-  //     '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
-  //   );
-  //   res.json(notifyReceiver);
-  // } catch (err) {
-  //   res.status(400);
-  //   throw new Error(err.message);
-  // }
-  res.json(newUser);
+    const notifyReceiver = await User.findByIdAndUpdate(
+      { _id: newUser._id },
+      {
+        $push: {
+          messages: message,
+        },
+      },
+      { new: true }
+    ).select(
+      '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
+    );
+    res.json(notifyReceiver);
+  } catch (err) {
+    res.status(400);
+    throw new Error(err.message);
+  }
 };
 
 exports.loginUser = async (req, res) => {
@@ -283,7 +290,6 @@ exports.loginUser = async (req, res) => {
 };
 
 exports.loginUserWithSecret = async (req, res) => {
-  console.log('loginUserWithSecret controller response => ', req.body);
   const { email } = req.body;
   const user = await User.findOneAndUpdate(
     { email },
@@ -349,7 +355,6 @@ exports.loginUserWithSecret = async (req, res) => {
 };
 
 exports.updateMobileNumbers = async (req, res) => {
-  console.log('updateMobileNumbers controller response => ', req.body);
   const { email, mobile } = req.body;
 
   try {
@@ -368,11 +373,9 @@ exports.updateMobileNumbers = async (req, res) => {
 };
 
 exports.updateFirestoreUser = async (req, res) => {
-  console.log('updateFirestoreUser controller response => ', req.body);
   const { prevMobile, mobile } = req.body;
   try {
     const firebaseUser = await admin.auth().getUserByPhoneNumber(prevMobile);
-    console.log(firebaseUser.uid);
     const updatedUser = await admin.auth().updateUser(firebaseUser.uid, {
       phoneNumber: mobile,
     });
@@ -390,7 +393,6 @@ exports.currentUser = async (req, res) => {
 };
 
 exports.checkInfoExists = async (req, res) => {
-  console.log('checkInfoExists controller response => ', req.body);
   const { _id, mobile, updatedMobile, secondMobile, updatedEmail } = req.body;
   if (updatedMobile && secondMobile) {
     const users = await User.find({
@@ -403,7 +405,6 @@ exports.checkInfoExists = async (req, res) => {
       ],
       _id: { $ne: _id },
     }).select('_id mobile secondMobile email');
-    console.log('users 1 => ', users);
     res.json(users);
   } else if (updatedMobile) {
     const users = await User.find({
@@ -414,7 +415,6 @@ exports.checkInfoExists = async (req, res) => {
       ],
       _id: { $ne: _id },
     }).select('_id mobile secondMobile email');
-    console.log('users 2 => ', users);
     res.json(users);
   } else if (secondMobile) {
     const users = await User.find({
@@ -427,14 +427,12 @@ exports.checkInfoExists = async (req, res) => {
       ],
       _id: { $ne: _id },
     }).select('_id mobile secondMobile email');
-    console.log('users 3 => ', users);
     res.json(users);
   } else {
     const users = await User.find({
       $or: [{ mobile }, { secondMobile: mobile }, { email: updatedEmail }],
       _id: { $ne: _id },
     }).select('_id mobile secondMobile email');
-    console.log('users => ', users);
     res.json(users);
   }
 };
@@ -467,15 +465,9 @@ exports.profileUpdate = async (req, res) => {
     if (req.body.statement) {
       data.statement = req.body.statement;
     }
-    // if (req.body.answer) {
-    //   data.answer = req.body.answer;
-    // }
     if (req.body.updatedAnswer) {
       data.answer = req.body.updatedAnswer;
     }
-    // if (req.body.email) {
-    //   data.email = req.body.email;
-    // }
     if (req.body.updatedEmail) {
       data.email = req.body.updatedEmail;
     }
@@ -1466,7 +1458,7 @@ exports.removeExpiredFeatures = async (req, res) => {
 };
 
 exports.dailyMatches = async (req, res) => {
-  const firstMember = await User.findById('63daf9a0a6fba9776c394db5').select(
+  const firstMember = await User.findById('63dc1d2a8eb01e4110743044').select(
     '_id createdAt'
   );
   const inception = firstMember.createdAt;
@@ -1489,7 +1481,7 @@ exports.dailyMatches = async (req, res) => {
 };
 
 exports.dailySignups = async (req, res) => {
-  const firstMember = await User.findById('63daf9a0a6fba9776c394db5').select(
+  const firstMember = await User.findById('63dc1d2a8eb01e4110743044').select(
     '_id createdAt'
   );
   const inception = firstMember.createdAt;
