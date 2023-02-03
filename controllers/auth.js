@@ -164,7 +164,7 @@ exports.checkCredentials = async (req, res) => {
 exports.createUser = async (req, res) => {
   const { name, email, mobile, secondMobile, statement, answer } = req.body;
   const username = req.body.username || nanoid(6);
-  const content = `Hi ${name}, welcome to Love Is In Cyprus! We're so glad to have you here.`;
+  const content = `Hi ${name}, welcome to Love Is In Cyprus! We're so glad to have you here. Don't forget to update your profile to increase your chances of making more connections. Just click on your avatar above to get started. We wish you all the best in finding your perfect partner!`;
   const newUser = await new User({
     name,
     username,
@@ -440,7 +440,24 @@ exports.checkInfoExists = async (req, res) => {
 exports.profileUpdate = async (req, res) => {
   try {
     const data = {};
-
+    if (req.body.updatedMobile) {
+      const firebaseUser = await admin
+        .auth()
+        .getUserByPhoneNumber(req.body.mobile);
+      const updatedUser = await admin
+        .auth()
+        .updateUser(firebaseUser.uid, {
+          phoneNumber: req.body.updatedMobile,
+        })
+        .then((userRecord) => {
+          console.log('Successfully updated user', userRecord.toJSON());
+        })
+        .catch((error) => {
+          console.log('Error updating user:', error);
+          return res.json({ timeout: true });
+        });
+      data.mobile = req.body.updatedMobile;
+    }
     if (req.body.username) {
       data.username = req.body.username;
     }
@@ -449,15 +466,6 @@ exports.profileUpdate = async (req, res) => {
     }
     if (req.body.name) {
       data.name = req.body.name;
-    }
-    if (req.body.updatedMobile) {
-      const firebaseUser = await admin
-        .auth()
-        .getUserByPhoneNumber(req.body.mobile);
-      const updatedUser = await admin.auth().updateUser(firebaseUser.uid, {
-        phoneNumber: req.body.updatedMobile,
-      });
-      data.mobile = req.body.updatedMobile;
     }
     if (req.body.secondMobile) {
       data.secondMobile = req.body.secondMobile;
