@@ -173,6 +173,7 @@ exports.createUser = async (req, res) => {
     secondMobile,
     statement,
     answer,
+    membership: { paid: true, expiry: new Date('June 30, 2023 23:59:59') },
   }).save();
 
   const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' }).select(
