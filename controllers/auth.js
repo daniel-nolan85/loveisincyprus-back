@@ -899,7 +899,9 @@ exports.searchUser = async (req, res) => {
         { name: { $regex: query, $options: 'i' } },
         { username: { $regex: query, $options: 'i' } },
       ],
-    }).select('_id name email username profileImage');
+    }).select(
+      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
+    );
     res.json(user);
   } catch (err) {
     console.log('searchUser => ', err);
@@ -989,10 +991,14 @@ exports.liveProfilePic = async (req, res) => {
 };
 
 exports.users = async (req, res) => {
+  const currentPage = req.params.page || 1;
+  const perPage = 12;
   try {
-    const users = await User.find({}).select(
-      '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
-    );
+    const users = await User.find({})
+      .select(
+        '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
+      )
+      .limit(currentPage * perPage);
     res.json(users);
   } catch (err) {
     console.log('users => ', err);
@@ -1049,7 +1055,10 @@ exports.deleteUser = async (req, res) => {
     const declined = await Event.updateMany({ $pull: { declined: u._id } });
     const chats = await Chat.deleteMany({ users: { $in: [u._id] } });
     const verifs = await Verif.remove({ postedBy: u._id });
-    const blocked = await new Blocked({ mobile: u.mobile }).save();
+    const blocked = await new Blocked({
+      mobile: u.mobile,
+      secondMobile: u.secondMobile,
+    }).save();
     res.json({ ok: true });
   } catch (err) {
     console.log('deleteUser => ', err);

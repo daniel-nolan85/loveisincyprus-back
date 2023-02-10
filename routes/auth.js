@@ -129,7 +129,7 @@ router.post('/users-nine-photos', authCheck, usersNinePhotos);
 router.get('/fetch-whitelist', fetchWhitelist);
 
 // admin
-router.post('/users', authCheck, adminCheck, users);
+router.post('/users/:page', authCheck, adminCheck, users);
 router.put('/admin/suspend-user/:userId', authCheck, adminCheck, suspendUser);
 router.put(
   '/admin/revoke-suspension/:userId',
@@ -141,6 +141,7 @@ router.put('/admin/delete-user/:userId', authCheck, adminCheck, deleteUser);
 router.put('/delete-self/:userId', authCheck, deleteSelf);
 router.post('/recent-users', authCheck, adminCheck, recentUsers);
 router.post('/recent-orders', authCheck, adminCheck, recentOrders);
+router.post('/admin/search-users/:query', authCheck, adminCheck, searchUser);
 router.post('/admin/search-locations', authCheck, adminCheck, searchLocations);
 router.post('/admin/fetch-locations', authCheck, adminCheck, fetchLocations);
 router.post('/admin/handle-whitelist', authCheck, adminCheck, handleWhitelist);

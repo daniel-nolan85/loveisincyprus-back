@@ -796,21 +796,40 @@ exports.declineInvite = async (req, res) => {
 };
 
 exports.listAll = async (req, res) => {
-  const users = await User.find({})
-    .limit(parseInt(req.params.count))
-    .select('_id name email username profileImage about')
-    .exec();
+  const users = await User.aggregate([
+    { $sample: { size: 24 } },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        username: 1,
+        email: 1,
+        profileImage: 1,
+        about: 1,
+      },
+    },
+  ]);
   res.json(users);
 };
 
 exports.searchFilters = async (req, res) => {
   const { query } = req.body;
   const searchedUsers = [];
-
   if (query) {
-    const users = await User.find({ $text: { $search: query } })
-      .select('_id name email username profileImage about eventsEligible optIn')
-      .exec();
+    const users = await User.aggregate([
+      { $match: { $text: { $search: query } } },
+      { $sample: { size: 24 } },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          email: 1,
+          profileImage: 1,
+          about: 1,
+        },
+      },
+    ]);
     res.json(users);
   } else {
     Promise.all(
@@ -818,49 +837,104 @@ exports.searchFilters = async (req, res) => {
         if (q.type && q.type == 'radio') {
           var radioQuery = {};
           radioQuery[q.field] = q.lookUp;
-          const users = await User.find(radioQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.aggregate([
+            { $match: radioQuery },
+            { $sample: { size: 24 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+              },
+            },
+          ]);
           searchedUsers.push(users);
         }
         if (q.range) {
           var rangeQuery = {};
           rangeQuery[q.field] = { $gte: q.range[0], $lte: q.range[1] };
-          const users = await User.find(rangeQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.aggregate([
+            { $match: rangeQuery },
+            { $sample: { size: 24 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+              },
+            },
+          ]);
           searchedUsers.push(users);
         }
         if (q.key) {
           var dropdownQuery = {};
           dropdownQuery[q.field] = q.key;
-          const users = await User.find(dropdownQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.aggregate([
+            { $match: dropdownQuery },
+            { $sample: { size: 24 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+              },
+            },
+          ]);
           searchedUsers.push(users);
         }
         if (q.type && q.type == 'number') {
           var numberQuery = {};
           numberQuery[q.field] = q.entry;
-          const users = await User.find(numberQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.find(numberQuery)
+            .select('_id name email username profileImage about')
+            .limit(24);
           searchedUsers.push(users);
         }
         if (q.type && q.type == 'string') {
           var stringQuery = {};
           stringQuery[q.field] = { $regex: q.entry };
-          const users = await User.find(stringQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.aggregate([
+            { $match: stringQuery },
+            { $sample: { size: 24 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+              },
+            },
+          ]);
           searchedUsers.push(users);
         }
         if (q.type && q.type == 'array') {
           var arrayQuery = {};
           arrayQuery[q.field] = { $all: q.entry };
-          const users = await User.find(arrayQuery).select(
-            '_id name email username profileImage about eventsEligible optIn'
-          );
+          const users = await User.aggregate([
+            { $match: arrayQuery },
+            { $sample: { size: 24 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+              },
+            },
+          ]);
           searchedUsers.push(users);
         }
       })
