@@ -455,7 +455,7 @@ exports.profileUpdate = async (req, res) => {
         })
         .catch((error) => {
           console.log('Error updating user:', error);
-          return res.json({ timeout: true });
+          return res.json(error);
         });
       data.mobile = req.body.updatedMobile;
     }
@@ -1113,17 +1113,25 @@ exports.recentOrders = async (req, res) => {
 exports.usersToSwipe = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id).select(
-      '_id nopes following'
+      '_id nopes following genderWanted'
     );
+    const genderUnwanted = await User.find({
+      gender: { $ne: user.genderWanted },
+    }).select('_id');
+    console.log('user => ', user);
+    console.log('genderUnwanted => ', genderUnwanted);
     let usersUnavailable = user.following;
     usersUnavailable.push(user._id);
     if (user.nopes.length > 0) {
       user.nopes.map((nope) => usersUnavailable.push(nope._id));
     }
-    const total = await User.find().select('_id');
-    let usersAvailable = total.length - usersUnavailable.length;
+    genderUnwanted.map((gu) => usersUnavailable.push(gu._id));
+    // const total = await User.find().select('_id');
+    // let usersAvailable = total.length - usersUnavailable.length;
+    console.log('usersUnavailable => ', usersUnavailable);
+
     const users = await User.find({ _id: { $nin: usersUnavailable } })
-      .limit(usersAvailable)
+      .limit(5)
       .select('_id name email profileImage age username');
     res.json(users);
   } catch (err) {
