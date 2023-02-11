@@ -1118,17 +1118,12 @@ exports.usersToSwipe = async (req, res) => {
     const genderUnwanted = await User.find({
       gender: { $ne: user.genderWanted },
     }).select('_id');
-    console.log('user => ', user);
-    console.log('genderUnwanted => ', genderUnwanted);
     let usersUnavailable = user.following;
     usersUnavailable.push(user._id);
     if (user.nopes.length > 0) {
       user.nopes.map((nope) => usersUnavailable.push(nope._id));
     }
     genderUnwanted.map((gu) => usersUnavailable.push(gu._id));
-    // const total = await User.find().select('_id');
-    // let usersAvailable = total.length - usersUnavailable.length;
-    console.log('usersUnavailable => ', usersUnavailable);
 
     const users = await User.find({ _id: { $nin: usersUnavailable } })
       .limit(5)
