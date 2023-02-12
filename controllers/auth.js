@@ -1303,9 +1303,22 @@ exports.searchLocations = async (req, res) => {
   }
 };
 
+exports.allowUSA = async (req, res) => {
+  try {
+    const permitUSA = await Location.findOneAndUpdate(
+      { countryCode: 'US' },
+      { $set: { whitelist: 'true' } },
+      { new: true }
+    );
+    res.json(permitUSA);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.fetchWhitelist = async (req, res) => {
   try {
-    const whitelist = await Location.find({ whitelist: true }).select(
+    const whitelist = await Location.find({ whitelist: 'true' }).select(
       'countryCode'
     );
     res.json(whitelist);

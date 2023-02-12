@@ -35,7 +35,7 @@ app.use(express.json({ limit: '2mb' }));
 // app.use(express.json({ limit: '50mb' }));
 // app.use(express.urlencoded({ limit: '50mb' }));
 app.use(cors());
-// app.use(limiter);
+app.use(limiter);
 
 // routes middleware
 readdirSync('./routes').map((r) => app.use('/api', require(`./routes/${r}`)));

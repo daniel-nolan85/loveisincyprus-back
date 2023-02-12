@@ -50,6 +50,7 @@ const {
   nineVisitors,
   ninePhotos,
   usersNinePhotos,
+  allowUSA,
   fetchWhitelist,
   // admin
   users,
@@ -126,6 +127,7 @@ router.post('/fetch-visitor', authCheck, fetchVisitor);
 router.post('/nine-visitors', authCheck, nineVisitors);
 router.post('/nine-photos', authCheck, ninePhotos);
 router.post('/users-nine-photos', authCheck, usersNinePhotos);
+router.put('/allow-usa', allowUSA);
 router.get('/fetch-whitelist', fetchWhitelist);
 
 // admin
