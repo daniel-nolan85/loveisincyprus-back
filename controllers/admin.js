@@ -39,17 +39,16 @@ exports.orderStatus = async (req, res) => {
   });
 
   let transporter = nodemailer.createTransport({
-    host: 'mail.loveisincyprus.com',
-    port: 465,
+    service: 'gmail',
     auth: {
-      user: 'loveisi3',
-      pass: 'nEW!d&Wmp4',
+      user: 'customercare@loveisincyprus.com',
+      pass: 'qsotfrnwgzigtmnv',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'lovecustomer@loveisincyprus.com',
+    from: 'customercare@loveisincyprus.com',
     to: email.email,
     subject: 'Order update from Love is in Cyprus',
     html: `

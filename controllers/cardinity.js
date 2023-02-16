@@ -86,7 +86,7 @@ exports.createPayment = async (req, res) => {
               '<input type="hidden" name="PaReq" value="' +
               response.authorization_information.data +
               '" />' +
-              '<input type="hidden" name="TermUrl" value="http://localhost:3000" />';
+              '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
             var threed_key = 'MD';
           } else if (response.threeds2_data) {
             var form_url = response.threeds2_data.acs_url;
@@ -177,7 +177,7 @@ exports.createAdPayment = async (req, res) => {
               '<input type="hidden" name="PaReq" value="' +
               response.authorization_information.data +
               '" />' +
-              '<input type="hidden" name="TermUrl" value="http://localhost:3000" />';
+              '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
             var threed_key = 'MD';
           } else if (response.threeds2_data) {
             var form_url = response.threeds2_data.acs_url;
@@ -301,17 +301,16 @@ exports.createMembershipPayment = async (req, res) => {
             const fortnight = new Date(Date.now() + 12096e5);
 
             let transporter = nodemailer.createTransport({
-              host: 'mail.loveisincyprus.com',
-              port: 465,
+              service: 'gmail',
               auth: {
-                user: 'loveisi3',
-                pass: 'nEW!d&Wmp4',
+                user: 'customercare@loveisincyprus.com',
+                pass: 'qsotfrnwgzigtmnv',
               },
               secure: true,
             });
 
             let mailOptions = {
-              from: 'lovecustomer@loveisincyprus.com',
+              from: 'customercare@loveisincyprus.com',
               to: amendMembership.email,
               subject: 'Thanks for subscribing',
               html: `
@@ -365,17 +364,16 @@ exports.createMembershipPayment = async (req, res) => {
             const fortnight = new Date(Date.now() + 12096e5);
 
             let transporter = nodemailer.createTransport({
-              host: 'mail.loveisincyprus.com',
-              port: 465,
+              service: 'gmail',
               auth: {
-                user: 'loveisi3',
-                pass: 'nEW!d&Wmp4',
+                user: 'customercare@loveisincyprus.com',
+                pass: 'qsotfrnwgzigtmnv',
               },
               secure: true,
             });
 
             let mailOptions = {
-              from: 'lovecustomer@loveisincyprus.com',
+              from: 'customercare@loveisincyprus.com',
               to: amendMembership.email,
               subject: 'Thanks for subscribing',
               html: `
@@ -407,7 +405,7 @@ exports.createMembershipPayment = async (req, res) => {
               '<input type="hidden" name="PaReq" value="' +
               response.authorization_information.data +
               '" />' +
-              '<input type="hidden" name="TermUrl" value="http://localhost:3000" />';
+              '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
             var threed_key = 'MD';
           } else if (response.threeds2_data) {
             var form_url = response.threeds2_data.acs_url;

@@ -30,18 +30,17 @@ exports.contactFormEmail = (req, res) => {
   const { name, email, subject, message } = req.body.values;
 
   let transporter = nodemailer.createTransport({
-    host: 'mail.loveisincyprus.com',
-    port: 465,
+    service: 'gmail',
     auth: {
-      user: 'loveisi3',
-      pass: 'nEW!d&Wmp4',
+      user: 'customercare@loveisincyprus.com',
+      pass: 'qsotfrnwgzigtmnv',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'lovecustomer@loveisincyprus.com',
-    to: 'lovecustomer@loveisincyprus.com',
+    from: 'customercare@loveisincyprus.com',
+    to: 'customercare@loveisincyprus.com',
     subject: subject,
     html: `
       <h3>Information</h3>
@@ -222,17 +221,16 @@ exports.createOrder = async (req, res) => {
   });
 
   let transporter = nodemailer.createTransport({
-    host: 'mail.loveisincyprus.com',
-    port: 465,
+    service: 'gmail',
     auth: {
-      user: 'loveisi3',
-      pass: 'nEW!d&Wmp4',
+      user: 'customercare@loveisincyprus.com',
+      pass: 'qsotfrnwgzigtmnv',
     },
     secure: true,
   });
 
   let mailOptions = {
-    from: 'lovecustomer@loveisincyprus.com',
+    from: 'customercare@loveisincyprus.com',
     to: user.email,
     subject: 'Order confirmation from Love is in Cyprus',
     html: `

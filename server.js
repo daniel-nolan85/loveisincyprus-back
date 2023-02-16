@@ -52,11 +52,15 @@ const io = require('socket.io')(server, {
   path: '/socket.io',
   pingTimeout: 60000,
   cors: {
+    // development
     origin: 'http://localhost:3000',
+    // production
+    // origin: 'https://loveisincyprus.com',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-type'],
   },
-  maxHttpBufferSize: 1e8,
+  maxHttpsBufferSize: 1e8,
+  secure: true,
 });
 
 io.on('connection', (socket) => {

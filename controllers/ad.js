@@ -70,11 +70,10 @@ exports.disapproveAd = async (req, res) => {
   ).exec();
 
   let transporter = nodemailer.createTransport({
-    host: 'mail.loveisincyprus.com',
-    port: 465,
+    service: 'gmail',
     auth: {
-      user: 'loveisi3',
-      pass: 'nEW!d&Wmp4',
+      user: 'customercare@loveisincyprus.com',
+      pass: process.env.GMAIL_AUTHORIZATION,
     },
     secure: true,
   });
@@ -84,7 +83,7 @@ exports.disapproveAd = async (req, res) => {
     : 'Your recent advertisement submission has been rejected.  You have not been charged. Feel free to re-try any time.';
 
   let mailOptions = {
-    from: 'lovecustomer@loveisincyprus.com',
+    from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
@@ -118,11 +117,10 @@ exports.approveAd = async (req, res) => {
   ).exec();
 
   let transporter = nodemailer.createTransport({
-    host: 'mail.loveisincyprus.com',
-    port: 465,
+    service: 'gmail',
     auth: {
-      user: 'loveisi3',
-      pass: 'nEW!d&Wmp4',
+      user: 'customercare@loveisincyprus.com',
+      pass: process.env.GMAIL_AUTHORIZATION,
     },
     secure: true,
   });
@@ -130,7 +128,7 @@ exports.approveAd = async (req, res) => {
   const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}.`;
 
   let mailOptions = {
-    from: 'lovecustomer@loveisincyprus.com',
+    from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
