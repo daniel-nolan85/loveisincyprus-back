@@ -42,7 +42,7 @@ exports.orderStatus = async (req, res) => {
     service: 'gmail',
     auth: {
       user: 'customercare@loveisincyprus.com',
-      pass: 'qsotfrnwgzigtmnv',
+      pass: process.env.GMAIL_AUTHORIZATION,
     },
     secure: true,
   });
