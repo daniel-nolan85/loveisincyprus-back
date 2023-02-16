@@ -4,8 +4,6 @@ const morgan = require('morgan');
 const cors = require('cors');
 const { readdirSync } = require('fs');
 require('dotenv').config();
-const Chat = require('./models/chat');
-const User = require('./models/user');
 const rateLimit = require('express-rate-limit');
 
 // app
@@ -25,7 +23,7 @@ mongoose
 // rate limit
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 150 requests per `window` (here, per 15 minutes)
+  max: 150, // Limit each IP to 150 requests per `window` (here, per 15 minutes)
   message: 'Too many requests', // message to send
 });
 
@@ -53,9 +51,9 @@ const io = require('socket.io')(server, {
   pingTimeout: 60000,
   cors: {
     // development
-    origin: 'http://localhost:3000',
+    // origin: 'http://localhost:3000',
     // production
-    // origin: 'https://loveisincyprus.com',
+    origin: 'https://loveisincyprus.com',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-type'],
   },
