@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
-const { readdirSync } = require('fs');
+const { readdirSync, readFileSync } = require('fs');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 const https = require('https');
@@ -11,9 +11,18 @@ const https = require('https');
 const app = express();
 
 // keys
-const key = readFileSync('privkey.pem', 'utf8');
-const cert = readFileSync('fullchain.pem', 'utf8');
-const ca = readFileSync('chain.pem', 'utf8');
+const key = readFileSync(
+  '/etc/letsencrypt/live/loveisincyprus.com/privkey.pem',
+  'utf8'
+);
+const cert = readFileSync(
+  '/etc/letsencrypt/live/loveisincyprus.com/fullchain.pem',
+  'utf8'
+);
+const ca = readFileSync(
+  '/etc/letsencrypt/live/loveisincyprus.com/chain.pem',
+  'utf8'
+);
 const credentials = { key, cert, ca };
 
 // db
@@ -48,11 +57,11 @@ readdirSync('./routes').map((r) => app.use('/api', require(`./routes/${r}`)));
 // port
 const port = process.env.PORT || 8000;
 
-// const server = https.createServer(credentials, app);
+const server = https.createServer(credentials, app);
 
-// server.listen(port, () => console.log(`Server is running on port ${port}`));
+server.listen(port, () => console.log(`Server is running on port ${port}`));
 
-const server = app.listen(port, () => {});
+// const server = app.listen(port, () => {});
 
 const io = require('socket.io')(server, {
   // wsEngine: 'ws',

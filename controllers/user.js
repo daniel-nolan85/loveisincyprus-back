@@ -1400,57 +1400,57 @@ exports.progressCompletion = async (req, res) => {
   } else {
     completion.sexFrequency = true;
   }
-  if (user.loves.length > 0) {
+  if (user && user.loves.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.loves = true;
   }
-  if (user.hates.length > 0) {
+  if (user && user.hates.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.hates = true;
   }
-  if (user.pets.length > 0) {
+  if (user && user.pets.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.pets = true;
   }
-  if (user.interests.length > 0) {
+  if (user && user.interests.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.interests = true;
   }
-  if (user.music.length > 0) {
+  if (user && user.music.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.music = true;
   }
-  if (user.books.length > 0) {
+  if (user && user.books.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.books = true;
   }
-  if (user.films.length > 0) {
+  if (user && user.films.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.films = true;
   }
-  if (user.sports.length > 0) {
+  if (user && user.sports.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.sports = true;
   }
-  if (user.hobbies.length > 0) {
+  if (user && user.hobbies.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.hobbies = true;
   }
-  if (user.traits.length > 0) {
+  if (user && user.traits.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.traits = true;
   }
-  if (user.treatSelf.length > 0) {
+  if (user && user.treatSelf.length > 0) {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.treatSelf = true;
