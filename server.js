@@ -5,6 +5,7 @@ const cors = require('cors');
 const { readdirSync, readFileSync } = require('fs');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
+const http = require('http');
 const https = require('https');
 
 // app
@@ -57,13 +58,18 @@ readdirSync('./routes').map((r) => app.use('/api', require(`./routes/${r}`)));
 // port
 const port = process.env.PORT || 8000;
 
-const server = https.createServer(credentials, app);
+const httpServer = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
 
-server.listen(port, () => console.log(`Server is running on port ${port}`));
+httpServer.listen(port, () =>
+  console.log(`Http server is running on port ${port}`)
+);
 
-// const server = app.listen(port, () => {});
+httpsServer.listen(port, () =>
+  console.log(`Https server is running on port ${port}`)
+);
 
-const io = require('socket.io')(server, {
+const io = require('socket.io')(httpServer, {
   // wsEngine: 'ws',
   path: '/socket.io',
   pingTimeout: 60000,
@@ -71,11 +77,12 @@ const io = require('socket.io')(server, {
     // development
     // origin: 'http://localhost:3000',
     // production
-    origin: 'https://loveisincyprus.com',
+    // origin: 'https://loveisincyprus.com',
+    origins: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-type'],
   },
-  maxHttpsBufferSize: 1e8,
+  maxHttpBufferSize: 1e8,
   secure: true,
 });
 
