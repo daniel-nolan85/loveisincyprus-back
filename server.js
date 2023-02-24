@@ -2,29 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
 const cors = require('cors');
-const { readdirSync, readFileSync } = require('fs');
+const { readdirSync } = require('fs');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
-const http = require('http');
-const https = require('https');
 
 // app
 const app = express();
-
-// keys
-const key = readFileSync(
-  '/etc/letsencrypt/live/loveisincyprus.com/privkey.pem',
-  'utf8'
-);
-const cert = readFileSync(
-  '/etc/letsencrypt/live/loveisincyprus.com/fullchain.pem',
-  'utf8'
-);
-const ca = readFileSync(
-  '/etc/letsencrypt/live/loveisincyprus.com/chain.pem',
-  'utf8'
-);
-const credentials = { key, cert, ca };
 
 // db
 mongoose
@@ -58,26 +41,14 @@ readdirSync('./routes').map((r) => app.use('/api', require(`./routes/${r}`)));
 // port
 const port = process.env.PORT || 8000;
 
-const httpServer = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
-
-httpServer.listen(port, () =>
-  console.log(`Http server is running on port ${port}`)
+const server = app.listen(port, () =>
+  console.log(`Server is running on port ${port}`)
 );
 
-httpsServer.listen(port, () =>
-  console.log(`Https server is running on port ${port}`)
-);
-
-const io = require('socket.io')(httpServer, {
-  // wsEngine: 'ws',
+const io = require('socket.io')(server, {
   path: '/socket.io',
   pingTimeout: 60000,
   cors: {
-    // development
-    // origin: 'http://localhost:3000',
-    // production
-    // origin: 'https://loveisincyprus.com',
     origins: '*',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-type'],
