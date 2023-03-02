@@ -864,10 +864,15 @@ exports.userFollowers = async (req, res) => {
 exports.userMatches = async (req, res) => {
   try {
     const user = await User.findById(req.body._id).select('matches');
-    const matches = await User.find({ _id: user.matches })
+    let matches = await User.find({
+      _id: user.matches,
+    })
       .select('_id name email username profileImage')
       .exec();
-    res.json(matches);
+    const filteredMatches = matches.filter(
+      (u) => u._id != '63dc1d2a8eb01e4110743044'
+    );
+    res.json(filteredMatches);
   } catch (err) {
     console.log('userMatches => ', err);
   }
@@ -1087,6 +1092,7 @@ exports.deleteUser = async (req, res) => {
     const maybe = await Event.updateMany({ $pull: { maybe: u._id } });
     const declined = await Event.updateMany({ $pull: { declined: u._id } });
     const chats = await Chat.deleteMany({ users: { $in: [u._id] } });
+    const messages = await Message.deleteMany({ sender: u._id });
     const verifs = await Verif.remove({ postedBy: u._id });
     const blocked = await new Blocked({
       mobile: u.mobile,
@@ -1560,3 +1566,36 @@ exports.dailySignups = async (req, res) => {
 
   res.json(numDailySignups);
 };
+
+// exports.addUserMainMatches = async (req, res) => {
+//   const userIds = [];
+//   const allUsers = await User.find(
+//     { _id: { $ne: '63dc1d2a8eb01e4110743044' } },
+//     { _id: 1 }
+//   );
+//   allUsers.map((u) => userIds.push(u._id));
+//   console.log('userIds => ', userIds);
+//   const addUsersToMainMatches = await User.findByIdAndUpdate(
+//     '63dc1d2a8eb01e4110743044',
+//     {
+//       $addToSet: {
+//         matches: { $each: userIds },
+//       },
+//     },
+//     { new: true }
+//   );
+
+//   const addMainToUsersMatches = await User.updateMany(
+//     { _id: { $ne: '63dc1d2a8eb01e4110743044' } },
+//     {
+//       $addToSet: {
+//         matches: '63dc1d2a8eb01e4110743044',
+//       },
+//     },
+//     { new: true }
+//   );
+// };
+
+// exports.removeMessages = async (req, res) => {
+//   const users = await User.updateMany({}, { $pull: { messages: {} } });
+// };
