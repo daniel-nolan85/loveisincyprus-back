@@ -186,7 +186,7 @@ exports.massMail = async (req, res) => {
 
     const sendNotif = await User.updateMany(
       { _id: { $in: userIds } },
-      { $push: { messages: { sender: sender._id } } }
+      { $push: { messages: { message } } }
     );
 
     await Chat.findByIdAndUpdate(chats[i]._id, {

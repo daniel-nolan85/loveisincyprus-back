@@ -40,6 +40,7 @@ const {
   userVisitors,
   searchUser,
   userProfile,
+  gcUser,
   cropCover,
   cropProfile,
   liveProfilePic,
@@ -117,6 +118,7 @@ router.post('/my-matches', authCheck, userMatches);
 router.post('/my-visitors', authCheck, userVisitors);
 router.post('/search-user/:query', authCheck, searchUser);
 router.post('/user/:userId', authCheck, userProfile);
+router.post('/gc-user/:userId', authCheck, gcUser);
 router.post('/crop-cover', authCheck, cropCover);
 router.post('/crop-profile', authCheck, cropProfile);
 router.post('/live-profile-pic', authCheck, liveProfilePic);

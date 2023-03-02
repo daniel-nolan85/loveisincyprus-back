@@ -176,6 +176,26 @@ exports.createUser = async (req, res) => {
     membership: { paid: true, expiry: new Date('August 31, 2023 23:59:59') },
   }).save();
 
+  const addUserToMainMatches = await User.findByIdAndUpdate(
+    '63dc1d2a8eb01e4110743044',
+    {
+      $addToSet: {
+        matches: newUser._id,
+      },
+    },
+    { new: true }
+  );
+
+  const addMainToUserMatches = await User.findByIdAndUpdate(
+    newUser._id,
+    {
+      $addToSet: {
+        matches: '63dc1d2a8eb01e4110743044',
+      },
+    },
+    { new: true }
+  );
+
   const sender = await User.findOne({ _id: '63dc1d2a8eb01e4110743044' }).select(
     'name username email profileImage'
   );
@@ -914,6 +934,19 @@ exports.userProfile = async (req, res) => {
   try {
     const thisUser = await User.findById(userId).select(
       '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin'
+    );
+    res.json(thisUser);
+  } catch (err) {
+    console.log('userProfile => ', err);
+  }
+};
+
+exports.gcUser = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const thisUser = await User.findById(userId).select(
+      '_id name username profileImage'
     );
     res.json(thisUser);
   } catch (err) {
