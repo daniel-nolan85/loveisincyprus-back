@@ -389,7 +389,7 @@ exports.updateMobileNumbers = async (req, res) => {
     );
     res.json(user);
   } catch (err) {
-    console.log(err);
+    console.log('updateMobileNumbers => ', err);
   }
 };
 
@@ -402,7 +402,7 @@ exports.updateFirestoreUser = async (req, res) => {
     });
     res.json(updatedUser);
   } catch (err) {
-    console.log(err);
+    console.log('updateFirestoreUser => ', err);
   }
 };
 

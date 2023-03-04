@@ -23,7 +23,7 @@ mongoose
 // rate limit
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 150, // Limit each IP to 150 requests per `window` (here, per 15 minutes)
+  max: 200, // Limit each IP to 200 requests per `window` (here, per 15 minutes)
   message: 'Too many requests', // message to send
 });
 

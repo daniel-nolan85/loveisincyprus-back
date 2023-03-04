@@ -20,7 +20,7 @@ const gifCardSchema = new mongoose.Schema(
       minlength: [1, 'Message is too short'],
       maxlength: [500, 'Message is too long'],
     },
-    message: {
+    amount: {
       type: Number,
       required: true,
     },

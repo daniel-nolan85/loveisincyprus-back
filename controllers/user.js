@@ -804,6 +804,9 @@ exports.listAll = async (req, res) => {
         email: 1,
         profileImage: 1,
         about: 1,
+        createdAt: 1,
+        lastLogin: 1,
+        followers: 1,
       },
     },
   ]);
@@ -825,6 +828,9 @@ exports.searchFilters = async (req, res) => {
           email: 1,
           profileImage: 1,
           about: 1,
+          createdAt: 1,
+          lastLogin: 1,
+          followers: 1,
         },
       },
     ]);
@@ -846,6 +852,9 @@ exports.searchFilters = async (req, res) => {
                 email: 1,
                 profileImage: 1,
                 about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
               },
             },
           ]);
@@ -865,6 +874,9 @@ exports.searchFilters = async (req, res) => {
                 email: 1,
                 profileImage: 1,
                 about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
               },
             },
           ]);
@@ -884,6 +896,9 @@ exports.searchFilters = async (req, res) => {
                 email: 1,
                 profileImage: 1,
                 about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
               },
             },
           ]);
@@ -893,7 +908,9 @@ exports.searchFilters = async (req, res) => {
           var numberQuery = {};
           numberQuery[q.field] = q.entry;
           const users = await User.find(numberQuery)
-            .select('_id name email username profileImage about')
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
             .limit(24);
           searchedUsers.push(users);
         }
@@ -911,6 +928,9 @@ exports.searchFilters = async (req, res) => {
                 email: 1,
                 profileImage: 1,
                 about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
               },
             },
           ]);
@@ -930,6 +950,9 @@ exports.searchFilters = async (req, res) => {
                 email: 1,
                 profileImage: 1,
                 about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
               },
             },
           ]);
