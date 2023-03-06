@@ -252,7 +252,12 @@ exports.loginUser = async (req, res) => {
     { $or: [{ mobile }, { email }] },
     { lastLogin: new Date(Date.now()) }
   ).select(
-    '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+    `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+    canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+    birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+    livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+    `
   );
 
   if (
@@ -279,7 +284,12 @@ exports.loginUser = async (req, res) => {
           { new: true }
         )
           .select(
-            '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+            `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+            canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+            birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+            livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+            `
           )
           .exec();
 
@@ -300,7 +310,12 @@ exports.loginUser = async (req, res) => {
       { new: true }
     )
       .select(
-        '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+        `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+        canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+        birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+        livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+        `
       )
       .exec();
     res.json(trialEnded);
@@ -317,7 +332,12 @@ exports.loginUserWithSecret = async (req, res) => {
     { email },
     { lastLogin: new Date(Date.now()) }
   ).select(
-    '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+    `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+    canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+    birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+    livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+    `
   );
 
   if (
@@ -344,7 +364,12 @@ exports.loginUserWithSecret = async (req, res) => {
           { new: true }
         )
           .select(
-            '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+            `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+            canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+            birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+            livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+            `
           )
           .exec();
 
@@ -365,7 +390,12 @@ exports.loginUserWithSecret = async (req, res) => {
       { new: true }
     )
       .select(
-        '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role'
+        `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+        canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+        birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
+        livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+        `
       )
       .exec();
     res.json(trialEnded);
