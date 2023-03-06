@@ -162,8 +162,9 @@ exports.checkCredentials = async (req, res) => {
 };
 
 exports.createUser = async (req, res) => {
-  const { name, email, mobile, secondMobile, statement, answer } = req.body;
+  const { name, email, mobile, statement, answer } = req.body;
   const username = req.body.username || nanoid(6);
+  const secondMobile = `+${req.body.secondMobile}`;
   const content = `Hi ${name}, welcome to Love Is In Cyprus! We're so glad to have you here. Don't forget to update your profile to increase your chances of making more connections. Just click on your avatar above to get started. We wish you all the best in finding your perfect partner!`;
   const newUser = await new User({
     name,
