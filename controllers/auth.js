@@ -490,6 +490,7 @@ exports.checkInfoExists = async (req, res) => {
 };
 
 exports.profileUpdate = async (req, res) => {
+  console.log('profileUpdate controller response => ', req.body);
   try {
     const data = {};
     if (req.body.updatedMobile) {
@@ -503,12 +504,13 @@ exports.profileUpdate = async (req, res) => {
         })
         .then((userRecord) => {
           console.log('Successfully updated user', userRecord.toJSON());
+          data.mobile = req.body.updatedMobile;
         })
         .catch((error) => {
           console.log('Error updating user:', error);
-          return res.json(error);
+          res.json(error);
+          return;
         });
-      data.mobile = req.body.updatedMobile;
     }
     if (req.body.username) {
       data.username = req.body.username;
