@@ -1600,36 +1600,3 @@ exports.dailySignups = async (req, res) => {
 
   res.json(numDailySignups);
 };
-
-// exports.addUserMainMatches = async (req, res) => {
-//   const userIds = [];
-//   const allUsers = await User.find(
-//     { _id: { $ne: '63dc1d2a8eb01e4110743044' } },
-//     { _id: 1 }
-//   );
-//   allUsers.map((u) => userIds.push(u._id));
-//   console.log('userIds => ', userIds);
-//   const addUsersToMainMatches = await User.findByIdAndUpdate(
-//     '63dc1d2a8eb01e4110743044',
-//     {
-//       $addToSet: {
-//         matches: { $each: userIds },
-//       },
-//     },
-//     { new: true }
-//   );
-
-//   const addMainToUsersMatches = await User.updateMany(
-//     { _id: { $ne: '63dc1d2a8eb01e4110743044' } },
-//     {
-//       $addToSet: {
-//         matches: '63dc1d2a8eb01e4110743044',
-//       },
-//     },
-//     { new: true }
-//   );
-// };
-
-// exports.removeMessages = async (req, res) => {
-//   const users = await User.updateMany({}, { $pull: { messages: {} } });
-// };
