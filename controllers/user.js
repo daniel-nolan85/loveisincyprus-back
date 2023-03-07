@@ -1643,15 +1643,15 @@ exports.highCompats = async (req, res) => {
   const { user } = req.body;
   const range = (min, max) =>
     [...Array(max - min + 1).keys()].map((i) => i + min);
-  let compatibility = {
-    points: 0,
-  };
   let highCompats = [];
   let veryHighCompats = [];
   let superCompats = [];
 
   const users = await User.find();
   users.map((u) => {
+    let compatibility = {
+      points: 0,
+    };
     if (u.genderWanted && user.gender && u.genderWanted == user.gender) {
       compatibility.genderTheyWant = true;
       compatibility.points = compatibility.points + 5;

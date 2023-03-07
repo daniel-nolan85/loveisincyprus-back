@@ -925,8 +925,11 @@ exports.nineMatches = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id).select('matches');
     let matches = user.matches;
+    const filteredMatches = matches.filter(
+      (u) => u._id != '63dc1d2a8eb01e4110743044'
+    );
     const users = await User.aggregate([
-      { $match: { _id: { $in: matches } } },
+      { $match: { _id: { $in: filteredMatches } } },
       { $sample: { size: 9 } },
       {
         $project: {
