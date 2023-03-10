@@ -539,6 +539,7 @@ exports.profileUpdate = async (req, res) => {
       data.email = req.body.updatedEmail;
     }
     if (req.body.profileImage) {
+      console.log('req.body.profileImage => ', req.body.profileImage);
       data.profileImage = req.body.profileImage;
     }
     if (req.body.coverImage) {
@@ -687,6 +688,7 @@ exports.profileUpdate = async (req, res) => {
     }
 
     if (req.body.newProfileImages.length > 0) {
+      console.log('newProfileImages');
       user = await User.findByIdAndUpdate(
         req.body.user._id,
         {
@@ -721,7 +723,7 @@ exports.profileUpdate = async (req, res) => {
        feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos`
     );
-
+    console.log('data => ', data);
     res.json(user);
   } catch (err) {
     if (err.code == 11000) {
@@ -980,7 +982,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin'
+      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin coverPhotos profilePhotos'
     );
     res.json(thisUser);
   } catch (err) {

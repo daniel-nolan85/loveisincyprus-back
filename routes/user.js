@@ -58,6 +58,8 @@ const {
   updateProfilePic,
   deleteCoverPic,
   deleteProfilePic,
+  updateCropCover,
+  updateCropProfile,
 } = require('../controllers/user');
 
 // routes
@@ -109,5 +111,7 @@ router.put('/cover-picture-update', authCheck, updateCoverPic);
 router.put('/profile-picture-update', authCheck, updateProfilePic);
 router.put('/cover-picture-delete', authCheck, deleteCoverPic);
 router.put('/profile-picture-delete', authCheck, deleteProfilePic);
+router.put('/update-crop-cover', authCheck, updateCropCover);
+router.put('/update-crop-profile', authCheck, updateCropProfile);
 
 module.exports = router;

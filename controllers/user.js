@@ -2046,3 +2046,37 @@ exports.deleteCoverPic = async (req, res) => {
     res.json(err);
   }
 };
+
+exports.updateCropCover = async (req, res) => {
+  const { _id, coverImage } = req.body;
+  try {
+    const crop = await User.findOneAndUpdate(
+      { _id },
+      {
+        coverImage,
+      },
+      { new: true }
+    ).select('coverImage coverPhotos');
+    res.json(crop);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.updateCropProfile = async (req, res) => {
+  const { _id, profileImage } = req.body;
+  try {
+    const crop = await User.findOneAndUpdate(
+      { _id },
+      {
+        profileImage,
+      },
+      { new: true }
+    ).select('profileImage profilePhotos');
+    res.json(crop);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
