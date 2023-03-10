@@ -237,7 +237,12 @@ exports.createUser = async (req, res) => {
       },
       { new: true }
     ).select(
-      '_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username'
+      `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+    canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
+    birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
+    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+    roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
+    `
     );
     res.json(notifyReceiver);
   } catch (err) {
@@ -255,8 +260,8 @@ exports.loginUser = async (req, res) => {
     `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
     canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-    livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+    roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
     `
   );
 
@@ -287,8 +292,8 @@ exports.loginUser = async (req, res) => {
             `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
             canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-            livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+            roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
             `
           )
           .exec();
@@ -313,8 +318,8 @@ exports.loginUser = async (req, res) => {
         `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
         canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-        livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
         `
       )
       .exec();
@@ -335,8 +340,8 @@ exports.loginUserWithSecret = async (req, res) => {
     `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
     canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-    livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+    hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+    roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
     `
   );
 
@@ -367,8 +372,8 @@ exports.loginUserWithSecret = async (req, res) => {
             `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
             canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-            livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+            hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+            roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
             `
           )
           .exec();
@@ -393,8 +398,8 @@ exports.loginUserWithSecret = async (req, res) => {
         `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
         canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
-        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports
-        livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency
+        hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
+        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
         `
       )
       .exec();
@@ -490,8 +495,8 @@ exports.checkInfoExists = async (req, res) => {
 };
 
 exports.profileUpdate = async (req, res) => {
-  console.log('profileUpdate controller response => ', req.body);
   try {
+    let user;
     const data = {};
     if (req.body.updatedMobile) {
       const firebaseUser = await admin
@@ -681,41 +686,42 @@ exports.profileUpdate = async (req, res) => {
       data.sexFrequency = req.body.sexFrequency;
     }
 
-    let user = await User.findByIdAndUpdate(req.body.user._id, data, {
+    if (req.body.newProfileImages.length > 0) {
+      user = await User.findByIdAndUpdate(
+        req.body.user._id,
+        {
+          $push: {
+            profilePhotos: { $each: req.body.newProfileImages, $position: 0 },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+    }
+    if (req.body.newCoverImages.length > 0) {
+      user = await User.findByIdAndUpdate(
+        req.body.user._id,
+        {
+          $push: {
+            coverPhotos: { $each: req.body.newCoverImages, $position: 0 },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+    }
+
+    user = await User.findByIdAndUpdate(req.body.user._id, data, {
       new: true,
     }).select(
       `username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language
        maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity
        feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
-       roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency`
+       roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos`
     );
 
-    if (req.body.profileImage) {
-      let user1 = await User.findByIdAndUpdate(
-        req.body.user._id,
-        {
-          $addToSet: {
-            profilePhotos: req.body.profileImage.url,
-          },
-        },
-        {
-          new: true,
-        }
-      );
-    }
-    if (req.body.coverImage) {
-      let user2 = await User.findByIdAndUpdate(
-        req.body.user._id,
-        {
-          $addToSet: {
-            coverPhotos: req.body.coverImage.url,
-          },
-        },
-        {
-          new: true,
-        }
-      );
-    }
     res.json(user);
   } catch (err) {
     if (err.code == 11000) {
@@ -1003,7 +1009,7 @@ exports.cropCover = async (req, res) => {
         req.body.user._id,
         {
           $push: {
-            coverPhotos: result.secure_url,
+            coverPhotos: { $each: [result.secure_url], $position: 0 },
           },
         },
         { new: true }
@@ -1026,7 +1032,7 @@ exports.cropProfile = async (req, res) => {
         req.body.user._id,
         {
           $push: {
-            profilePhotos: result.secure_url,
+            profilePhotos: { $each: [result.secure_url], $position: 0 },
           },
         },
         { new: true }

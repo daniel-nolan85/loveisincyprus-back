@@ -1596,7 +1596,9 @@ exports.clearProfileImage = async (req, res) => {
         clearPhoto: true,
       },
       { new: true }
-    ).exec();
+    )
+      // .exec()
+      .select('clearPhoto profilePhotos');
     res.json(clearImage);
   } else {
     const clearImage = await User.findByIdAndUpdate(
@@ -1605,7 +1607,9 @@ exports.clearProfileImage = async (req, res) => {
         clearPhoto: false,
       },
       { new: true }
-    ).exec();
+    )
+      // .exec()
+      .select('clearPhoto');
     res.json(clearImage);
   }
 };
@@ -1906,5 +1910,139 @@ exports.updateAge = async (req, res) => {
       { age }
     );
     res.json(updateAge);
+  }
+};
+
+exports.updateCoverPic = async (req, res) => {
+  const { _id, img } = req.body;
+  try {
+    let user;
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { coverPhotos: { url: img.url } },
+      },
+      { new: true }
+    );
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $push: { coverPhotos: { $each: [img], $position: 0 } },
+      },
+      { new: true }
+    );
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        coverImage: img,
+      },
+      { new: true }
+    ).select('coverImage coverPhotos');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.updateProfilePic = async (req, res) => {
+  const { _id, img } = req.body;
+  try {
+    let user;
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { profilePhotos: { url: img.url } },
+      },
+      { new: true }
+    );
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $push: { profilePhotos: { $each: [img], $position: 0 } },
+      },
+      { new: true }
+    );
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        profileImage: img,
+      },
+      { new: true }
+    ).select('profileImage profilePhotos');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.deleteProfilePic = async (req, res) => {
+  const { _id, profileImage, img, images } = req.body;
+  try {
+    let user;
+    if (images.length > 1 && profileImage.url === img.url) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $set: { profileImage: images[1] },
+        },
+        { new: true }
+      ).select('profileImage profilePhotos');
+    } else if (images.length === 1 && profileImage.url === img.url) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $unset: { profileImage: img.url },
+        },
+        { new: true }
+      ).select('profileImage profilePhotos');
+    }
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { profilePhotos: { url: img.url } },
+      },
+      { new: true }
+    ).select('profileImage profilePhotos');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.deleteCoverPic = async (req, res) => {
+  const { _id, coverImage, img, images } = req.body;
+  try {
+    let user;
+    if (images.length > 1 && coverImage.url === img.url) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $set: { coverImage: images[1] },
+        },
+        { new: true }
+      ).select('coverImage coverPhotos');
+    } else if (images.length === 1 && coverImage.url === img.url) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $unset: { coverImage: img.url },
+        },
+        { new: true }
+      ).select('coverImage coverPhotos');
+    }
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { coverPhotos: { url: img.url } },
+      },
+      { new: true }
+    ).select('coverImage coverPhotos');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
   }
 };

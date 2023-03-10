@@ -54,6 +54,10 @@ const {
   expiredSuspension,
   highCompats,
   updateAge,
+  updateCoverPic,
+  updateProfilePic,
+  deleteCoverPic,
+  deleteProfilePic,
 } = require('../controllers/user');
 
 // routes
@@ -101,5 +105,9 @@ router.post('/fetch-products', fetchProducts);
 router.put('/expired-suspension', expiredSuspension);
 router.post('/high-compat-users', authCheck, subscriberCheck, highCompats);
 router.put('/update-age', updateAge);
+router.put('/cover-picture-update', authCheck, updateCoverPic);
+router.put('/profile-picture-update', authCheck, updateProfilePic);
+router.put('/cover-picture-delete', authCheck, deleteCoverPic);
+router.put('/profile-picture-delete', authCheck, deleteProfilePic);
 
 module.exports = router;
