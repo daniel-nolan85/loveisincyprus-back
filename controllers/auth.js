@@ -539,7 +539,6 @@ exports.profileUpdate = async (req, res) => {
       data.email = req.body.updatedEmail;
     }
     if (req.body.profileImage) {
-      console.log('req.body.profileImage => ', req.body.profileImage);
       data.profileImage = req.body.profileImage;
     }
     if (req.body.coverImage) {
@@ -688,7 +687,6 @@ exports.profileUpdate = async (req, res) => {
     }
 
     if (req.body.newProfileImages.length > 0) {
-      console.log('newProfileImages');
       user = await User.findByIdAndUpdate(
         req.body.user._id,
         {
@@ -723,7 +721,6 @@ exports.profileUpdate = async (req, res) => {
        feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos`
     );
-    console.log('data => ', data);
     res.json(user);
   } catch (err) {
     if (err.code == 11000) {
@@ -1011,7 +1008,10 @@ exports.cropCover = async (req, res) => {
         req.body.user._id,
         {
           $push: {
-            coverPhotos: { $each: [result.secure_url], $position: 0 },
+            coverPhotos: {
+              $each: [{ url: result.secure_url, public_id: result.public_id }],
+              $position: 0,
+            },
           },
         },
         { new: true }
@@ -1030,11 +1030,15 @@ exports.cropProfile = async (req, res) => {
   try {
     if (req.body.croppedProfile) {
       const result = await cloudinary.uploader.upload(req.body.croppedProfile);
+
       const user = await User.findByIdAndUpdate(
         req.body.user._id,
         {
           $push: {
-            profilePhotos: { $each: [result.secure_url], $position: 0 },
+            profilePhotos: {
+              $each: [{ url: result.secure_url, public_id: result.public_id }],
+              $position: 0,
+            },
           },
         },
         { new: true }

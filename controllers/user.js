@@ -2066,6 +2066,7 @@ exports.updateCropCover = async (req, res) => {
 
 exports.updateCropProfile = async (req, res) => {
   const { _id, profileImage } = req.body;
+
   try {
     const crop = await User.findOneAndUpdate(
       { _id },
