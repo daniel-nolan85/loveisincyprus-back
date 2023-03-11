@@ -1596,9 +1596,7 @@ exports.clearProfileImage = async (req, res) => {
         clearPhoto: true,
       },
       { new: true }
-    )
-      // .exec()
-      .select('clearPhoto profilePhotos');
+    ).select('clearPhoto profilePhotos');
     res.json(clearImage);
   } else {
     const clearImage = await User.findByIdAndUpdate(
@@ -1607,9 +1605,7 @@ exports.clearProfileImage = async (req, res) => {
         clearPhoto: false,
       },
       { new: true }
-    )
-      // .exec()
-      .select('clearPhoto');
+    ).select('clearPhoto');
     res.json(clearImage);
   }
 };
