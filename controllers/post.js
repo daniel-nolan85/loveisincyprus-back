@@ -9,7 +9,7 @@ cloudinary.config({
 });
 
 exports.createPost = async (req, res) => {
-  const { content, image, user } = req.body;
+  const { content, postImages, user } = req.body;
 
   try {
     if (!content.length) {
@@ -17,14 +17,14 @@ exports.createPost = async (req, res) => {
         error: 'Content is required',
       });
     } else {
-      const post = new Post({ content, image, postedBy: user });
+      const post = new Post({ content, postImages, postedBy: user });
       post.save();
-      if (image.url) {
+      if (postImages) {
         const user1 = await User.findByIdAndUpdate(
           req.body.user._id,
           {
             $push: {
-              uploadedPhotos: image.url,
+              uploadedPhotos: { $each: postImages, $position: 0 },
             },
           },
           {
@@ -85,12 +85,25 @@ exports.userPost = async (req, res) => {
 exports.updatePost = async (req, res) => {
   try {
     const update = {};
+    let images = req.body.post.postImages;
 
     if (req.body.content) {
       update.content = req.body.content;
     }
-    if (Object.keys(req.body.image).length !== 0) {
-      update.image = req.body.image;
+    if (req.body.postImages.length > 0) {
+      req.body.postImages.map((img) => images.unshift(img));
+      update.postImages = images;
+      const user1 = await User.findByIdAndUpdate(
+        req.body._id,
+        {
+          $push: {
+            uploadedPhotos: { $each: req.body.postImages, $position: 0 },
+          },
+        },
+        {
+          new: true,
+        }
+      );
     }
     const post = await Post.findByIdAndUpdate(req.body.post._id, update, {
       new: true,
@@ -102,22 +115,44 @@ exports.updatePost = async (req, res) => {
 };
 
 exports.deletePost = async (req, res) => {
+  console.log('deletePost', req.body);
   try {
-    const post = await Post.findByIdAndDelete(req.params.postId);
-    if (post.image) {
-      const image = await cloudinary.uploader.destroy(post.image);
+    const post = await Post.findById(req.params.postId).select(
+      'postImages comments'
+    );
+    const urls = post.postImages.map((img) => img.url);
+    const public_ids = post.postImages.map((img) => img.public_id);
+
+    console.log('public_ids => ', public_ids);
+    for (const public_id of public_ids) {
+      const image = await cloudinary.uploader.destroy(public_id);
+    }
+    if (post.postImages && post.postImages.length > 0) {
       const user = await User.findByIdAndUpdate(
-        req.body.post.postedBy._id,
+        req.body.post.postedBy,
         {
           $pull: {
-            uploadedPhotos: post.image.url,
+            uploadedPhotos: { url: { $in: urls } },
           },
         },
         {
           new: true,
         }
-      );
+      ).select('uploadedPhotos');
     }
+    if (post.comments && post.comments.length > 0) {
+      const comment_ids = post.comments
+        .map((comment) => {
+          if (comment.image) {
+            return comment.image.public_id;
+          }
+        })
+        .filter((id) => id != null);
+      for (const comment_id of comment_ids) {
+        const image = await cloudinary.uploader.destroy(comment_id);
+      }
+    }
+    const postToDelete = await Post.findByIdAndDelete(req.params.postId);
     res.json({ ok: true });
   } catch (err) {
     console.log(err);
@@ -282,6 +317,7 @@ exports.removeComment = async (req, res) => {
       },
       { new: true }
     );
+    const image = await cloudinary.uploader.destroy(comment.image.public_id);
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -460,5 +496,29 @@ exports.fetchReportedComments = async (req, res) => {
     res.json(posts);
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.deletePostPic = async (req, res) => {
+  const { _id, img, post } = req.body;
+  console.log('img => ', img);
+  try {
+    const postToUpdate = await Post.findOneAndUpdate(
+      { _id: post._id },
+      { $pull: { postImages: { url: img.url } } },
+      { new: true }
+    );
+    const user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { uploadedPhotos: { url: img.url } },
+      },
+      { new: true }
+    ).select('uploadedPhotos');
+    const image = await cloudinary.uploader.destroy(img.public_id);
+    res.json(postToUpdate);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
   }
 };

@@ -10,6 +10,13 @@ const Chat = require('../models/chat');
 const Message = require('../models/message');
 const UserSearch = require('../models/userSearch');
 const axios = require('axios');
+const cloudinary = require('cloudinary');
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+});
 
 exports.recaptcha = async (req, res) => {
   const { secret, token } = req.body;
@@ -2001,6 +2008,7 @@ exports.deleteProfilePic = async (req, res) => {
       },
       { new: true }
     ).select('profileImage profilePhotos');
+    const image = await cloudinary.uploader.destroy(img.public_id);
     res.json(user);
   } catch (err) {
     console.log(err);
@@ -2036,6 +2044,7 @@ exports.deleteCoverPic = async (req, res) => {
       },
       { new: true }
     ).select('coverImage coverPhotos');
+    const image = await cloudinary.uploader.destroy(img.public_id);
     res.json(user);
   } catch (err) {
     console.log(err);

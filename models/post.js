@@ -11,10 +11,7 @@ const postSchema = new mongoose.Schema(
       type: ObjectId,
       ref: 'User',
     },
-    image: {
-      url: String,
-      pulic_id: String,
-    },
+    postImages: Array,
     likes: [{ type: ObjectId, ref: 'User' }],
     comments: [
       {
@@ -26,7 +23,7 @@ const postSchema = new mongoose.Schema(
         },
         image: {
           url: String,
-          pulic_id: String,
+          public_id: String,
         },
         reported: { type: Boolean, default: false },
       },

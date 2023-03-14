@@ -32,6 +32,7 @@ const {
   totalPostsByUser,
   totalPostsByThisUser,
   followersPosts,
+  deletePostPic,
   //admin
   posts,
   adminRemoveComment,
@@ -64,6 +65,7 @@ router.post('/this-users-posts/:page', thisUsersPosts);
 router.post('/total-posts-by-user', totalPostsByUser);
 router.post('/total-posts-by-this-user', totalPostsByThisUser);
 router.post('/followers-posts', followersPosts);
+router.put('/post-picture-delete', authCheck, deletePostPic);
 
 // admin
 router.put('/admin/delete-post/:postId', authCheck, adminCheck, deletePost);
