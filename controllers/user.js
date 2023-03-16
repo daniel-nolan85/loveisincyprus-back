@@ -93,20 +93,9 @@ exports.usersPhotos = async (req, res) => {
 
 exports.visitorPhotos = async (req, res) => {
   try {
-    const photos = [];
-    const user = await User.findById(req.body.user._id);
-    if (user.profilePhotos) {
-      photos.push(user.profilePhotos);
-    }
-    if (user.coverPhotos) {
-      photos.push(user.coverPhotos);
-    }
-    if (user.uploadedPhotos) {
-      photos.push(user.uploadedPhotos);
-    }
-    let merged = [].concat.apply([], photos);
-    let total = merged.length;
+    const user = await User.findById(req.body.user._id).select('profilePhotos');
 
+    let total = user.profilePhotos.length;
     res.json(total);
   } catch (err) {
     console.log(err);
@@ -2081,6 +2070,167 @@ exports.updateCropProfile = async (req, res) => {
       { new: true }
     ).select('profileImage profilePhotos');
     res.json(crop);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.uploadNewImages = async (req, res) => {
+  const { _id, imageType, newUploads } = req.body;
+  let user;
+  try {
+    if (imageType === 'profile') {
+      user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $push: {
+            profilePhotos: newUploads,
+          },
+          $set: { profileImage: newUploads[0] },
+        },
+        {
+          new: true,
+        }
+      ).select(
+        'profilePhotos coverPhotos uploadedPhotos profileImage coverImage'
+      );
+    } else if (imageType === 'cover') {
+      user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $push: {
+            coverPhotos: newUploads,
+          },
+          $set: { coverImage: newUploads[0] },
+        },
+        {
+          new: true,
+        }
+      ).select(
+        'profilePhotos coverPhotos uploadedPhotos profileImage coverImage'
+      );
+    } else {
+      user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $push: {
+            uploadedPhotos: newUploads,
+          },
+        },
+        {
+          new: true,
+        }
+      ).select(
+        'profilePhotos coverPhotos uploadedPhotos profileImage coverImage'
+      );
+    }
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
+  }
+};
+
+exports.uploadPicDelete = async (req, res) => {
+  const { _id, coverImage, profileImage, img, imageType } = req.body;
+  try {
+    let user;
+    const profilePhotos = await User.findById(_id).select('profilePhotos');
+    const coverPhotos = await User.findById(_id).select('coverPhotos');
+    if (
+      imageType === 'cover' &&
+      coverPhotos.coverPhotos.length > 1 &&
+      coverImage.url === img.url
+    ) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $set: { coverImage: coverPhotos.coverPhotos[1] },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    } else if (
+      imageType === 'cover' &&
+      coverPhotos.coverPhotos.length === 1 &&
+      coverImage.url === img.url
+    ) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $unset: { coverImage: img.url },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    }
+    if (
+      imageType === 'profile' &&
+      profilePhotos.profilePhotos.length > 1 &&
+      profileImage.url === img.url
+    ) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $set: { profileImage: profilePhotos.profilePhotos[1] },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    } else if (
+      imageType === 'profile' &&
+      profilePhotos.profilePhotos.length === 1 &&
+      profileImage.url === img.url
+    ) {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $unset: { profileImage: img.url },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    }
+    if (imageType === 'cover') {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $pull: { coverPhotos: { url: img.url } },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    }
+    if (imageType === 'profile') {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $pull: { profilePhotos: { url: img.url } },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    }
+    if (imageType === 'general upload') {
+      user = await User.findOneAndUpdate(
+        { _id },
+        {
+          $pull: { uploadedPhotos: { url: img.url } },
+        },
+        { new: true }
+      ).select(
+        'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
+      );
+    }
+    const image = await cloudinary.uploader.destroy(img.public_id);
+    res.json(user);
   } catch (err) {
     console.log(err);
     res.json(err);

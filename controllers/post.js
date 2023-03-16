@@ -115,7 +115,6 @@ exports.updatePost = async (req, res) => {
 };
 
 exports.deletePost = async (req, res) => {
-  console.log('deletePost', req.body);
   try {
     const post = await Post.findById(req.params.postId).select(
       'postImages comments'
@@ -123,7 +122,6 @@ exports.deletePost = async (req, res) => {
     const urls = post.postImages.map((img) => img.url);
     const public_ids = post.postImages.map((img) => img.public_id);
 
-    console.log('public_ids => ', public_ids);
     for (const public_id of public_ids) {
       const image = await cloudinary.uploader.destroy(public_id);
     }
@@ -317,7 +315,9 @@ exports.removeComment = async (req, res) => {
       },
       { new: true }
     );
-    const image = await cloudinary.uploader.destroy(comment.image.public_id);
+    if (comment.image) {
+      const image = await cloudinary.uploader.destroy(comment.image.public_id);
+    }
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -501,7 +501,6 @@ exports.fetchReportedComments = async (req, res) => {
 
 exports.deletePostPic = async (req, res) => {
   const { _id, img, post } = req.body;
-  console.log('img => ', img);
   try {
     const postToUpdate = await Post.findOneAndUpdate(
       { _id: post._id },
