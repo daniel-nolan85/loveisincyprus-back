@@ -36,6 +36,7 @@ const {
   removeUserEvent,
   fetchEventUsers,
   numUpcomingEvents,
+  deleteEventPostPic,
 } = require('../controllers/event');
 
 // routes
@@ -83,5 +84,6 @@ router.post('/decline-event-invite', authCheck, declineEventInvite);
 router.put('/remove-user-event', authCheck, removeUserEvent);
 router.post('/event-users', authCheck, fetchEventUsers);
 router.post('/fetch-num-upcoming-events', authCheck, numUpcomingEvents);
+router.put('/event-picture-delete', authCheck, deleteEventPostPic);
 
 module.exports = router;

@@ -19,10 +19,6 @@ const eventSchema = new mongoose.Schema(
       minlength: [2, 'Event description is too short'],
       maxlength: [2000, 'Event description is too long'],
     },
-    mainImage: {
-      url: String,
-      pulic_id: String,
-    },
     uploadedPhotos: Array,
     post: [
       {
@@ -34,10 +30,7 @@ const eventSchema = new mongoose.Schema(
           type: ObjectId,
           ref: 'User',
         },
-        image: {
-          url: String,
-          pulic_id: String,
-        },
+        postImages: Array,
         likes: [{ type: ObjectId, ref: 'User' }],
         comments: [
           {

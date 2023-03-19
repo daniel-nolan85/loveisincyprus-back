@@ -1912,7 +1912,7 @@ exports.updateCoverPic = async (req, res) => {
     user = await User.findOneAndUpdate(
       { _id },
       {
-        $pull: { coverPhotos: { url: img.url } },
+        $pull: { coverPhotos: { $in: [img, { url: img.url }] } },
       },
       { new: true }
     );
@@ -1926,7 +1926,7 @@ exports.updateCoverPic = async (req, res) => {
     user = await User.findOneAndUpdate(
       { _id },
       {
-        coverImage: img,
+        coverImage: typeof img === 'string' ? { url: img } : img,
       },
       { new: true }
     ).select('coverImage coverPhotos');
@@ -1944,7 +1944,7 @@ exports.updateProfilePic = async (req, res) => {
     user = await User.findOneAndUpdate(
       { _id },
       {
-        $pull: { profilePhotos: { url: img.url } },
+        $pull: { profilePhotos: { $in: [img, { url: img.url }] } },
       },
       { new: true }
     );
@@ -1958,7 +1958,7 @@ exports.updateProfilePic = async (req, res) => {
     user = await User.findOneAndUpdate(
       { _id },
       {
-        profileImage: img,
+        profileImage: typeof img === 'string' ? { url: img } : img,
       },
       { new: true }
     ).select('profileImage profilePhotos');
@@ -1971,33 +1971,41 @@ exports.updateProfilePic = async (req, res) => {
 
 exports.deleteProfilePic = async (req, res) => {
   const { _id, profileImage, img, images } = req.body;
+  const imageUrl = img.url || img;
   try {
     let user;
-    if (images.length > 1 && profileImage.url === img.url) {
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { profilePhotos: { $in: [img, { url: img.url }] } },
+      },
+      { new: true }
+    ).select('profileImage profilePhotos');
+    if (images.length > 1 && profileImage.url === imageUrl) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $set: { profileImage: images[1] },
+          $set: {
+            profileImage:
+              typeof images[1] === 'string' ? { url: images[1] } : images[1],
+          },
         },
         { new: true }
       ).select('profileImage profilePhotos');
-    } else if (images.length === 1 && profileImage.url === img.url) {
+    } else if (images.length === 1 && profileImage.url === imageUrl) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $unset: { profileImage: img.url },
+          $unset: img.url
+            ? { 'profileImage.url': img.url }
+            : { profileImage: img },
         },
         { new: true }
       ).select('profileImage profilePhotos');
     }
-    user = await User.findOneAndUpdate(
-      { _id },
-      {
-        $pull: { profilePhotos: { url: img.url } },
-      },
-      { new: true }
-    ).select('profileImage profilePhotos');
-    const image = await cloudinary.uploader.destroy(img.public_id);
+    if (img.public_id) {
+      const image = await cloudinary.uploader.destroy(img.public_id);
+    }
     res.json(user);
   } catch (err) {
     console.log(err);
@@ -2007,33 +2015,39 @@ exports.deleteProfilePic = async (req, res) => {
 
 exports.deleteCoverPic = async (req, res) => {
   const { _id, coverImage, img, images } = req.body;
+  const imageUrl = img.url || img;
   try {
     let user;
-    if (images.length > 1 && coverImage.url === img.url) {
+    user = await User.findOneAndUpdate(
+      { _id },
+      {
+        $pull: { coverPhotos: { $in: [img, { url: img.url }] } },
+      },
+      { new: true }
+    ).select('coverImage coverPhotos');
+    if (images.length > 1 && coverImage.url === imageUrl) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $set: { coverImage: images[1] },
+          $set: {
+            coverImage:
+              typeof images[1] === 'string' ? { url: images[1] } : images[1],
+          },
         },
         { new: true }
       ).select('coverImage coverPhotos');
-    } else if (images.length === 1 && coverImage.url === img.url) {
+    } else if (images.length === 1 && coverImage.url === imageUrl) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $unset: { coverImage: img.url },
+          $unset: img.url ? { 'coverImage.url': img.url } : { coverImage: img },
         },
         { new: true }
       ).select('coverImage coverPhotos');
     }
-    user = await User.findOneAndUpdate(
-      { _id },
-      {
-        $pull: { coverPhotos: { url: img.url } },
-      },
-      { new: true }
-    ).select('coverImage coverPhotos');
-    const image = await cloudinary.uploader.destroy(img.public_id);
+    if (img.public_id) {
+      const image = await cloudinary.uploader.destroy(img.public_id);
+    }
     res.json(user);
   } catch (err) {
     console.log(err);
@@ -2138,10 +2152,11 @@ exports.uploadPicDelete = async (req, res) => {
     let user;
     const profilePhotos = await User.findById(_id).select('profilePhotos');
     const coverPhotos = await User.findById(_id).select('coverPhotos');
+    const imageUrl = img.url || img;
     if (
       imageType === 'cover' &&
       coverPhotos.coverPhotos.length > 1 &&
-      coverImage.url === img.url
+      (coverImage.url === imageUrl || coverImage === imageUrl)
     ) {
       user = await User.findOneAndUpdate(
         { _id },
@@ -2155,12 +2170,12 @@ exports.uploadPicDelete = async (req, res) => {
     } else if (
       imageType === 'cover' &&
       coverPhotos.coverPhotos.length === 1 &&
-      coverImage.url === img.url
+      (coverImage.url === imageUrl || coverImage === imageUrl)
     ) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $unset: { coverImage: img.url },
+          $unset: img.url ? { 'coverImage.url': img.url } : { coverImage: img },
         },
         { new: true }
       ).select(
@@ -2170,7 +2185,7 @@ exports.uploadPicDelete = async (req, res) => {
     if (
       imageType === 'profile' &&
       profilePhotos.profilePhotos.length > 1 &&
-      profileImage.url === img.url
+      (profileImage.url === imageUrl || profileImage === imageUrl)
     ) {
       user = await User.findOneAndUpdate(
         { _id },
@@ -2184,12 +2199,14 @@ exports.uploadPicDelete = async (req, res) => {
     } else if (
       imageType === 'profile' &&
       profilePhotos.profilePhotos.length === 1 &&
-      profileImage.url === img.url
+      (profileImage.url === imageUrl || profileImage === imageUrl)
     ) {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $unset: { profileImage: img.url },
+          $unset: img.url
+            ? { 'profileImage.url': img.url }
+            : { profileImage: img },
         },
         { new: true }
       ).select(
@@ -2200,7 +2217,7 @@ exports.uploadPicDelete = async (req, res) => {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $pull: { coverPhotos: { url: img.url } },
+          $pull: { coverPhotos: { $in: [img, { url: img.url }] } },
         },
         { new: true }
       ).select(
@@ -2211,7 +2228,7 @@ exports.uploadPicDelete = async (req, res) => {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $pull: { profilePhotos: { url: img.url } },
+          $pull: { profilePhotos: { $in: [img, { url: img.url }] } },
         },
         { new: true }
       ).select(
@@ -2222,14 +2239,16 @@ exports.uploadPicDelete = async (req, res) => {
       user = await User.findOneAndUpdate(
         { _id },
         {
-          $pull: { uploadedPhotos: { url: img.url } },
+          $pull: { uploadedPhotos: { $in: [img, { url: img.url }] } },
         },
         { new: true }
       ).select(
         'coverImage coverPhotos profileImage profilePhotos uploadedPhotos'
       );
     }
-    const image = await cloudinary.uploader.destroy(img.public_id);
+    if (img.public_id) {
+      const image = await cloudinary.uploader.destroy(img.public_id);
+    }
     res.json(user);
   } catch (err) {
     console.log(err);

@@ -9,6 +9,7 @@ cloudinary.config({
 });
 
 exports.create = async (req, res) => {
+  console.log('create => ', req.body);
   try {
     const newEvent = await new Event(req.body).save();
 
@@ -128,8 +129,7 @@ exports.fetchEvent = async (req, res) => {
 };
 
 exports.createEventPost = async (req, res) => {
-  const { content, image, user, event } = req.body;
-
+  const { content, postImages, user, event } = req.body;
   try {
     if (!content.length) {
       res.json({
@@ -138,15 +138,15 @@ exports.createEventPost = async (req, res) => {
     } else {
       const post = await Event.findByIdAndUpdate(
         { _id: event._id },
-        { $push: { post: { content, image, postedBy: user } } },
+        { $push: { post: { content, postImages, postedBy: user } } },
         { new: true }
       );
-      if (image.url) {
+      if (postImages) {
         const eventImg = await Event.findByIdAndUpdate(
           { _id: event._id },
           {
             $push: {
-              uploadedPhotos: image.url,
+              uploadedPhotos: postImages,
             },
           },
           {
@@ -214,58 +214,27 @@ exports.unlikeEventPost = async (req, res) => {
 };
 
 exports.updateEventPost = async (req, res) => {
-  let content;
-  if (req.body.content) {
-    content = req.body.content;
-  } else {
-    content = req.body.post.content;
-  }
-
-  let image;
-  if (Object.keys(req.body.image).length !== 0) {
-    image = req.body.image;
-  } else if (req.body.post.image) {
-    image = req.body.post.image;
-  } else {
-    image = '';
-  }
-
-  const query = {
-    'post._id': req.body.post._id,
-  };
-
-  const updatePost = !image
-    ? {
-        $set: {
-          'post.$[post].content': content,
-        },
-      }
-    : {
-        $set: {
-          'post.$[post].content': content,
-          'post.$[post].image': image,
-        },
-      };
-
+  console.log('updateEventPost => ', req.body);
   try {
-    const post = await Event.findOneAndUpdate(query, updatePost, {
-      arrayFilters: [{ 'post._id': { $eq: req.body.post._id } }],
-    });
-    res.json({ ok: true });
-  } catch (err) {
-    console.log(err);
-  }
-};
+    let content;
+    if (req.body.content) {
+      content = req.body.content;
+    } else {
+      content = req.body.post.content;
+    }
 
-exports.deleteEventPost = async (req, res) => {
-  try {
-    if (req.body.post.image) {
-      const image = await cloudinary.uploader.destroy(req.body.post.image);
-      const eventImage = await Event.findOneAndUpdate(
+    let images = req.body.post.postImages || [];
+
+    if (req.body.postImages && req.body.postImages.length > 0) {
+      req.body.postImages.map((image) => images.unshift(image));
+    }
+
+    if (req.body.postImages.length > 0) {
+      const event = await Event.findOneAndUpdate(
         { 'post._id': req.body.post._id },
         {
-          $pull: {
-            uploadedPhotos: req.body.post.image.url,
+          $push: {
+            uploadedPhotos: req.body.postImages,
           },
         },
         {
@@ -273,7 +242,49 @@ exports.deleteEventPost = async (req, res) => {
         }
       );
     }
+
+    const updatePost = {
+      $set: {
+        'post.$[post].content': content,
+        'post.$[post].postImages': images,
+      },
+    };
+
     const post = await Event.findOneAndUpdate(
+      { 'post._id': req.body.post._id },
+      updatePost,
+      { arrayFilters: [{ 'post._id': { $eq: req.body.post._id } }] }
+    );
+    res.json(post);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.deleteEventPost = async (req, res) => {
+  const { post } = req.body;
+  try {
+    if (post.postImages && post.postImages.length > 0) {
+      const urls = post.postImages.map((img) => img.url);
+      const public_ids = post.postImages.map((img) => img.public_id);
+      console.log('urls => ', urls);
+      console.log('public_ids => ', public_ids);
+      for (const public_id of public_ids) {
+        const image = await cloudinary.uploader.destroy(public_id);
+      }
+      const eventImages = await Event.findOneAndUpdate(
+        { 'post._id': req.body.post._id },
+        {
+          $pull: {
+            uploadedPhotos: { url: { $in: urls } },
+          },
+        },
+        {
+          new: true,
+        }
+      ).select('uploadedPhotos');
+    }
+    const eventPost = await Event.findOneAndUpdate(
       {
         'post._id': req.body.post._id,
       },
@@ -586,5 +597,26 @@ exports.numUpcomingEvents = async (req, res) => {
     res.json(numOfUpcoming);
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.deleteEventPostPic = async (req, res) => {
+  const { img, post } = req.body;
+  try {
+    const postToUpdate = await Event.findOneAndUpdate(
+      { 'post._id': post._id },
+      {
+        $pull: {
+          'post.$.postImages': { url: img.url },
+          uploadedPhotos: { url: img.url },
+        },
+      },
+      { new: true }
+    );
+    const image = await cloudinary.uploader.destroy(img.public_id);
+    res.json(postToUpdate);
+  } catch (err) {
+    console.log(err);
+    res.json(err);
   }
 };
