@@ -11,7 +11,7 @@ const gifCardSchema = new mongoose.Schema(
     },
     image: {
       url: String,
-      pulic_id: String,
+      public_id: String,
     },
     message: {
       type: String,

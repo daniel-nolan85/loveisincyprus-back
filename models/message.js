@@ -9,7 +9,7 @@ const messageSchema = new mongoose.Schema(
     reported: { type: Boolean, default: false },
     image: {
       url: String,
-      pulic_id: String,
+      public_id: String,
     },
   },
   { timestamps: true }

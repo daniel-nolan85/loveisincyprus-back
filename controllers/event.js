@@ -301,24 +301,6 @@ exports.deleteEventPost = async (req, res) => {
   }
 };
 
-exports.removeEventComment = async (req, res) => {
-  try {
-    const { postId, comment } = req.body;
-    const eventPost = await Event.findOneAndUpdate(
-      { 'post._id': postId },
-      {
-        $pull: {
-          'post.$.comments': { _id: comment._id },
-        },
-      },
-      { new: true }
-    );
-    res.json(eventPost);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 exports.addEventComment = async (req, res) => {
   try {
     const { postId, comment, image, user } = req.body;
@@ -364,6 +346,9 @@ exports.removeEventComment = async (req, res) => {
       },
       { new: true }
     );
+    if (comment.image) {
+      const image = await cloudinary.uploader.destroy(comment.image.public_id);
+    }
     res.json(eventPost);
   } catch (err) {
     console.log(err);
@@ -371,6 +356,7 @@ exports.removeEventComment = async (req, res) => {
 };
 
 exports.updateEventComment = async (req, res) => {
+  console.log('updateEventComment => ', req.body);
   let text;
   if (req.body.text) {
     text = req.body.text;
@@ -380,6 +366,9 @@ exports.updateEventComment = async (req, res) => {
 
   let image;
   if (Object.keys(req.body.image).length !== 0) {
+    if (req.body.comment.image) {
+      cloudinary.uploader.destroy(req.body.comment.image.public_id);
+    }
     image = req.body.image;
   } else if (req.body.comment.image) {
     image = req.body.comment.image;

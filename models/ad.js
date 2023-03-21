@@ -8,7 +8,7 @@ const adSchema = new mongoose.Schema(
     },
     image: {
       url: String,
-      pulic_id: String,
+      public_id: String,
     },
     duration: String,
     status: String,

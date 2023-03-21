@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema(
     about: {},
     profileImage: {
       url: String,
-      pulic_id: String,
+      public_id: String,
     },
     coverImage: {
       url: String,
-      pulic_id: String,
+      public_id: String,
     },
     gender: String,
     location: String,
