@@ -790,32 +790,29 @@ exports.declineInvite = async (req, res) => {
 };
 
 exports.listAll = async (req, res) => {
-  const users = await User.aggregate([
-    { $sample: { size: 24 } },
-    {
-      $project: {
-        _id: 1,
-        name: 1,
-        username: 1,
-        email: 1,
-        profileImage: 1,
-        about: 1,
-        createdAt: 1,
-        lastLogin: 1,
-        followers: 1,
-      },
-    },
-  ]);
+  const { page } = req.body;
+  console.log('listAll => ', req.body);
+  const currentPage = page || 1;
+  const perPage = 48;
+  const users = await User.find({})
+    .skip((currentPage - 1) * perPage)
+    .select(
+      '_id name email username profileImage about createdAt lastLogin followers'
+    )
+    .limit(perPage)
+    .exec();
   res.json(users);
 };
 
 exports.searchFilters = async (req, res) => {
+  console.log('searchFilters => ', req.body);
   const { query } = req.body;
+  const { arg } = req.body;
   const searchedUsers = [];
   if (query) {
     const users = await User.aggregate([
       { $match: { $text: { $search: query } } },
-      { $sample: { size: 24 } },
+      { $sample: { size: 48 } },
       {
         $project: {
           _id: 1,
@@ -833,13 +830,13 @@ exports.searchFilters = async (req, res) => {
     res.json(users);
   } else {
     Promise.all(
-      req.body.map(async (q) => {
+      arg.map(async (q) => {
         if (q.type && q.type == 'radio') {
           var radioQuery = {};
           radioQuery[q.field] = q.lookUp;
           const users = await User.aggregate([
             { $match: radioQuery },
-            { $sample: { size: 24 } },
+            { $sample: { size: 48 } },
             {
               $project: {
                 _id: 1,
@@ -856,12 +853,37 @@ exports.searchFilters = async (req, res) => {
           ]);
           searchedUsers.push(users);
         }
-        if (q.range) {
+        if (q.ageRange) {
           var rangeQuery = {};
-          rangeQuery[q.field] = { $gte: q.range[0], $lte: q.range[1] };
+          rangeQuery[q.field] = { $gte: q.ageRange[0], $lte: q.ageRange[1] };
           const users = await User.aggregate([
             { $match: rangeQuery },
-            { $sample: { size: 24 } },
+            { $sample: { size: 48 } },
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                username: 1,
+                email: 1,
+                profileImage: 1,
+                about: 1,
+                createdAt: 1,
+                lastLogin: 1,
+                followers: 1,
+              },
+            },
+          ]);
+          searchedUsers.push(users);
+        }
+        if (q.incomeRange) {
+          var rangeQuery = {};
+          rangeQuery[q.field] = {
+            $gte: q.incomeRange[0],
+            $lte: q.incomeRange[1],
+          };
+          const users = await User.aggregate([
+            { $match: rangeQuery },
+            { $sample: { size: 48 } },
             {
               $project: {
                 _id: 1,
@@ -883,7 +905,7 @@ exports.searchFilters = async (req, res) => {
           dropdownQuery[q.field] = q.key;
           const users = await User.aggregate([
             { $match: dropdownQuery },
-            { $sample: { size: 24 } },
+            { $sample: { size: 48 } },
             {
               $project: {
                 _id: 1,
@@ -907,7 +929,7 @@ exports.searchFilters = async (req, res) => {
             .select(
               '_id name email username profileImage about createdAt lastLogin followers'
             )
-            .limit(24);
+            .limit(48);
           searchedUsers.push(users);
         }
         if (q.type && q.type == 'string') {
@@ -915,7 +937,7 @@ exports.searchFilters = async (req, res) => {
           stringQuery[q.field] = { $regex: q.entry };
           const users = await User.aggregate([
             { $match: stringQuery },
-            { $sample: { size: 24 } },
+            { $sample: { size: 48 } },
             {
               $project: {
                 _id: 1,
@@ -937,7 +959,7 @@ exports.searchFilters = async (req, res) => {
           arrayQuery[q.field] = { $all: q.entry };
           const users = await User.aggregate([
             { $match: arrayQuery },
-            { $sample: { size: 24 } },
+            { $sample: { size: 48 } },
             {
               $project: {
                 _id: 1,

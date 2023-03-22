@@ -92,7 +92,7 @@ router.post('/mark-notif-as-read', authCheck, markNotifAsRead);
 router.post('/accept-invite', authCheck, acceptInvite);
 router.post('/maybe', authCheck, maybe);
 router.post('/decline-invite', authCheck, declineInvite);
-router.get('/fetch-users', authCheck, listAll);
+router.post('/fetch-users', authCheck, listAll);
 router.post('/fetch-users/filters', authCheck, searchFilters);
 router.post('/save-search', authCheck, adminCheck, saveSearch);
 router.post('/analyse-users', authCheck, analyseUsers);
