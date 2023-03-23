@@ -968,7 +968,10 @@ exports.searchUser = async (req, res) => {
     }).select(
       '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
     );
-    res.json(user);
+    const filteredUsers = user.filter(
+      (u) => u._id != '63dc1d2a8eb01e4110743044'
+    );
+    res.json(filteredUsers);
   } catch (err) {
     console.log('searchUser => ', err);
   }

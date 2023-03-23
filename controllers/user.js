@@ -791,7 +791,6 @@ exports.declineInvite = async (req, res) => {
 
 exports.listAll = async (req, res) => {
   const { page } = req.body;
-  console.log('listAll => ', req.body);
   const currentPage = page || 1;
   const perPage = 48;
   const users = await User.find({})
@@ -801,79 +800,79 @@ exports.listAll = async (req, res) => {
     )
     .limit(perPage)
     .exec();
-  res.json(users);
+  const filteredUsers = users.filter(
+    (u) => u._id != '63dc1d2a8eb01e4110743044'
+  );
+  res.json(filteredUsers);
 };
 
 exports.searchFilters = async (req, res) => {
   console.log('searchFilters => ', req.body);
-  const { query } = req.body;
-  const { arg } = req.body;
+  const { page, arg } = req.body;
   const searchedUsers = [];
-  if (query) {
-    const users = await User.aggregate([
-      { $match: { $text: { $search: query } } },
-      { $sample: { size: 48 } },
-      {
-        $project: {
-          _id: 1,
-          name: 1,
-          username: 1,
-          email: 1,
-          profileImage: 1,
-          about: 1,
-          createdAt: 1,
-          lastLogin: 1,
-          followers: 1,
-        },
-      },
-    ]);
-    res.json(users);
+  let searchedUsersNum;
+  let filteredUsers;
+  const currentPage = page || 1;
+  const perPage = 48;
+  if (arg.query) {
+    const countQuery = User.find({
+      $or: [
+        { email: { $regex: arg.query, $options: 'i' } },
+        { name: { $regex: arg.query, $options: 'i' } },
+        { username: { $regex: arg.query, $options: 'i' } },
+      ],
+    }).countDocuments();
+    const total_docs = await countQuery;
+    const users = await User.find({
+      $or: [
+        { email: { $regex: arg.query, $options: 'i' } },
+        { name: { $regex: arg.query, $options: 'i' } },
+        { username: { $regex: arg.query, $options: 'i' } },
+      ],
+    })
+      .skip((currentPage - 1) * perPage)
+      .select(
+        '_id name email username profileImage about createdAt lastLogin followers'
+      )
+      .limit(perPage)
+      .exec();
+    searchedUsersNum = total_docs;
+    const filteredUsers = users.filter(
+      (u) => u._id != '63dc1d2a8eb01e4110743044'
+    );
+    res.json({ filteredUsers, searchedUsersNum });
   } else {
     Promise.all(
       arg.map(async (q) => {
         if (q.type && q.type == 'radio') {
           var radioQuery = {};
           radioQuery[q.field] = q.lookUp;
-          const users = await User.aggregate([
-            { $match: radioQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(radioQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(radioQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage)
+            .exec();
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.ageRange) {
           var rangeQuery = {};
           rangeQuery[q.field] = { $gte: q.ageRange[0], $lte: q.ageRange[1] };
-          const users = await User.aggregate([
-            { $match: rangeQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(rangeQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(rangeQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage)
+            .exec();
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.incomeRange) {
           var rangeQuery = {};
@@ -881,100 +880,74 @@ exports.searchFilters = async (req, res) => {
             $gte: q.incomeRange[0],
             $lte: q.incomeRange[1],
           };
-          const users = await User.aggregate([
-            { $match: rangeQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(rangeQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(rangeQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage)
+            .exec();
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.key) {
           var dropdownQuery = {};
           dropdownQuery[q.field] = q.key;
-          const users = await User.aggregate([
-            { $match: dropdownQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(dropdownQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(dropdownQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage)
+            .exec();
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.type && q.type == 'number') {
           var numberQuery = {};
           numberQuery[q.field] = q.entry;
+          const countQuery = User.find(numberQuery).countDocuments();
+          const total_docs = await countQuery;
           const users = await User.find(numberQuery)
+            .skip((currentPage - 1) * perPage)
             .select(
               '_id name email username profileImage about createdAt lastLogin followers'
             )
-            .limit(48);
+            .limit(perPage);
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.type && q.type == 'string') {
           var stringQuery = {};
           stringQuery[q.field] = { $regex: q.entry };
-          const users = await User.aggregate([
-            { $match: stringQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(stringQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(stringQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage);
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
         if (q.type && q.type == 'array') {
           var arrayQuery = {};
           arrayQuery[q.field] = { $all: q.entry };
-          const users = await User.aggregate([
-            { $match: arrayQuery },
-            { $sample: { size: 48 } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                username: 1,
-                email: 1,
-                profileImage: 1,
-                about: 1,
-                createdAt: 1,
-                lastLogin: 1,
-                followers: 1,
-              },
-            },
-          ]);
+          const countQuery = User.find(arrayQuery).countDocuments();
+          const total_docs = await countQuery;
+          const users = await User.find(arrayQuery)
+            .skip((currentPage - 1) * perPage)
+            .select(
+              '_id name email username profileImage about createdAt lastLogin followers'
+            )
+            .limit(perPage);
           searchedUsers.push(users);
+          searchedUsersNum = total_docs;
         }
       })
     ).then(() => {
@@ -999,8 +972,10 @@ exports.searchFilters = async (req, res) => {
                 .values(),
             ];
 
-      const filteredUsers = intersection(searchedUsers);
-      res.json(filteredUsers);
+      filteredUsers = intersection(searchedUsers).filter(
+        (u) => u._id != '63dc1d2a8eb01e4110743044'
+      );
+      res.json({ filteredUsers, searchedUsersNum });
     });
   }
 };

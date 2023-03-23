@@ -6,6 +6,8 @@ const { readdirSync } = require('fs');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
 
+const User = require('./models/user');
+
 // app
 const app = express();
 
@@ -17,7 +19,24 @@ mongoose
     useFindAndModify: false,
     useCreateIndex: true,
   })
-  .then(() => console.log('DB CONNECTED'))
+  .then(async () => {
+    console.log('DB CONNECTED');
+    // await User.collection.dropIndexes({
+    //   name: 'text',
+    //   email: 'text',
+    //   username: 'text',
+    // });
+    // User.schema.index({ name: 'text', email: 'text', username: 'text' });
+    // console.log('TEXT INDEX UPDATED');
+    // const users = await User.find();
+    // users.forEach(async (user) => {
+    //   user.name = user.name || '';
+    //   user.email = user.email || '';
+    //   user.username = user.username || '';
+    //   await user.save();
+    // });
+    // console.log('ALL USERS UPDATED');
+  })
   .catch((err) => console.log(`DB CONNECTION ERR ${err}`));
 
 // rate limit
