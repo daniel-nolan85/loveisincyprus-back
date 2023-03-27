@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
+const { ObjectId } = require('mongodb');
 
 exports.accessChat = async (req, res) => {
   const { _id, u } = req.body;
@@ -184,16 +185,28 @@ exports.massMail = async (req, res) => {
       select: 'name username email profileImage',
     });
 
-    const sendNotif = await User.updateMany(
-      { _id: { $in: userIds } },
-      { $push: { messages: { message } } }
-    );
+    // for (let i = 0; i < userIds.length; i++) {
+    //   const userId = userIds[i];
+    //   const user = await User.findById(userId);
+    //   if (user) {
+    //     user.messages.push({ sender: '63dc1d2a8eb01e4110743044' });
+    //     await user.save();
+    //   }
+    // }
 
     await Chat.findByIdAndUpdate(chats[i]._id, {
       latestMessage: message,
     });
-    res.json(message);
   }
+  const sendNotif = await User.updateMany(
+    { _id: { $in: userIds } },
+    {
+      $push: {
+        messages: { sender: '63dc1d2a8eb01e4110743044' },
+      },
+    }
+  );
+  res.json(message);
 };
 
 exports.chatMatches = async (req, res) => {

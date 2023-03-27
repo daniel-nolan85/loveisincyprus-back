@@ -104,7 +104,10 @@ exports.fetchOptIns = async (req, res) => {
   const optIns = await User.find({ optIn: true }).select(
     'optIn _id name email username profileImage pointsGained pointsLost pointsSpent featuredMember'
   );
-  res.json(optIns);
+  const filteredOptIns = optIns.filter(
+    (u) => u._id != '63dc1d2a8eb01e4110743044'
+  );
+  res.json(filteredOptIns);
 };
 
 exports.totalMessages = async (req, res) => {

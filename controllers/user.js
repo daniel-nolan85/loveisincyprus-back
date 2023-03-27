@@ -796,7 +796,7 @@ exports.listAll = async (req, res) => {
   const users = await User.find({})
     .skip((currentPage - 1) * perPage)
     .select(
-      '_id name email username profileImage about createdAt lastLogin followers'
+      '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
     )
     .limit(perPage)
     .exec();
@@ -832,7 +832,7 @@ exports.searchFilters = async (req, res) => {
     })
       .skip((currentPage - 1) * perPage)
       .select(
-        '_id name email username profileImage about createdAt lastLogin followers'
+        '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
       )
       .limit(perPage)
       .exec();
@@ -852,7 +852,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(radioQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage)
             .exec();
@@ -867,7 +867,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(rangeQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage)
             .exec();
@@ -885,7 +885,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(rangeQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage)
             .exec();
@@ -900,7 +900,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(dropdownQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage)
             .exec();
@@ -915,7 +915,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(numberQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage);
           searchedUsers.push(users);
@@ -929,7 +929,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(stringQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage);
           searchedUsers.push(users);
@@ -943,7 +943,7 @@ exports.searchFilters = async (req, res) => {
           const users = await User.find(arrayQuery)
             .skip((currentPage - 1) * perPage)
             .select(
-              '_id name email username profileImage about createdAt lastLogin followers'
+              '_id name email username profileImage about createdAt lastLogin followers optIn eventsEligible'
             )
             .limit(perPage);
           searchedUsers.push(users);
