@@ -10,6 +10,7 @@ const adSchema = new mongoose.Schema(
       url: String,
       public_id: String,
     },
+    hyperlink: String,
     duration: String,
     status: String,
     demographic: [{ type: String }],

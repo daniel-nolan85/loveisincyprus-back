@@ -731,11 +731,26 @@ exports.profileUpdate = async (req, res) => {
 
 exports.findUsers = async (req, res) => {
   try {
-    const user = await User.findById(req.body.user._id).select('_id following');
+    const user = await User.findById(req.body.user._id).select(
+      '_id following genderWanted gender'
+    );
     let following = user.following;
     following.push(user._id);
     const users = await User.aggregate([
-      { $match: { _id: { $nin: following } } },
+      {
+        $match: {
+          $and: [
+            { _id: { $nin: following } },
+            { clearPhoto: true },
+            {
+              $or: [
+                { gender: { $eq: user.genderWanted } },
+                { gender: { $ne: user.gender } },
+              ],
+            },
+          ],
+        },
+      },
       { $sample: { size: 5 } },
       {
         $project: {

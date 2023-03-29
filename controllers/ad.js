@@ -2,8 +2,15 @@ const Ad = require('../models/ad');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  const { content, image, duration, demographic, contactInfo, accountInfo } =
-    req.body;
+  const {
+    hyperlink,
+    content,
+    image,
+    duration,
+    demographic,
+    contactInfo,
+    accountInfo,
+  } = req.body;
   if (demographic.length === 0) {
     demographic.push('everyone');
   }
@@ -24,6 +31,7 @@ exports.submitAd = async (req, res) => {
       });
     } else {
       const ad = new Ad({
+        hyperlink,
         content,
         image,
         duration,

@@ -790,9 +790,16 @@ exports.declineInvite = async (req, res) => {
 };
 
 exports.listAll = async (req, res) => {
-  const { page } = req.body;
+  const { doc, page } = req.body;
   const currentPage = page || 1;
-  const perPage = 48;
+  let perPage;
+  const countQuery = User.find({}).countDocuments();
+  const total_docs = await countQuery;
+  if (doc === 'search') {
+    perPage = 48;
+  } else {
+    perPage = total_docs;
+  }
   const users = await User.find({})
     .skip((currentPage - 1) * perPage)
     .select(
@@ -808,12 +815,12 @@ exports.listAll = async (req, res) => {
 
 exports.searchFilters = async (req, res) => {
   console.log('searchFilters => ', req.body);
-  const { page, arg } = req.body;
+  const { doc, page, arg } = req.body;
   const searchedUsers = [];
   let searchedUsersNum;
   let filteredUsers;
   const currentPage = page || 1;
-  const perPage = 48;
+  let perPage;
   if (arg.query) {
     const countQuery = User.find({
       $or: [
@@ -823,6 +830,11 @@ exports.searchFilters = async (req, res) => {
       ],
     }).countDocuments();
     const total_docs = await countQuery;
+    if (doc === 'search') {
+      perPage = 48;
+    } else {
+      perPage = total_docs;
+    }
     const users = await User.find({
       $or: [
         { email: { $regex: arg.query, $options: 'i' } },
@@ -849,6 +861,11 @@ exports.searchFilters = async (req, res) => {
           radioQuery[q.field] = q.lookUp;
           const countQuery = User.find(radioQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(radioQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -864,6 +881,11 @@ exports.searchFilters = async (req, res) => {
           rangeQuery[q.field] = { $gte: q.ageRange[0], $lte: q.ageRange[1] };
           const countQuery = User.find(rangeQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(rangeQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -882,6 +904,11 @@ exports.searchFilters = async (req, res) => {
           };
           const countQuery = User.find(rangeQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(rangeQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -897,6 +924,11 @@ exports.searchFilters = async (req, res) => {
           dropdownQuery[q.field] = q.key;
           const countQuery = User.find(dropdownQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(dropdownQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -912,6 +944,11 @@ exports.searchFilters = async (req, res) => {
           numberQuery[q.field] = q.entry;
           const countQuery = User.find(numberQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(numberQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -926,6 +963,11 @@ exports.searchFilters = async (req, res) => {
           stringQuery[q.field] = { $regex: q.entry };
           const countQuery = User.find(stringQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(stringQuery)
             .skip((currentPage - 1) * perPage)
             .select(
@@ -940,6 +982,11 @@ exports.searchFilters = async (req, res) => {
           arrayQuery[q.field] = { $all: q.entry };
           const countQuery = User.find(arrayQuery).countDocuments();
           const total_docs = await countQuery;
+          if (doc === 'search') {
+            perPage = 48;
+          } else {
+            perPage = total_docs;
+          }
           const users = await User.find(arrayQuery)
             .skip((currentPage - 1) * perPage)
             .select(
