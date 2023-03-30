@@ -997,7 +997,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt following verified clearPhoto membership lastLogin coverPhotos profilePhotos'
+      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt verified clearPhoto membership lastLogin coverPhotos profilePhotos'
     );
     res.json(thisUser);
   } catch (err) {

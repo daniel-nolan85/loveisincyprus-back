@@ -187,6 +187,7 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
+  console.log('createOrder => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
   const user = await User.findOne({ mobile: req.user.phone_number })
@@ -211,7 +212,7 @@ exports.createOrder = async (req, res) => {
     return `
       <tr>
         <td>${p.product.title}</td>
-        <td>${p.price}</td>
+        <td>€${p.price}</td>
         <td>${p.count}</td>
       </tr>`;
   });

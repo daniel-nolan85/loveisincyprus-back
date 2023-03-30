@@ -175,12 +175,15 @@ exports.newsFeed = async (req, res) => {
   try {
     const user = await User.findById(req.body.user._id);
     let following = user.following;
+    let matches = user.matches;
     following.push(req.body.user._id);
 
     const currentPage = req.params.page || 1;
     const perPage = 10;
 
-    const posts = await Post.find({ postedBy: { $in: following } })
+    const posts = await Post.find({
+      $or: [{ postedBy: { $in: following } }, { postedBy: { $in: matches } }],
+    })
       .populate('postedBy', '_id name email profileImage username')
       .populate('comments.postedBy', '_id name email profileImage username')
       .populate('likes', '_id name email profileImage username')
@@ -465,8 +468,11 @@ exports.followersPosts = async (req, res) => {
   try {
     const { user } = req.body;
     const following = user.following;
+    const matches = user.matches;
     following.push(user._id);
-    const posts = await Post.find({ postedBy: { $in: following } });
+    const posts = await Post.find({
+      $or: [{ postedBy: { $in: following } }, { postedBy: { $in: matches } }],
+    });
     const total = posts.length;
     res.json(total);
   } catch (err) {

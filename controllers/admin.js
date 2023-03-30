@@ -30,10 +30,9 @@ exports.orderStatus = async (req, res) => {
   const email = await User.findById(updated.orderedBy).select('email');
 
   const listItems = updated.products.map((p) => {
-    return `
-      <tr>
+    return `<tr>
         <td>${p.product.title}</td>
-        <td>${p.price}</td>
+        <td>€${p.price}</td>
         <td>${p.count}</td>
       </tr>`;
   });

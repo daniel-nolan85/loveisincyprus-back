@@ -10,6 +10,10 @@ const orderSchema = new mongoose.Schema(
           ref: 'Product',
         },
         count: Number,
+        refunded: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
     paymentIntent: {},
