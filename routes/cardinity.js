@@ -16,6 +16,7 @@ const {
   createAdPayment,
   createMembershipPayment,
   refundSubscription,
+  handlePending,
 } = require('../controllers/cardinity');
 
 // routes
@@ -29,5 +30,6 @@ router.post(
   eligibleForRefund,
   refundSubscription
 );
+router.post('/cardinity/3d/callback', authCheck, handlePending);
 
 module.exports = router;

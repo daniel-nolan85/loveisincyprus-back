@@ -3,12 +3,24 @@ const express = require('express');
 const router = express.Router();
 
 // middleware
-const { authCheck } = require('../middleware/auth');
+const { authCheck, adminCheck } = require('../middleware/auth');
 
 // controllers
-const { requestRefund } = require('../controllers/refund');
+const {
+  requestRefund,
+  fetchRefunds,
+  itemsReturned,
+  itemsNotReturned,
+  rejectRefund,
+  processRefund,
+} = require('../controllers/refund');
 
 // routes
 router.post('/request-refund', authCheck, requestRefund);
+router.get('/fetch-refunds', authCheck, adminCheck, fetchRefunds);
+router.put('/handle-returns', authCheck, adminCheck, itemsReturned);
+router.put('/handle-unreturns', authCheck, adminCheck, itemsNotReturned);
+router.put('/reject-refund', authCheck, adminCheck, rejectRefund);
+router.put('/process-refund', authCheck, adminCheck, processRefund);
 
 module.exports = router;

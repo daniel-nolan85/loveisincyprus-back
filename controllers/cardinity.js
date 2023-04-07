@@ -57,10 +57,12 @@ exports.createPayment = async (req, res) => {
       holder: cardHolder,
     },
     threeds2_data: {
-      notification_url: 'https://www.loveisincyprus.com',
+      // notification_url: 'http://localhost:8000/api/cardinity/3d/callback',
+      notification_url:
+        'https://www.loveisincyprus.com/api/cardinity/3d/callback',
       browser_info: {
         accept_header: 'text/html',
-        browser_language: 'en',
+        browser_language: 'en-US',
         screen_width: 390,
         screen_height: 400,
         challenge_window_size: '390x400',
@@ -72,54 +74,65 @@ exports.createPayment = async (req, res) => {
   });
 
   if (purchase.errors) {
+    console.log('errors => ', purchase);
     res.send(purchase.errors);
   } else {
     client
       .call(purchase)
       .then((response) => {
+        console.log('response => ', response);
         if (response.status == 'approved') {
           res.send(response);
         } else if (response.status == 'pending') {
-          if (response.authorization_information) {
-            var form_url = response.authorization_information.url;
-            var inputs =
-              '<input type="hidden" name="PaReq" value="' +
-              response.authorization_information.data +
-              '" />' +
-              '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
-            var threed_key = 'MD';
-          } else if (response.threeds2_data) {
-            var form_url = response.threeds2_data.acs_url;
-            var inputs =
-              '<input name="creq" value="' +
-              response.threeds2_data.creq +
-              '" />';
-            var threed_key = 'threeDSSessionData';
-          }
+          console.log('pending => ', response);
           res.setHeader('Content-Type', 'text/html');
-          form =
-            '<html><head>' +
-            '<title>3-D Secure Example</title>' +
-            '<script type="text/javascript">' +
-            +'function OnLoadEvent(){' +
-            +'document.ThreeDForm.submit();' +
-            +'}' +
-            '</script>' +
-            '</head>' +
-            '<body onload="OnLoadEvent();">' +
-            '<form name="ThreeDForm" method="POST" action="' +
-            form_url +
-            '">' +
-            '<button type=submit>Click Here</button>' +
-            inputs +
-            '<input type="hidden" name="' +
-            threed_key +
-            '" value="' +
-            response.id +
-            '" />' +
-            '</form>' +
-            '</body></html>';
-          res.end(form);
+          form = `
+            <form name="ThreeDForm" method="POST" action=${response.threeds2_data.acs_url}>
+            <button type='submit' className='submit-btn'>Click Here</button>
+            <input name="creq" value=${response.threeds2_data.creq} className='input-field' />
+            <input type="hidden" name="threeDSSessionData" value=${response.id} />
+            </form>`;
+          res.send({ response, form });
+          // if (response.authorization_information) {
+          //   var form_url = response.authorization_information.url;
+          //   var inputs =
+          //     '<input type="hidden" name="PaReq" value="' +
+          //     response.authorization_information.data +
+          //     '" />' +
+          //     '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
+          //   var threed_key = 'MD';
+          // } else if (response.threeds2_data) {
+          //   var form_url = response.threeds2_data.acs_url;
+          //   var inputs =
+          //     '<input name="creq" value="' +
+          //     response.threeds2_data.creq +
+          //     '" />';
+          //   var threed_key = 'threeDSSessionData';
+          // }
+          // res.setHeader('Content-Type', 'text/html');
+          // form =
+          //   '<html><head>' +
+          //   '<title>3-D Secure Example</title>' +
+          //   '<script type="application/javascript">' +
+          //   +'function OnLoadEvent(){' +
+          //   +'document.ThreeDForm.submit();' +
+          //   +'}' +
+          //   '</script>' +
+          //   '</head>' +
+          //   '<body onload="OnLoadEvent();">' +
+          //   '<form name="ThreeDForm" method="POST" action="' +
+          //   form_url +
+          //   '">' +
+          //   '<button type=submit>Click Here</button>' +
+          //   inputs +
+          //   '<input type="hidden" name="' +
+          //   threed_key +
+          //   '" value="' +
+          //   response.id +
+          //   '" />' +
+          //   '</form>' +
+          //   '</body></html>';
+          // res.end(form);
         } else {
           res.setHeader('Content-Type', 'text/plain');
           res.end(JSON.stringify(response, null, 2));
@@ -151,7 +164,7 @@ exports.createAdPayment = async (req, res) => {
       notification_url: 'https://www.loveisincyprus.com',
       browser_info: {
         accept_header: 'text/html',
-        browser_language: 'en',
+        browser_language: 'en-US',
         screen_width: 390,
         screen_height: 400,
         challenge_window_size: '390x400',
@@ -191,7 +204,7 @@ exports.createAdPayment = async (req, res) => {
           form =
             '<html><head>' +
             '<title>3-D Secure Example</title>' +
-            '<script type="text/javascript">' +
+            '<script type="application/javascript">' +
             +'function OnLoadEvent(){' +
             +'document.ThreeDForm.submit();' +
             +'}' +
@@ -247,7 +260,7 @@ exports.createMembershipPayment = async (req, res) => {
       notification_url: 'https://www.loveisincyprus.com',
       browser_info: {
         accept_header: 'text/html',
-        browser_language: 'en',
+        browser_language: 'en-US',
         screen_width: 390,
         screen_height: 400,
         challenge_window_size: '390x400',
@@ -419,7 +432,7 @@ exports.createMembershipPayment = async (req, res) => {
           form =
             '<html><head>' +
             '<title>3-D Secure Example</title>' +
-            '<script type="text/javascript">' +
+            '<script type="application/javascript">' +
             +'function OnLoadEvent(){' +
             +'document.ThreeDForm.submit();' +
             +'}' +
@@ -478,4 +491,8 @@ exports.refundSubscription = async (req, res) => {
     .catch((err) => {
       console.log(err);
     });
+};
+
+exports.handlePending = async (req, res) => {
+  console.log('handlePending => ', req.body);
 };

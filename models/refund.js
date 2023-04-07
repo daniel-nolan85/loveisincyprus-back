@@ -23,6 +23,9 @@ const refundSchema = new mongoose.Schema(
       type: ObjectId,
       ref: 'User',
     },
+    returned: { type: Boolean, default: false },
+    refundedItems: Array,
+    refundStatus: String,
   },
   { timestamps: true }
 );
