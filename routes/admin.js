@@ -20,6 +20,7 @@ const {
   setPreferences,
   fetchProductsForReview,
   fetchNewOrders,
+  fetchNewRefunds,
 } = require('../controllers/admin');
 
 // routes
@@ -42,5 +43,6 @@ router.put(
 router.put('/set-preferences', authCheck, adminCheck, setPreferences);
 router.get('/fetch-products-for-review', fetchProductsForReview);
 router.get('/fetch-new-orders', fetchNewOrders);
+router.get('/fetch-new-refunds', fetchNewRefunds);
 
 module.exports = router;

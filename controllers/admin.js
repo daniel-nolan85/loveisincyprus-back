@@ -4,6 +4,7 @@ const Message = require('../models/message');
 const Ad = require('../models/ad');
 const Post = require('../models/post');
 const Product = require('../models/product');
+const Refund = require('../models/refund');
 const nodemailer = require('nodemailer');
 
 exports.orders = async (req, res) => {
@@ -392,6 +393,17 @@ exports.fetchNewOrders = async (req, res) => {
       '_id'
     );
     res.json(orders);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchNewRefunds = async (req, res) => {
+  try {
+    const refunds = await Refund.find({ refundStatus: 'requested' }).select(
+      '_id'
+    );
+    res.json(refunds);
   } catch (err) {
     console.log(err);
   }

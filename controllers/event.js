@@ -9,7 +9,6 @@ cloudinary.config({
 });
 
 exports.create = async (req, res) => {
-  console.log('create => ', req.body);
   try {
     const newEvent = await new Event(req.body).save();
 
@@ -214,7 +213,6 @@ exports.unlikeEventPost = async (req, res) => {
 };
 
 exports.updateEventPost = async (req, res) => {
-  console.log('updateEventPost => ', req.body);
   try {
     let content;
     if (req.body.content) {
@@ -267,8 +265,6 @@ exports.deleteEventPost = async (req, res) => {
     if (post.postImages && post.postImages.length > 0) {
       const urls = post.postImages.map((img) => img.url);
       const public_ids = post.postImages.map((img) => img.public_id);
-      console.log('urls => ', urls);
-      console.log('public_ids => ', public_ids);
       for (const public_id of public_ids) {
         const image = await cloudinary.uploader.destroy(public_id);
       }
@@ -356,7 +352,6 @@ exports.removeEventComment = async (req, res) => {
 };
 
 exports.updateEventComment = async (req, res) => {
-  console.log('updateEventComment => ', req.body);
   let text;
   if (req.body.text) {
     text = req.body.text;

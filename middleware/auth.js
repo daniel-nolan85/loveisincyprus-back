@@ -16,7 +16,6 @@ exports.authCheck = async (req, res, next) => {
 };
 
 exports.adminCheck = async (req, res, next) => {
-  console.log('adminCheck');
   const adminUser = await User.findOne({
     mobile: req.user.phone_number,
   }).exec();

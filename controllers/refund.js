@@ -4,6 +4,7 @@ const Order = require('../models/order');
 const cloudinary = require('cloudinary');
 const nodemailer = require('nodemailer');
 const Cardinity = require('cardinity-nodejs');
+const axios = require('axios');
 
 const Client = Cardinity.client();
 const RefundMember = Cardinity.refund();
@@ -20,7 +21,6 @@ cloudinary.config({
 });
 
 exports.requestRefund = async (req, res) => {
-  console.log('requestRefund => ', req.body);
   const {
     _id,
     items,
@@ -72,6 +72,7 @@ exports.requestRefund = async (req, res) => {
         amountRequested,
         orderedBy,
         paymentIntent,
+        refundStatus: 'requested',
       });
       refund.save();
     }
@@ -175,8 +176,7 @@ exports.itemsNotReturned = async (req, res) => {
     const returned = await Refund.findByIdAndUpdate(
       req.body.refund._id,
       {
-        $set: { returned: false },
-        $unset: { refundStatus: '' },
+        $set: { returned: false, refundStatus: 'requested' },
       },
       { new: true }
     );
@@ -225,6 +225,13 @@ exports.rejectRefund = async (req, res) => {
       </tr>`;
     });
 
+    const reason = req.body.reason
+      ? `
+        <p style="margin-bottom: 5px;">Your request was rejected for the following reason:</p>
+        <p style="margin-bottom: 5px;">${req.body.reason}</p>
+      `
+      : '';
+
     let transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -237,7 +244,7 @@ exports.rejectRefund = async (req, res) => {
     let mailOptions = {
       from: 'customercare@loveisincyprus.com',
       to: orderedBy.email,
-      subject: 'Refund request from Love Is In Cyprus',
+      subject: 'Your refund has been rejected',
       html: `
     <h3 style="margin-bottom: 5px;">Your recent request for a refund has been rejected</h3>
     <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${_id}</span></p>
@@ -255,8 +262,7 @@ exports.rejectRefund = async (req, res) => {
       </tbody>
     </table>
     <br/>
-    <p style="margin-bottom: 5px;">Your request was rejected for the following reason:</p>
-    <p style="margin-bottom: 5px;">${req.body.reason}</p>
+    ${reason}
     <h3>Thank you for shopping with us!</h3>
     `,
     };
@@ -275,7 +281,6 @@ exports.rejectRefund = async (req, res) => {
 };
 
 exports.processRefund = async (req, res) => {
-  console.log('processRefund => ', req.body);
   const { refund, message, refundAmount, products } = req.body;
   try {
     const returned = await Refund.findByIdAndUpdate(
@@ -390,4 +395,52 @@ exports.processRefund = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.emailBuyer = async (req, res) => {
+  const { orderedBy, subject, message, refundImages } = req.body;
+
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'customercare@loveisincyprus.com',
+      pass: process.env.GMAIL_AUTHORIZATION,
+    },
+    secure: true,
+  });
+
+  let attachments = [];
+  if (refundImages.length > 0) {
+    attachments = await Promise.all(
+      refundImages.map(async (image, idx) => {
+        const imageResponse = await axios.get(image.url, {
+          responseType: 'arraybuffer',
+        });
+        const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+        return {
+          filename: `image${idx + 1}.jpg`,
+          content: imageBuffer,
+        };
+      })
+    );
+  }
+
+  let mailOptions = {
+    from: 'customercare@loveisincyprus.com',
+    to: orderedBy.email,
+    subject: subject,
+    html: `
+      <p>${message}</p>
+      `,
+    attachments,
+  };
+
+  transporter.sendMail(mailOptions, (err, response) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('Success');
+    }
+  });
+  transporter.close();
 };

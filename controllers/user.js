@@ -187,7 +187,6 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  console.log('createOrder => ', req.body);
   const paymentIntent = req.body.cardinityResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
   const user = await User.findOne({ mobile: req.user.phone_number })
@@ -815,7 +814,6 @@ exports.listAll = async (req, res) => {
 };
 
 exports.searchFilters = async (req, res) => {
-  console.log('searchFilters => ', req.body);
   const { doc, page, arg } = req.body;
   const searchedUsers = [];
   let searchedUsersNum;

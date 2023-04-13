@@ -2,7 +2,6 @@ const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
 const axios = require('axios');
 
 exports.accessChat = async (req, res) => {
@@ -146,7 +145,6 @@ exports.allMessages = async (req, res) => {
 };
 
 exports.massMail = async (req, res) => {
-  console.log('massMail => ', req.body);
   const { image, content, selected } = req.body.massMail;
 
   if (!content || selected.length < 1) {
