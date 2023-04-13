@@ -3,6 +3,15 @@ const User = require('../models/user');
 const Order = require('../models/order');
 const cloudinary = require('cloudinary');
 const nodemailer = require('nodemailer');
+const Cardinity = require('cardinity-nodejs');
+
+const Client = Cardinity.client();
+const RefundMember = Cardinity.refund();
+
+const client = new Client(
+  process.env.CARDINITY_KEY,
+  process.env.CARDINITY_SECRET
+);
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -11,8 +20,16 @@ cloudinary.config({
 });
 
 exports.requestRefund = async (req, res) => {
-  const { _id, items, reason, refundImages, refundAmount, orderedBy } =
-    req.body;
+  console.log('requestRefund => ', req.body);
+  const {
+    _id,
+    items,
+    reason,
+    refundImages,
+    amountRequested,
+    orderedBy,
+    paymentIntent,
+  } = req.body;
   const itemIds = items.map((item) => item.split('-')[0]);
   const countMap = {};
 
@@ -52,8 +69,9 @@ exports.requestRefund = async (req, res) => {
         reason,
         items: itemIds,
         refundImages,
-        refundAmount,
+        amountRequested,
         orderedBy,
+        paymentIntent,
       });
       refund.save();
     }
@@ -97,7 +115,7 @@ exports.requestRefund = async (req, res) => {
         ${listItems}
       </tbody>
     </table>
-    <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${refundAmount} after reduction handling charges.</p>
+    <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${amountRequested} after reduction handling charges.</p>
     <p style="margin-bottom: 5px;">Please return your unwanted items to us at the following address:</p>
     <br/>
     <p>WOLF</p>
@@ -257,13 +275,13 @@ exports.rejectRefund = async (req, res) => {
 };
 
 exports.processRefund = async (req, res) => {
-  // console.log('processRefund => ', req.body);
-  const { refund, reason, refundAmount, products } = req.body;
+  console.log('processRefund => ', req.body);
+  const { refund, message, refundAmount, products } = req.body;
   try {
     const returned = await Refund.findByIdAndUpdate(
       refund._id,
       {
-        $push: { refundedItems: products },
+        $push: { refundedItems: products, messages: message },
       },
       { new: true }
     );
@@ -272,8 +290,103 @@ exports.processRefund = async (req, res) => {
     } else {
       returned.refundStatus = 'partial';
     }
+
+    const amounts = returned.refundedItems.map((refundedItem) =>
+      Number(refundedItem.split(', ')[1])
+    );
+    const amountSum = amounts.reduce((acc, amount) => acc + amount, 0);
+    const tenPercent = amountSum * 0.1;
+    const calc = amountSum - tenPercent;
+    returned.amountGranted = calc;
+
     const updated = await returned.save();
     res.json(returned);
+
+    const itemsNoIndex = products.map((item) => item.replace(/-\d+/, ''));
+    const toBeRefunded = itemsNoIndex.reduce((count, value) => {
+      count[value] = (count[value] || 0) + 1;
+      return count;
+    }, {});
+    const refundedItems = Object.entries(toBeRefunded).map(([key, value]) => {
+      const [id, price, title] = key.split(', ');
+      return { id, price, title, quantity: value };
+    });
+    const listItems = refundedItems.map((p) => {
+      return `
+      <tr>
+        <td>${p.title}</td>
+        <td>€${p.price}</td>
+        <td>${p.quantity}</td>
+      </tr>`;
+    });
+
+    const additionalInfo = message
+      ? `
+        <p style="margin-bottom: 5px;">Additional information regarding this refund:</p>
+        <p style="margin-bottom: 5px;">${message}</p>
+      `
+      : '';
+
+    let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'customercare@loveisincyprus.com',
+        pass: process.env.GMAIL_AUTHORIZATION,
+      },
+      secure: true,
+    });
+
+    let mailOptions = {
+      from: 'customercare@loveisincyprus.com',
+      to: refund.orderedBy.email,
+      subject: 'Your refund has been approved',
+      html: `
+    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${refund._id}</span></p>
+    <p style="margin-bottom: 5px;">Your recent request for a refund for the following items has been approved:</p>
+    <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${listItems}
+      </tbody>
+    </table>
+    <br/>
+    ${additionalInfo}
+    <p style="margin-bottom: 5px;">Please note, we do charge a 10% handling fee for refunds as stipulated in our terms & conditions.</p>
+    <p style="margin-bottom: 5px;">You will receive an amount of €${refundAmount} to the bank which made the initial transaction of this order within 30 days.</p>
+    <h3>Thank you for shopping with us!</h3>
+    `,
+    };
+
+    transporter.sendMail(mailOptions, (err, response) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send('Success');
+      }
+    });
+    transporter.close();
+
+    const refundMember = new RefundMember({
+      amount: refundAmount,
+      description:
+        'User has requested a refund on their transaction and has been approved by admin',
+      id: refund.paymentIntent.id,
+    });
+
+    client
+      .call(refundMember)
+      .then(async (response) => {
+        console.log('response => ', response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   } catch (err) {
     console.log(err);
   }

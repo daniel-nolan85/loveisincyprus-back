@@ -10,6 +10,13 @@ const refundSchema = new mongoose.Schema(
       minlength: [1, 'Reason is too short'],
       maxlength: [500, 'Reason is too long'],
     },
+    messages: [
+      {
+        type: String,
+        trim: true,
+        maxlength: [500, 'Reason is too long'],
+      },
+    ],
     items: [
       {
         type: ObjectId,
@@ -18,7 +25,8 @@ const refundSchema = new mongoose.Schema(
       },
     ],
     refundImages: Array,
-    refundAmount: Number,
+    amountRequested: Number,
+    amountGranted: Number,
     orderedBy: {
       type: ObjectId,
       ref: 'User',
@@ -26,6 +34,7 @@ const refundSchema = new mongoose.Schema(
     returned: { type: Boolean, default: false },
     refundedItems: Array,
     refundStatus: String,
+    paymentIntent: {},
   },
   { timestamps: true }
 );

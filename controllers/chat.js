@@ -1,7 +1,9 @@
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
-const { ObjectId } = require('mongodb');
+const nodemailer = require('nodemailer');
+const fs = require('fs');
+const axios = require('axios');
 
 exports.accessChat = async (req, res) => {
   const { _id, u } = req.body;
@@ -144,7 +146,8 @@ exports.allMessages = async (req, res) => {
 };
 
 exports.massMail = async (req, res) => {
-  const { image, content, selected } = req.body;
+  console.log('massMail => ', req.body);
+  const { image, content, selected } = req.body.massMail;
 
   if (!content || selected.length < 1) {
     return res.sendStatus(400);
@@ -155,9 +158,20 @@ exports.massMail = async (req, res) => {
   );
   const userIds = [];
   const chats = [];
+  const userEmails = [];
+
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'customercare@loveisincyprus.com',
+      pass: process.env.GMAIL_AUTHORIZATION,
+    },
+    secure: true,
+  });
 
   for (var i = 0; i < selected.length; i++) {
     userIds.push(selected[i]._id);
+    userEmails.push(selected[i].email);
   }
 
   for (var i = 0; i < userIds.length; i++) {
@@ -185,19 +199,42 @@ exports.massMail = async (req, res) => {
       select: 'name username email profileImage',
     });
 
-    // for (let i = 0; i < userIds.length; i++) {
-    //   const userId = userIds[i];
-    //   const user = await User.findById(userId);
-    //   if (user) {
-    //     user.messages.push({ sender: '63dc1d2a8eb01e4110743044' });
-    //     await user.save();
-    //   }
-    // }
-
     await Chat.findByIdAndUpdate(chats[i]._id, {
       latestMessage: message,
     });
   }
+
+  for (const email of userEmails) {
+    let mailOptions = {
+      from: 'customercare@loveisincyprus.com',
+      to: email,
+      subject: req.body.subject,
+      html: `
+      ${content}
+      `,
+    };
+    if (Object.keys(image).length > 0) {
+      const imageResponse = await axios.get(image.url, {
+        responseType: 'arraybuffer',
+      });
+      const imageBuffer = Buffer.from(imageResponse.data, 'binary');
+      mailOptions.attachments = [
+        {
+          filename: 'image.jpg',
+          content: imageBuffer,
+        },
+      ];
+    }
+    transporter.sendMail(mailOptions, (err, response) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send('Success');
+      }
+    });
+  }
+  transporter.close();
+
   const sendNotif = await User.updateMany(
     { _id: { $in: userIds } },
     {
