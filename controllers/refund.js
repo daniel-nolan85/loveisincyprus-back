@@ -124,7 +124,6 @@ exports.requestRefund = async (req, res) => {
     <p>8560 Peyia</p>
     <p>Cyprus</p>
     <br/>
-    <p style="font-size: 18px; margin-bottom: 5px;">The status of your order is currently <span style="font-weight: bold;">pending</span>. We'll continue to notify you as this updates.</p>
     <p style="margin-bottom: 5px;">Your request will be inspected upon our receipt of the items and, if granted, your refund will be returned to the bank account your purchase was made with no more than 30 days later.</p>
     <h3>Thank you for shopping with us!</h3>
     `,
@@ -282,11 +281,12 @@ exports.rejectRefund = async (req, res) => {
 
 exports.processRefund = async (req, res) => {
   const { refund, message, refundAmount, products } = req.body;
+  const messageToBuyer = message || 'No message was sent';
   try {
     const returned = await Refund.findByIdAndUpdate(
       refund._id,
       {
-        $push: { refundedItems: products, messages: message },
+        $push: { refundedItems: products, messages: messageToBuyer },
       },
       { new: true }
     );
