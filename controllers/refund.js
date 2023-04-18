@@ -102,7 +102,7 @@ exports.requestRefund = async (req, res) => {
       subject: 'Refund request from Love Is In Cyprus',
       html: `
     <h3 style="margin-bottom: 5px;">Your recent request for a refund has been received</h3>
-    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${_id}</span></p>
+    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${paymentIntent.id}</span></p>
     <p style="margin-bottom: 5px;">Your recent request for a refund for the following items has been received:</p>
     <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
       <thead>
@@ -117,13 +117,14 @@ exports.requestRefund = async (req, res) => {
       </tbody>
     </table>
     <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${amountRequested} after reduction handling charges.</p>
-    <p style="margin-bottom: 5px;">Please return your unwanted items to us at the following address:</p>
+    <p style="margin-bottom: 5px;">Please return your unwanted items to our goods department at the following address:</p>
     <br/>
     <p>WOLF</p>
     <p>Agiou Athanasiou 16-2</p>
     <p>8560 Peyia</p>
     <p>Cyprus</p>
     <br/>
+    <p style="margin-bottom: 5px; text-transform: uppercase; color: #ff0e0e; font-size: 25px; font-weight: bold;">You must include your Order Id with your return, failure to do so may result in your request being rejected.<p>
     <p style="margin-bottom: 5px;">Your request will be inspected upon our receipt of the items and, if granted, your refund will be returned to the bank account your purchase was made with no more than 30 days later.</p>
     <h3>Thank you for shopping with us!</h3>
     `,
@@ -186,7 +187,7 @@ exports.itemsNotReturned = async (req, res) => {
 };
 
 exports.rejectRefund = async (req, res) => {
-  const { _id, items, orderedBy } = req.body.refund;
+  const { _id, items, orderedBy, paymentIntent } = req.body.refund;
   try {
     const returned = await Refund.findByIdAndUpdate(
       _id,
@@ -246,7 +247,7 @@ exports.rejectRefund = async (req, res) => {
       subject: 'Your refund has been rejected',
       html: `
     <h3 style="margin-bottom: 5px;">Your recent request for a refund has been rejected</h3>
-    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${_id}</span></p>
+    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${paymentIntent.id}</span></p>
     <p style="margin-bottom: 5px;">Your recent request for a refund for the following items has been rejected:</p>
     <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
       <thead>
@@ -346,7 +347,7 @@ exports.processRefund = async (req, res) => {
       to: refund.orderedBy.email,
       subject: 'Your refund has been approved',
       html: `
-    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${refund._id}</span></p>
+    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${refund.paymentIntent.id}</span></p>
     <p style="margin-bottom: 5px;">Your recent request for a refund for the following items has been approved:</p>
     <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
       <thead>

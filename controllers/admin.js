@@ -54,7 +54,7 @@ exports.orderStatus = async (req, res) => {
     html: `
       <h3 style="margin-bottom: 5px;">The status of your recent order has just been updated</h3>
       <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${
-        updated._id
+        updated.paymentIntent.id
       }</span></p>
       <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
         <thead>

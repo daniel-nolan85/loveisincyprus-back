@@ -232,7 +232,7 @@ exports.createOrder = async (req, res) => {
     html: `
       <h3 style="margin-bottom: 5px;">Thanks for your recent order</h3>
       <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${
-        newOrder._id
+        newOrder.paymentIntent.id
       }</span></p>
       <p style="margin-bottom: 5px;">Your payment has been successfully authorised and we will soon dispatch the following items:</p>
       <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
@@ -297,6 +297,7 @@ exports.orders = async (req, res) => {
   const userOrders = await Order.find({ orderedBy: user._id })
     .sort('-createdAt')
     .populate('products.product')
+    .populate('orderedBy', 'username email')
     .exec();
   res.json(userOrders);
 };
