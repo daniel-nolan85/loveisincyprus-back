@@ -6,6 +6,15 @@ const Post = require('../models/post');
 const Product = require('../models/product');
 const Refund = require('../models/refund');
 const nodemailer = require('nodemailer');
+const Cardinity = require('cardinity-nodejs');
+
+const Client = Cardinity.client();
+const RefundMember = Cardinity.refund();
+
+const client = new Client(
+  process.env.CARDINITY_KEY,
+  process.env.CARDINITY_SECRET
+);
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -85,7 +94,12 @@ exports.orderStatus = async (req, res) => {
 
       <p style="font-size: 18px; margin-bottom: 5px;">The status of your order is currently <span style="font-weight: bold;">${
         updated.orderStatus
-      }</span>. We'll continue to notify you as this updates.</p>
+      }</span>. 
+      ${
+        updated.orderStatus === 'cancelled'
+          ? 'You have been fully refunded for this transaction'
+          : "We'll continue to notify you as this updates"
+      } .</p>
       <h3>Thank you for shopping with us</h3>
     `,
   };
@@ -98,6 +112,23 @@ exports.orderStatus = async (req, res) => {
     }
   });
   transporter.close();
+
+  if (updated.orderStatus === 'Cancelled') {
+    const refundMember = new RefundMember({
+      amount: updated.paymentIntent.amount,
+      description: 'Admin has cancelled this transaction',
+      id: updated.paymentIntent.id,
+    });
+
+    client
+      .call(refundMember)
+      .then(async (response) => {
+        console.log('response => ', response);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 };
 
 exports.fetchOptIns = async (req, res) => {
