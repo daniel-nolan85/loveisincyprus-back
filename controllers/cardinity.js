@@ -57,7 +57,6 @@ exports.createPayment = async (req, res) => {
       holder: cardHolder,
     },
     threeds2_data: {
-      // notification_url: 'http://localhost:8000/api/cardinity/3d/callback',
       notification_url:
         'https://www.loveisincyprus.com/api/cardinity/3d/callback',
       browser_info: {

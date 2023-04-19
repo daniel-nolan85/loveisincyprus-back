@@ -30,6 +30,6 @@ router.post(
   eligibleForRefund,
   refundSubscription
 );
-router.post('/cardinity/3d/callback', authCheck, handlePending);
+router.post('/cardinity/3d/callback', handlePending);
 
 module.exports = router;
