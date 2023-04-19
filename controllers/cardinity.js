@@ -87,8 +87,9 @@ exports.createPayment = async (req, res) => {
           res.setHeader('Content-Type', 'text/html');
           form = `
             <form name="ThreeDForm" method="POST" action=${response.threeds2_data.acs_url}>
-            <button type='submit' className='submit-btn'>Click Here</button>
-            <input name="creq" value=${response.threeds2_data.creq} className='input-field' />
+            <h2 style='text-align: center; margin: 10px auto;'>You are about to be redirected to your bank in order to verify this transaction.</h2>
+            <button type='submit' style='width: fit-content; padding: 10px 30px; cursor: pointer; display: block; margin: 20px auto; background: #ef5b85; border: 0; outline: none; border-radius: 30px; color: #fff;'>Continue</button>
+            <input type="hidden" name="creq" value=${response.threeds2_data.creq} className='input-field' />
             <input type="hidden" name="threeDSSessionData" value=${response.id} />
             </form>`;
           res.send({ response, form });
