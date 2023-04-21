@@ -62,6 +62,8 @@ const {
   updateCropProfile,
   uploadNewImages,
   uploadPicDelete,
+  catchIp,
+  calcPoints,
 } = require('../controllers/user');
 
 // routes
@@ -117,5 +119,7 @@ router.put('/update-crop-cover', authCheck, updateCropCover);
 router.put('/update-crop-profile', authCheck, updateCropProfile);
 router.put('/upload-new-images', authCheck, uploadNewImages);
 router.put('/upload-picture-delete', authCheck, uploadPicDelete);
+router.put('/catch-ip', catchIp);
+router.put('/calc-points', calcPoints);
 
 module.exports = router;

@@ -74,6 +74,7 @@ const userSchema = new mongoose.Schema(
         spent: { type: Date, default: Date.now },
       },
     ],
+    pointsTotal: Number,
     notifications: [
       {
         notif: {},
@@ -142,6 +143,7 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    profilePercentage: Number,
     eventsEligible: {
       type: Boolean,
       default: false,
@@ -183,6 +185,29 @@ const userSchema = new mongoose.Schema(
       until: Date,
       reason: String,
     },
+    ipAddresses: Array,
+    reports: {
+      post: Array,
+      comment: Array,
+      message: Array,
+    },
+    reported: {
+      post: Array,
+      comment: Array,
+      message: Array,
+    },
+    messagesSent: Number,
+    messagesReceived: Number,
+    itemsOrdered: Number,
+    itemsOrderedValue: Number,
+    giftCardsSent: Number,
+    giftCardsSentValue: Number,
+    giftCardsReceived: Number,
+    giftCardsReceivedValue: Number,
+    tShirts: Number,
+    sprays: Number,
+    droppers: Number,
+    perfumes: Number,
     canVerify: {
       type: Boolean,
       default: false,

@@ -289,6 +289,46 @@ exports.createOrder = async (req, res) => {
 
   let updated = await Product.bulkWrite(bulkOption, {});
 
+  console.log('products => ', products);
+  let itemsOrdered = 0;
+  let itemsOrderedValue = 0;
+  let tShirts = 0;
+  let sprays = 0;
+  let droppers = 0;
+  let perfumes = 0;
+  for (const product of products) {
+    itemsOrdered += product.count;
+    itemsOrderedValue += product.price * product.count;
+    const productCounterMap = {
+      '63dd0fed199b3908655bf129': 'perfumes',
+      '63dd06ea199b3908655bf127': 'perfumes',
+      '63dd1901199b3908655bf12c': 'tShirts',
+      '63dd1a0b199b3908655bf12d': 'tShirts',
+      '63dd1fd3199b3908655bf12e': 'droppers',
+      '63e6918813bdeadf84d9ca63': 'droppers',
+      '63e6894a13bdeadf84d9ca5e': 'sprays',
+      '63e68eb713bdeadf84d9ca61': 'sprays',
+    };
+    const productCounterKey = productCounterMap[product.product._id];
+    if (productCounterKey) {
+      eval(`${productCounterKey} += product.count`);
+    }
+  }
+  const incItemsFields = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $inc: {
+        itemsOrdered,
+        itemsOrderedValue,
+        tShirts,
+        droppers,
+        sprays,
+        perfumes,
+      },
+    },
+    { new: true }
+  );
+
   res.json(newOrder);
 };
 
@@ -1269,6 +1309,7 @@ exports.analyseUsers = async (req, res) => {
 
 exports.progressCompletion = async (req, res) => {
   const { user } = req.body;
+  console.log('user => ', user);
   let completion = {
     percentage: 0,
   };
@@ -1520,6 +1561,14 @@ exports.progressCompletion = async (req, res) => {
   }
 
   res.json(completion);
+
+  const updateProgress = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: { profilePercentage: completion.percentage },
+    },
+    { new: true }
+  );
 
   if (completion.percentage == 100) {
     const complete = await User.findByIdAndUpdate(
@@ -2298,4 +2347,43 @@ exports.uploadPicDelete = async (req, res) => {
     console.log(err);
     res.json(err);
   }
+};
+
+exports.catchIp = async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.body.user._id,
+    {
+      $addToSet: { ipAddresses: req.body.userIp },
+    },
+    { new: true }
+  );
+  res.json(user);
+};
+
+exports.calcPoints = async (req, res) => {
+  const user = await User.findById(req.body._id).select(
+    'pointsGained pointsLost pointsSpent'
+  );
+
+  const sumPointsGained = user.pointsGained.reduce(
+    (sum, point) => sum + point.amount,
+    0
+  );
+  const sumPointsLost = user.pointsLost.reduce(
+    (sum, point) => sum + point.amount,
+    0
+  );
+  const sumPointsSpent = user.pointsSpent.reduce(
+    (sum, point) => sum + point.amount,
+    0
+  );
+  const pointsTotal = sumPointsGained - sumPointsLost - sumPointsSpent;
+  const updatePointsTotal = await User.findByIdAndUpdate(
+    req.body._id,
+    {
+      $set: { pointsTotal },
+    },
+    { new: true }
+  );
+  res.json(updatePointsTotal);
 };

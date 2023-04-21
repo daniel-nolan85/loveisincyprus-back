@@ -165,6 +165,22 @@ exports.reportPost = async (req, res) => {
       { new: true }
     );
 
+    const userReporting = await User.findByIdAndUpdate(
+      req.body._id,
+      {
+        $push: { 'reports.post': req.body.post },
+      },
+      { new: true }
+    );
+
+    const userReported = await User.findByIdAndUpdate(
+      req.body.post.postedBy._id,
+      {
+        $push: { 'reported.post': req.body.post },
+      },
+      { new: true }
+    );
+
     res.json(post);
   } catch (err) {
     console.log(err);
@@ -368,7 +384,7 @@ exports.updateComment = async (req, res) => {
 
 exports.reportComment = async (req, res) => {
   try {
-    const { postId, comment } = req.body;
+    const { postId, comment, _id } = req.body;
     const post = await Post.findOneAndUpdate(
       {
         _id: postId,
@@ -376,6 +392,21 @@ exports.reportComment = async (req, res) => {
       },
       {
         $set: { 'comments.$.reported': true },
+      },
+      { new: true }
+    );
+    const userReporting = await User.findByIdAndUpdate(
+      _id,
+      {
+        $push: { 'reports.comment': comment },
+      },
+      { new: true }
+    );
+
+    const userReported = await User.findByIdAndUpdate(
+      comment.postedBy._id,
+      {
+        $push: { 'reported.comment': comment },
       },
       { new: true }
     );

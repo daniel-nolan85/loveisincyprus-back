@@ -439,3 +439,279 @@ exports.fetchNewRefunds = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.usersData = async (req, res) => {
+  console.log('usersData => ', req.body);
+  const { byPage, filterBy } = req.body;
+  const users = await User.find({})
+    .select(
+      '_id username name email gender age createdAt lastLogin ipAddresses mobile membership verified profilePhotos profilePercentage pointsTotal featuredMember following followers reports reported messagesSent messagesReceived itemsOrdered itemsOrderedValue giftCardsSent giftCardsSentValue giftCardsReceived giftCardsReceivedValue tShirts sprays droppers perfumes'
+    )
+    .exec();
+  const removeAdmin = users.filter((u) => u._id != '63dc1d2a8eb01e4110743044');
+  if (byPage !== 'all') {
+    const filteredUsers = removeAdmin.slice(0, byPage);
+    res.json(filteredUsers);
+  } else {
+    res.json(removeAdmin);
+  }
+};
+
+exports.progressCompletionData = async (req, res) => {
+  const user = await User.findById(req.body.id).select(
+    'coverImage profileImage name gender about birthday location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation politics religion foods livesWith roleInLife managesEdu marriage income ageOfPartner changes relocate sexLikes sexFrequency loves hates pets interests music books films sports hobbies traits treatSelf'
+  );
+  let completion = {
+    percentage: 0,
+  };
+
+  console.log('user => ', user);
+
+  if (user.hasOwnProperty('coverImage')) {
+    completion.percentage = completion.percentage + 3;
+  } else {
+    completion.coverImage = true;
+  }
+  if (Object.keys(user).includes('profileImage')) {
+    completion.percentage = completion.percentage + 3;
+  } else {
+    completion.profileImage = true;
+  }
+  if (Object.keys(user).includes('name')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.name = true;
+  }
+  if (Object.keys(user).includes('gender')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.gender = true;
+  }
+  if (Object.keys(user).includes('about')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.about = true;
+  }
+  if (Object.keys(user).includes('birthday')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.birthday = true;
+  }
+  if (Object.keys(user).includes('location')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.location = true;
+  }
+  if (Object.keys(user).includes('genderWanted')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.genderWanted = true;
+  }
+  if (Object.keys(user).includes('relWanted')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.relWanted = true;
+  }
+  if (Object.keys(user).includes('language')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.language = true;
+  }
+  if (Object.keys(user).includes('maritalStatus')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.maritalStatus = true;
+  }
+  if (Object.keys(user).includes('numOfChildren')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.numOfChildren = true;
+  }
+  if (Object.keys(user).includes('drinks')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.drinks = true;
+  }
+  if (Object.keys(user).includes('smokes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.smokes = true;
+  }
+  if (Object.keys(user).includes('nationality')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.nationality = true;
+  }
+  if (Object.keys(user).includes('height')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.height = true;
+  }
+  if (Object.keys(user).includes('build')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.build = true;
+  }
+  if (Object.keys(user).includes('hairColor')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairColor = true;
+  }
+  if (Object.keys(user).includes('hairStyle')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairStyle = true;
+  }
+  if (Object.keys(user).includes('hairLength')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hairLength = true;
+  }
+  if (Object.keys(user).includes('eyeColor')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.eyeColor = true;
+  }
+  if (Object.keys(user).includes('ethnicity')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.ethnicity = true;
+  }
+  if (Object.keys(user).includes('feetType')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.feetType = true;
+  }
+  if (Object.keys(user).includes('education')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.education = true;
+  }
+  if (Object.keys(user).includes('occupation')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.occupation = true;
+  }
+  if (Object.keys(user).includes('politics')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.politics = true;
+  }
+  if (Object.keys(user).includes('religion')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.religion = true;
+  }
+  if (Object.keys(user).includes('foods')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.foods = true;
+  }
+  if (Object.keys(user).includes('livesWith')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.livesWith = true;
+  }
+  if (Object.keys(user).includes('roleInLife')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.roleInLife = true;
+  }
+  if (Object.keys(user).includes('managesEdu')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.managesEdu = true;
+  }
+  if (Object.keys(user).includes('marriage')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.marriage = true;
+  }
+  if (Object.keys(user).includes('income')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.income = true;
+  }
+  if (Object.keys(user).includes('ageOfPartner')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.ageOfPartner = true;
+  }
+  if (Object.keys(user).includes('changes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.changes = true;
+  }
+  if (Object.keys(user).includes('relocate')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.relocate = true;
+  }
+  if (Object.keys(user).includes('sexLikes')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sexLikes = true;
+  }
+  if (Object.keys(user).includes('sexFrequency')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sexFrequency = true;
+  }
+  if (user && user.loves.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.loves = true;
+  }
+  if (user && user.hates.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hates = true;
+  }
+  if (user && user.pets.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.pets = true;
+  }
+  if (user && user.interests.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.interests = true;
+  }
+  if (user && user.music.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.music = true;
+  }
+  if (user && user.books.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.books = true;
+  }
+  if (user && user.films.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.films = true;
+  }
+  if (user && user.sports.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.sports = true;
+  }
+  if (user && user.hobbies.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.hobbies = true;
+  }
+  if (user && user.traits.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.traits = true;
+  }
+  if (user && user.treatSelf.length > 0) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.treatSelf = true;
+  }
+  console.log('completion => ', completion);
+  res.json(completion);
+};

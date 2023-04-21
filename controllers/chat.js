@@ -126,6 +126,21 @@ exports.sendMessage = async (req, res) => {
       latestMessage: message,
     });
     res.json(message);
+
+    const incMessagesSent = await User.findByIdAndUpdate(
+      _id,
+      {
+        $inc: { messagesSent: 1 },
+      },
+      { new: true }
+    );
+    const incMessagesReceived = await User.findByIdAndUpdate(
+      receiver._id,
+      {
+        $inc: { messagesReceived: 1 },
+      },
+      { new: true }
+    );
   } catch (err) {
     res.status(400);
     throw new Error(err.message);
@@ -277,7 +292,21 @@ exports.reportMessage = async (req, res) => {
       { reported: true },
       { new: true }
     );
+    const userReporting = await User.findByIdAndUpdate(
+      req.body._id,
+      {
+        $push: { 'reports.message': req.body.message },
+      },
+      { new: true }
+    );
 
+    const userReported = await User.findByIdAndUpdate(
+      req.body.message.sender._id,
+      {
+        $push: { 'reported.message': req.body.message },
+      },
+      { new: true }
+    );
     res.json(message);
   } catch (err) {
     console.log(err);
