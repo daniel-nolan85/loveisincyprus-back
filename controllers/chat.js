@@ -127,17 +127,17 @@ exports.sendMessage = async (req, res) => {
     });
     res.json(message);
 
-    const incMessagesSent = await User.findByIdAndUpdate(
-      _id,
+    const updateMessagesSent = await User.findOneAndUpdate(
+      { _id },
       {
-        $inc: { messagesSent: 1 },
+        $push: { messagesSent: { content, image, receiver: receiver._id } },
       },
       { new: true }
     );
-    const incMessagesReceived = await User.findByIdAndUpdate(
-      receiver._id,
+    const updateMessagesReceived = await User.findOneAndUpdate(
+      { _id: receiver._id },
       {
-        $inc: { messagesReceived: 1 },
+        $push: { messagesReceived: { content, image, sender: sender._id } },
       },
       { new: true }
     );

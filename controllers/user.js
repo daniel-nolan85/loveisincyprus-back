@@ -1562,21 +1562,21 @@ exports.progressCompletion = async (req, res) => {
 
   res.json(completion);
 
-  const updateProgress = await User.findByIdAndUpdate(
-    user._id,
-    {
-      $set: { profilePercentage: completion.percentage },
-    },
-    { new: true }
-  );
+  // const updateProgress = await User.findByIdAndUpdate(
+  //   user._id,
+  //   {
+  //     $set: { profilePercentage: completion.percentage },
+  //   },
+  //   { new: true }
+  // );
 
-  if (completion.percentage == 100) {
-    const complete = await User.findByIdAndUpdate(
-      user._id,
-      { profileComplete: true },
-      { new: true }
-    );
-  }
+  // if (completion.percentage == 100) {
+  //   const complete = await User.findByIdAndUpdate(
+  //     user._id,
+  //     { profileComplete: true },
+  //     { new: true }
+  //   );
+  // }
 };
 
 exports.optInOrOut = async (req, res) => {

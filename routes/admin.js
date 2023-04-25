@@ -23,6 +23,12 @@ const {
   fetchNewRefunds,
   usersData,
   progressCompletionData,
+  pointsData,
+  updateUserProgress,
+  followingData,
+  followersData,
+  visitorsData,
+  ordersData,
 } = require('../controllers/admin');
 
 // routes
@@ -48,5 +54,11 @@ router.get('/fetch-new-orders', fetchNewOrders);
 router.get('/fetch-new-refunds', fetchNewRefunds);
 router.post('/users-data', authCheck, adminCheck, usersData);
 router.post('/progress-completion-data', authCheck, progressCompletionData);
+router.post('/points-data', authCheck, pointsData);
+router.put('/update-user-progress', updateUserProgress);
+router.post('/following-data', authCheck, followingData);
+router.post('/followers-data', authCheck, followersData);
+router.post('/visitors-data', authCheck, visitorsData);
+router.post('/orders-data', authCheck, ordersData);
 
 module.exports = router;

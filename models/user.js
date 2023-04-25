@@ -196,8 +196,26 @@ const userSchema = new mongoose.Schema(
       comment: Array,
       message: Array,
     },
-    messagesSent: Number,
-    messagesReceived: Number,
+    messagesSent: [
+      {
+        content: { type: String, trim: true },
+        image: {
+          url: String,
+          public_id: String,
+        },
+        receiver: { type: ObjectId, ref: 'User' },
+      },
+    ],
+    messagesReceived: [
+      {
+        content: { type: String, trim: true },
+        image: {
+          url: String,
+          public_id: String,
+        },
+        sender: { type: ObjectId, ref: 'User' },
+      },
+    ],
     itemsOrdered: Number,
     itemsOrderedValue: Number,
     giftCardsSent: Number,
