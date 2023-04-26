@@ -325,6 +325,7 @@ exports.fetchReportedMessages = async (req, res) => {
 };
 
 exports.deleteMessage = async (req, res) => {
+  console.log('req.params => ', req.params);
   try {
     const message = await Message.findByIdAndDelete(req.params.messageId);
     res.json({ ok: true });
