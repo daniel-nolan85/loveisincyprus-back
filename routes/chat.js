@@ -17,6 +17,7 @@ const {
   reportMessage,
   fetchReportedMessages,
   deleteMessage,
+  fetchAllChats,
 } = require('../controllers/chat');
 
 // routes
@@ -36,5 +37,6 @@ router.put(
   adminCheck,
   deleteMessage
 );
+router.post('/fetch-all-chats', authCheck, adminCheck, fetchAllChats);
 
 module.exports = router;

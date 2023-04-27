@@ -494,5 +494,7 @@ exports.refundSubscription = async (req, res) => {
 };
 
 exports.handlePending = async (req, res) => {
-  console.log('handlePending => ', req.body);
+  console.log('handlePendingBody => ', req.body);
+  console.log('handlePendingQuery => ', req.query);
+  console.log('handlePendingParams => ', req.params);
 };

@@ -333,3 +333,18 @@ exports.deleteMessage = async (req, res) => {
     console.log(err);
   }
 };
+
+exports.fetchAllChats = async (req, res) => {
+  try {
+    const chats = await Chat.find({
+      users: {
+        $nin: ['63dc1d2a8eb01e4110743044'],
+      },
+    })
+      .populate('users', '_id username name email profileImage')
+      .populate('latestMessage');
+    res.json(chats);
+  } catch (err) {
+    console.log(err);
+  }
+};
