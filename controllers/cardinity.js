@@ -60,7 +60,7 @@ exports.createPayment = async (req, res) => {
       notification_url:
         'https://www.loveisincyprus.com/api/cardinity/3d/callback',
       browser_info: {
-        accept_header: 'text/html',
+        accept_header: 'application/json',
         browser_language: 'en-US',
         screen_width: 390,
         screen_height: 400,
