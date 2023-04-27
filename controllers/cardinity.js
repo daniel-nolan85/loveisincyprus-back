@@ -95,8 +95,7 @@ exports.createPayment = async (req, res) => {
             </form>`;
           res.send({ response, form });
         } else {
-          res.setHeader('Content-Type', 'text/plain');
-          res.end(JSON.stringify(response, null, 2));
+          res.status(400).send('Transaction failed.');
         }
 
         if (response.status === 'pending' && response.threeds2_data) {
@@ -107,6 +106,7 @@ exports.createPayment = async (req, res) => {
           });
 
           const finalizeResponse = await client.call(finalizeObj);
+          console.log('finalizeResponse => ', finalizeResponse);
 
           if (finalizeResponse.status === 'approved') {
             // handle successful payment
