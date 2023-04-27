@@ -79,7 +79,7 @@ exports.createPayment = async (req, res) => {
   } else {
     client
       .call(purchase)
-      .then(async (response) => {
+      .then((response) => {
         console.log('response => ', response);
         if (response.status == 'approved') {
           res.send(response);
@@ -95,25 +95,8 @@ exports.createPayment = async (req, res) => {
             </form>`;
           res.send({ response, form });
         } else {
-          res.status(400).send('Transaction failed.');
-        }
-
-        if (response.status === 'pending' && response.threeds2_data) {
-          const finalizeObj = new Finalize({
-            id: response.id,
-            cres: req.body.cres,
-            threedsv2: true,
-          });
-
-          const finalizeResponse = await client.call(finalizeObj);
-          console.log('finalizeResponse => ', finalizeResponse);
-
-          if (finalizeResponse.status === 'approved') {
-            // handle successful payment
-            res.send(finalizeResponse);
-          } else {
-            res.status(400).send('Transaction failed.');
-          }
+          res.setHeader('Content-Type', 'text/plain');
+          res.end(JSON.stringify(response, null, 2));
         }
       })
       .catch((err) => {
@@ -472,7 +455,35 @@ exports.refundSubscription = async (req, res) => {
 };
 
 exports.handlePending = async (req, res) => {
-  console.log('handlePendingBody => ', req.body);
-  console.log('handlePendingQuery => ', req.query);
-  console.log('handlePendingParams => ', req.params);
+  if (req.body.PaRes) {
+    console.log('PaRes');
+    var finalize_obj = new Finalize({
+      id: req.body.MD,
+      authorize_data: req.body.PaRes,
+    });
+    console.log('finalize_obj => ', finalize_obj);
+  } else if (req.body.cres) {
+    console.log('cres');
+    var finalize_obj = new Finalize({
+      id: req.body.threeDSSessionData,
+      cres: req.body.cres,
+      threedsv2: true,
+    });
+    console.log('finalize_obj => ', finalize_obj);
+  }
+  if (finalize_obj.errors) {
+    res.end(JSON.stringify(finalize_obj.errors, null, 2));
+  } else {
+    client
+      .call(finalize_obj)
+      .then(function (response) {
+        if (response.status == 'approved') {
+          console.log('response => ', response);
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+        res.end(JSON.stringify(error, null, 2));
+      });
+  }
 };
