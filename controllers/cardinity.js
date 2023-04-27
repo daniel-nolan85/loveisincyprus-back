@@ -8,6 +8,7 @@ const moment = require('moment');
 const Client = Cardinity.client();
 const Payment = Cardinity.payment();
 const Refund = Cardinity.refund();
+const Finalize = Cardinity.finalize();
 
 const client = new Client(
   process.env.CARDINITY_KEY,
@@ -78,7 +79,7 @@ exports.createPayment = async (req, res) => {
   } else {
     client
       .call(purchase)
-      .then((response) => {
+      .then(async (response) => {
         console.log('response => ', response);
         if (response.status == 'approved') {
           res.send(response);
@@ -93,49 +94,26 @@ exports.createPayment = async (req, res) => {
             <input type="hidden" name="threeDSSessionData" value=${response.id} />
             </form>`;
           res.send({ response, form });
-          // if (response.authorization_information) {
-          //   var form_url = response.authorization_information.url;
-          //   var inputs =
-          //     '<input type="hidden" name="PaReq" value="' +
-          //     response.authorization_information.data +
-          //     '" />' +
-          //     '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
-          //   var threed_key = 'MD';
-          // } else if (response.threeds2_data) {
-          //   var form_url = response.threeds2_data.acs_url;
-          //   var inputs =
-          //     '<input name="creq" value="' +
-          //     response.threeds2_data.creq +
-          //     '" />';
-          //   var threed_key = 'threeDSSessionData';
-          // }
-          // res.setHeader('Content-Type', 'text/html');
-          // form =
-          //   '<html><head>' +
-          //   '<title>3-D Secure Example</title>' +
-          //   '<script type="application/javascript">' +
-          //   +'function OnLoadEvent(){' +
-          //   +'document.ThreeDForm.submit();' +
-          //   +'}' +
-          //   '</script>' +
-          //   '</head>' +
-          //   '<body onload="OnLoadEvent();">' +
-          //   '<form name="ThreeDForm" method="POST" action="' +
-          //   form_url +
-          //   '">' +
-          //   '<button type=submit>Click Here</button>' +
-          //   inputs +
-          //   '<input type="hidden" name="' +
-          //   threed_key +
-          //   '" value="' +
-          //   response.id +
-          //   '" />' +
-          //   '</form>' +
-          //   '</body></html>';
-          // res.end(form);
         } else {
           res.setHeader('Content-Type', 'text/plain');
           res.end(JSON.stringify(response, null, 2));
+        }
+
+        if (response.status === 'pending' && response.threeds2_data) {
+          const finalizeObj = new Finalize({
+            id: response.id,
+            cres: req.body.cres,
+            threedsv2: true,
+          });
+
+          const finalizeResponse = await client.call(finalizeObj);
+
+          if (finalizeResponse.status === 'approved') {
+            // handle successful payment
+            res.send(finalizeResponse);
+          } else {
+            res.status(400).send('Transaction failed.');
+          }
         }
       })
       .catch((err) => {
