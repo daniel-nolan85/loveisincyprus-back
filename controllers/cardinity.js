@@ -84,7 +84,7 @@ exports.createPayment = async (req, res) => {
           res.send(response);
         } else if (response.status == 'pending') {
           console.log('pending => ', response);
-          res.setHeader('Content-Type', 'text/html');
+          res.setHeader('Content-Type', 'application/json');
           form = `
             <form name="ThreeDForm" method="POST" action=${response.threeds2_data.acs_url}>
             <h2 style='text-align: center; margin: 10px auto;'>You are about to be redirected to your bank in order to verify this transaction.</h2>
