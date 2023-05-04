@@ -5,6 +5,7 @@ const Ad = require('../models/ad');
 const Post = require('../models/post');
 const Product = require('../models/product');
 const Refund = require('../models/refund');
+const GiftCard = require('../models/giftCard');
 const nodemailer = require('nodemailer');
 const Cardinity = require('cardinity-nodejs');
 
@@ -441,7 +442,6 @@ exports.fetchNewRefunds = async (req, res) => {
 };
 
 exports.usersData = async (req, res) => {
-  console.log('usersData => ', req.body);
   const { byPage } = req.body;
   const users = await User.find({})
     .select(
@@ -466,9 +466,6 @@ exports.progressCompletionData = async (req, res) => {
   let completion = {
     percentage: 0,
   };
-
-  console.log('user => ', user);
-
   if (user.username !== null && user.username !== undefined) {
     completion.username = user.username;
   }
@@ -717,7 +714,6 @@ exports.progressCompletionData = async (req, res) => {
   } else {
     completion.treatSelf = true;
   }
-  console.log('completion => ', completion);
   res.json(completion);
 };
 
@@ -1017,7 +1013,6 @@ exports.followingData = async (req, res) => {
     .select('following')
     .populate('following', '_id name email profileImage username');
 
-  console.log(user);
   res.json(user);
 };
 
@@ -1026,7 +1021,6 @@ exports.followersData = async (req, res) => {
     .select('followers')
     .populate('followers', '_id name email profileImage username');
 
-  console.log(user);
   res.json(user);
 };
 
@@ -1035,7 +1029,6 @@ exports.visitorsData = async (req, res) => {
     .select('visitors')
     .populate('visitors', '_id name email profileImage username');
 
-  console.log(user);
   res.json(user);
 };
 
@@ -1047,4 +1040,26 @@ exports.ordersData = async (req, res) => {
     .populate('orderedBy', 'username email')
     .exec();
   res.json(userOrders);
+};
+
+exports.gcSentData = async (req, res) => {
+  const user = await User.findById(req.body.id);
+  const gcSent = await GiftCard.find({ from: user._id })
+    .sort('-createdAt')
+    .select('from to amount')
+    .populate('from', '_id name username email profileImage')
+    .populate('to', '_id name username email profileImage')
+    .exec();
+  res.json(gcSent);
+};
+
+exports.gcReceivedData = async (req, res) => {
+  const user = await User.findById(req.body.id);
+  const gcReceived = await GiftCard.find({ to: user._id })
+    .sort('-createdAt')
+    .select('from to amount')
+    .populate('from', '_id name username email profileImage')
+    .populate('to', '_id name username email profileImage')
+    .exec();
+  res.json(gcReceived);
 };

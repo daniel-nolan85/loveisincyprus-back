@@ -125,6 +125,9 @@ io.on('connection', (socket) => {
   socket.on('new event', (event) => {
     socket.in(event.invitees.map((e) => e._id)).emit('event added', event);
   });
+  socket.on('new gift card', (gift) => {
+    socket.in(gift.to).emit('gift card added', gift);
+  });
 
   socket.off('setup', () => {
     socket.leave(userData._id);

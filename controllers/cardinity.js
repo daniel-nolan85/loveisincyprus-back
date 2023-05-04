@@ -59,7 +59,8 @@ exports.createPayment = async (req, res) => {
     },
     threeds2_data: {
       notification_url:
-        'https://www.loveisincyprus.com/api/cardinity/3d/callback',
+        // 'https://www.loveisincyprus.com/api/cardinity/3d/callback',
+        'https://7fa9-2600-8801-131d-e400-996-f29b-4c9a-ba8a.ngrok-free.app/api/cardinity/3d/callback',
       browser_info: {
         accept_header: 'application/json',
         browser_language: 'en-US',
@@ -80,24 +81,25 @@ exports.createPayment = async (req, res) => {
     client
       .call(purchase)
       .then((response) => {
-        console.log('response => ', response);
-        if (response.status == 'approved') {
-          res.send(response);
-        } else if (response.status == 'pending') {
-          console.log('pending => ', response);
-          res.setHeader('Content-Type', 'application/json');
-          form = `
-            <form name="ThreeDForm" method="POST" action=${response.threeds2_data.acs_url}>
-            <h2 style='text-align: center; margin: 10px auto;'>You are about to be redirected to your bank in order to verify this transaction.</h2>
-            <button type='submit' style='width: fit-content; padding: 10px 30px; cursor: pointer; display: block; margin: 20px auto; background: #ef5b85; border: 0; outline: none; border-radius: 30px; color: #fff;'>Continue</button>
-            <input type="hidden" name="creq" value=${response.threeds2_data.creq} className='input-field' />
-            <input type="hidden" name="threeDSSessionData" value=${response.id} />
-            </form>`;
-          res.send({ response, form });
-        } else {
-          res.setHeader('Content-Type', 'text/plain');
-          res.end(JSON.stringify(response, null, 2));
-        }
+        res.send(response);
+        // if (response.status == 'approved') {
+        //   res.send(response);
+        // } else if (response.status == 'pending') {
+        //   console.log('pending response => ', response);
+        //   console.log('pending res => ', res);
+        //   res.setHeader('Content-Type', 'application/json');
+        //   form = `
+        //     <form name="ThreeDForm" method="POST" action=${response.threeds2_data.acs_url}>
+        //     <h2 style='text-align: center; margin: 10px auto;'>You are about to be redirected to your bank in order to verify this transaction.</h2>
+        //     <button type='submit' style='width: fit-content; padding: 10px 30px; cursor: pointer; display: block; margin: 20px auto; background: #ef5b85; border: 0; outline: none; border-radius: 30px; color: #fff;'>Continue</button>
+        //     <input type="hidden" name="creq" value=${response.threeds2_data.creq} className='input-field' />
+        //     <input type="hidden" name="threeDSSessionData" value=${response.id} />
+        //     </form>`;
+        //   res.send({ response, form });
+        // } else {
+        //   res.setHeader('Content-Type', 'text/plain');
+        //   res.end(JSON.stringify(response, null, 2));
+        // }
       })
       .catch((err) => {
         console.log(err);
@@ -199,6 +201,97 @@ exports.createAdPayment = async (req, res) => {
     { status: 'paid' },
     { new: true }
   ).exec();
+};
+
+exports.createGCPayment = async (req, res) => {
+  const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
+  const { amount, userAgent } = req.body;
+
+  const purchase = new Payment({
+    amount: amount,
+    currency: 'eur',
+    country: 'CY',
+    payment_method: 'card',
+    payment_instrument: {
+      pan: cardNumber,
+      exp_year: parseInt(expiry.slice(-4)),
+      exp_month: parseInt(expiry.slice(0, 2)),
+      cvc: cvc,
+      holder: cardHolder,
+    },
+    threeds2_data: {
+      notification_url: 'https://www.loveisincyprus.com',
+      browser_info: {
+        accept_header: 'text/html',
+        browser_language: 'en-US',
+        screen_width: 390,
+        screen_height: 400,
+        challenge_window_size: '390x400',
+        user_agent: userAgent,
+        color_depth: 24,
+        time_zone: -60,
+      },
+    },
+  });
+
+  if (purchase.errors) {
+    res.send(purchase.errors);
+  } else {
+    client
+      .call(purchase)
+      .then((response) => {
+        if (response.status == 'approved') {
+          res.send(response);
+        } else if (response.status == 'pending') {
+          if (response.authorization_information) {
+            var form_url = response.authorization_information.url;
+            var inputs =
+              '<input type="hidden" name="PaReq" value="' +
+              response.authorization_information.data +
+              '" />' +
+              '<input type="hidden" name="TermUrl" value="https://loveisincyprus.com" />';
+            var threed_key = 'MD';
+          } else if (response.threeds2_data) {
+            var form_url = response.threeds2_data.acs_url;
+            var inputs =
+              '<input name="creq" value="' +
+              response.threeds2_data.creq +
+              '" />';
+            var threed_key = 'threeDSSessionData';
+          }
+          res.setHeader('Content-Type', 'text/html');
+          form =
+            '<html><head>' +
+            '<title>3-D Secure Example</title>' +
+            '<script type="application/javascript">' +
+            +'function OnLoadEvent(){' +
+            +'document.ThreeDForm.submit();' +
+            +'}' +
+            '</script>' +
+            '</head>' +
+            '<body onload="OnLoadEvent();">' +
+            '<form name="ThreeDForm" method="POST" action="' +
+            form_url +
+            '">' +
+            '<button type=submit>Click Here</button>' +
+            inputs +
+            '<input type="hidden" name="' +
+            threed_key +
+            '" value="' +
+            response.id +
+            '" />' +
+            '</form>' +
+            '</body></html>';
+          res.end(form);
+        } else {
+          res.setHeader('Content-Type', 'text/plain');
+          res.end(JSON.stringify(response, null, 2));
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 };
 
 exports.createMembershipPayment = async (req, res) => {
@@ -455,35 +548,39 @@ exports.refundSubscription = async (req, res) => {
 };
 
 exports.handlePending = async (req, res) => {
+  console.log('handlePending => ', req.body);
+  let finalize_obj = null;
   if (req.body.PaRes) {
     console.log('PaRes');
-    var finalize_obj = new Finalize({
+    finalize_obj = new Finalize({
       id: req.body.MD,
       authorize_data: req.body.PaRes,
     });
     console.log('finalize_obj => ', finalize_obj);
   } else if (req.body.cres) {
     console.log('cres');
-    var finalize_obj = new Finalize({
+    finalize_obj = new Finalize({
       id: req.body.threeDSSessionData,
       cres: req.body.cres,
       threedsv2: true,
     });
     console.log('finalize_obj => ', finalize_obj);
   }
-  if (finalize_obj.errors) {
-    res.end(JSON.stringify(finalize_obj.errors, null, 2));
-  } else {
-    client
-      .call(finalize_obj)
-      .then(function (response) {
-        if (response.status == 'approved') {
-          console.log('response => ', response);
-        }
-      })
-      .catch(function (error) {
-        console.log(error);
-        res.end(JSON.stringify(error, null, 2));
-      });
+  if (!finalize_obj) {
+    console.log('!finalize_obj');
+    res.end('Invalid request');
+    return;
   }
+
+  client
+    .call(finalize_obj)
+    .then(function (response) {
+      if (response.status == 'approved') {
+        console.log('response => ', response);
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.end(JSON.stringify(error, null, 2));
+    });
 };

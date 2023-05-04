@@ -29,6 +29,8 @@ const {
   followersData,
   visitorsData,
   ordersData,
+  gcSentData,
+  gcReceivedData,
 } = require('../controllers/admin');
 
 // routes
@@ -60,5 +62,7 @@ router.post('/following-data', authCheck, followingData);
 router.post('/followers-data', authCheck, followersData);
 router.post('/visitors-data', authCheck, visitorsData);
 router.post('/orders-data', authCheck, ordersData);
+router.post('/gc-sent-data', authCheck, gcSentData);
+router.post('/gc-received-data', authCheck, gcReceivedData);
 
 module.exports = router;

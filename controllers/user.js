@@ -289,7 +289,6 @@ exports.createOrder = async (req, res) => {
 
   let updated = await Product.bulkWrite(bulkOption, {});
 
-  console.log('products => ', products);
   let itemsOrdered = 0;
   let itemsOrderedValue = 0;
   let tShirts = 0;
@@ -1309,7 +1308,6 @@ exports.analyseUsers = async (req, res) => {
 
 exports.progressCompletion = async (req, res) => {
   const { user } = req.body;
-  console.log('user => ', user);
   let completion = {
     percentage: 0,
   };

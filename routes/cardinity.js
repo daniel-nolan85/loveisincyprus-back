@@ -14,6 +14,7 @@ const {
   calculateFinalAmount,
   createPayment,
   createAdPayment,
+  createGCPayment,
   createMembershipPayment,
   refundSubscription,
   handlePending,
@@ -23,6 +24,7 @@ const {
 router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-payment', authCheck, createPayment);
 router.post('/create-ad-payment', authCheck, adminCheck, createAdPayment);
+router.post('/create-gc-payment', authCheck, createGCPayment);
 router.post('/create-membership-payment', authCheck, createMembershipPayment);
 router.post(
   '/refund-subscription',

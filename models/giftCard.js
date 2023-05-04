@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Schema;
 
 const gifCardSchema = new mongoose.Schema(
   {
@@ -24,7 +25,11 @@ const gifCardSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    paid: Boolean,
+    succeeded: Boolean,
+    from: { type: ObjectId, ref: 'User' },
+    to: { type: ObjectId, ref: 'User' },
+    expiry: Date,
+    couponCode: String,
   },
   { timestamps: true }
 );
