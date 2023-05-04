@@ -2,10 +2,18 @@ const Coupon = require('../models/coupon');
 
 exports.create = async (req, res) => {
   try {
-    const { name, expiry, discount } = req.body.coupon;
-    res.json(await new Coupon({ name, expiry, discount }).save());
+    const { name, selectedProducts, expiry, discount } = req.body.coupon;
+    res.json(
+      await new Coupon({
+        name,
+        products: selectedProducts,
+        expiry,
+        discount,
+      }).save()
+    );
   } catch (err) {
-    console.log(err);
+    console.log('error', err);
+    res.json(err);
   }
 };
 
@@ -27,11 +35,11 @@ exports.remove = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, discount, expiry } = req.body.coupon;
+    const { name, selectedProducts, discount, expiry } = req.body.coupon;
     res.json(
       await Coupon.findByIdAndUpdate(
         { _id: req.params.couponId },
-        { name, discount, expiry }
+        { name, products: selectedProducts, discount, expiry }
       ).exec()
     );
   } catch (err) {
@@ -39,9 +47,19 @@ exports.update = async (req, res) => {
   }
 };
 
-exports.deleteAfterUse = async (req, res) => {
+exports.handleAfterUse = async (req, res) => {
+  console.log('handleAfterUse => ', req.body);
+  const { cartTotal } = req.body;
   try {
-    res.json(await Coupon.findByIdAndDelete(req.params.couponId).exec());
+    const coupon = await Coupon.findById(req.params.couponId);
+    if (coupon.name.slice(0, 5) === 'GIFT-' && coupon.discount > cartTotal) {
+      await Coupon.findByIdAndUpdate(req.params.couponId, {
+        $inc: { discount: -cartTotal },
+      });
+      res.json(coupon);
+    } else {
+      res.json(await Coupon.findByIdAndDelete(req.params.couponId).exec());
+    }
   } catch (err) {
     console.log(err);
   }

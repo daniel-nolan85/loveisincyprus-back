@@ -163,6 +163,7 @@ exports.saveAddress = async (req, res) => {
 exports.applyCouponToUserCart = async (req, res) => {
   const { coupon } = req.body;
   const validCoupon = await Coupon.findOne({ name: coupon }).exec();
+  console.log('validCoupon => ', validCoupon);
   if (validCoupon === null) {
     return res.json({
       err: 'Invalid coupon',
@@ -173,10 +174,39 @@ exports.applyCouponToUserCart = async (req, res) => {
     .populate('products.product', '_id title price')
     .exec();
 
-  let totalAfterDiscount = (
-    cartTotal -
-    (cartTotal * validCoupon.discount) / 100
-  ).toFixed(2);
+  let totalAfterDiscount;
+
+  if (validCoupon.products.length > 0) {
+    const sum = products.reduce((total, product) => total + product.price, 0);
+    const updatedProducts = products.map((product) => {
+      if (validCoupon.products.includes(product.product._id)) {
+        const newPrice = product.price * (1 - validCoupon.discount / 100);
+        return { ...product, price: newPrice };
+      } else {
+        return product;
+      }
+    });
+    const updatedCartTotal = updatedProducts.reduce(
+      (total, product) => total + product.price,
+      0
+    );
+    totalAfterDiscount = updatedCartTotal;
+  } else if (
+    coupon.slice(0, 5) === 'GIFT-' &&
+    validCoupon.discount >= cartTotal
+  ) {
+    totalAfterDiscount = 0;
+  } else if (
+    coupon.slice(0, 5) === 'GIFT-' &&
+    validCoupon.discount < cartTotal
+  ) {
+    totalAfterDiscount = (cartTotal - validCoupon.discount).toFixed(2);
+  } else {
+    totalAfterDiscount = (
+      cartTotal -
+      (cartTotal * validCoupon.discount) / 100
+    ).toFixed(2);
+  }
 
   Cart.findOneAndUpdate(
     { orderedBy: user._id },

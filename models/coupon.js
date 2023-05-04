@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Schema;
 
 const couponSchema = new mongoose.Schema(
   {
@@ -11,6 +12,7 @@ const couponSchema = new mongoose.Schema(
       minlength: [6, 'Coupon name is too short'],
       maxlength: [18, 'Coupon name is too long'],
     },
+    products: [{ type: ObjectId, ref: 'Product' }],
     expiry: {
       type: Date,
       required: true,
