@@ -60,7 +60,7 @@ exports.createPayment = async (req, res) => {
     threeds2_data: {
       notification_url:
         // 'https://www.loveisincyprus.com/api/cardinity/3d/callback',
-        'https://7fa9-2600-8801-131d-e400-996-f29b-4c9a-ba8a.ngrok-free.app/api/cardinity/3d/callback',
+        'https://7b41-2600-8801-131d-e400-4d49-85d-4408-131a.ngrok-free.app/api/cardinity/3d/callback',
       browser_info: {
         accept_header: 'application/json',
         browser_language: 'en-US',
@@ -551,12 +551,10 @@ exports.handlePending = async (req, res) => {
   console.log('handlePending => ', req.body);
   let finalize_obj = null;
   if (req.body.PaRes) {
-    console.log('PaRes');
     finalize_obj = new Finalize({
       id: req.body.MD,
       authorize_data: req.body.PaRes,
     });
-    console.log('finalize_obj => ', finalize_obj);
   } else if (req.body.cres) {
     console.log('cres');
     finalize_obj = new Finalize({
@@ -576,7 +574,13 @@ exports.handlePending = async (req, res) => {
     .call(finalize_obj)
     .then(function (response) {
       if (response.status == 'approved') {
-        console.log('response => ', response);
+        res.redirect(
+          `${
+            process.env.REDIRECT
+          }/finalizing-payment?status=approved&response=${encodeURIComponent(
+            JSON.stringify(response)
+          )}`
+        );
       }
     })
     .catch(function (error) {
