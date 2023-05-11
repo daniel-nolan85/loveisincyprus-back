@@ -226,6 +226,7 @@ const userSchema = new mongoose.Schema(
     sprays: Number,
     droppers: Number,
     perfumes: Number,
+    visits: [{ type: Date }],
     canVerify: {
       type: Boolean,
       default: false,

@@ -255,7 +255,11 @@ exports.loginUser = async (req, res) => {
   const { mobile, email } = req.body;
   const user = await User.findOneAndUpdate(
     { $or: [{ mobile }, { email }] },
-    { lastLogin: new Date(Date.now()) }
+    {
+      $set: { lastLogin: new Date(Date.now()) },
+      $push: { visits: new Date(Date.now()) },
+    },
+    { new: true }
   ).select(
     `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
     canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender

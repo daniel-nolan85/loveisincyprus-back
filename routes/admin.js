@@ -31,6 +31,7 @@ const {
   ordersData,
   gcSentData,
   gcReceivedData,
+  usersForAnalytics,
 } = require('../controllers/admin');
 
 // routes
@@ -64,5 +65,11 @@ router.post('/visitors-data', authCheck, visitorsData);
 router.post('/orders-data', authCheck, ordersData);
 router.post('/gc-sent-data', authCheck, gcSentData);
 router.post('/gc-received-data', authCheck, gcReceivedData);
+router.get(
+  '/fetch-users-for-analytics',
+  authCheck,
+  adminCheck,
+  usersForAnalytics
+);
 
 module.exports = router;
