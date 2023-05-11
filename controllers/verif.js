@@ -3,6 +3,7 @@ const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const cloudinary = require('cloudinary');
+const nodemailer = require('nodemailer');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -12,6 +13,7 @@ cloudinary.config({
 
 exports.submitVerif = async (req, res) => {
   const { verifImg, user } = req.body;
+  console.log('user => ', user);
 
   try {
     if (!verifImg) {
@@ -30,6 +32,34 @@ exports.submitVerif = async (req, res) => {
         { new: true }
       );
       verif.save();
+
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'customercare@loveisincyprus.com',
+          pass: process.env.GMAIL_AUTHORIZATION,
+        },
+        secure: true,
+      });
+
+      let emailAdmin = {
+        from: 'customercare@loveisincyprus.com',
+        to: 'william.wolf@mac.com',
+        subject: 'New verification submission was placed on Love is in Cyprus',
+        html: `
+      <h3 style="margin-bottom: 5px;">You have received a new verification submission to review</h3>
+    `,
+      };
+      transporter.sendMail(emailAdmin, (err, response) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send('Success');
+        }
+      });
+
+      transporter.close();
+
       res.json(verif);
     }
   } catch (err) {

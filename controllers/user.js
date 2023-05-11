@@ -255,7 +255,50 @@ exports.createOrder = async (req, res) => {
     secure: true,
   });
 
-  let mailOptions = {
+  let emailAdmin = {
+    from: 'customercare@loveisincyprus.com',
+    to: 'william.wolf@mac.com',
+    subject: 'New order was placed on Love is in Cyprus',
+    html: `
+      <h3 style="margin-bottom: 5px;">You have received a new order</h3>
+      <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${
+        newOrder.paymentIntent.id
+      }</span></p>
+      <p style="margin-bottom: 5px;">User's payment has been successfully authorised for the following items:</p>
+      <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${listItems}
+        </tbody>
+      </table>
+      <p style='margin-bottom: 5px;'>
+            Discount: ${
+              newOrder.discount
+                ? '€' + newOrder.discount.toFixed(2)
+                : 'No coupon applied'
+            }
+      </p>
+      <p style="margin-bottom: 5px;">${
+        newOrder.deliveryFee &&
+        'Delivery fee: €' + newOrder.deliveryFee.toFixed(2)
+      }</p>
+      <h3 style="margin-bottom: 5px;">${
+        'Total: €' + newOrder.paymentIntent.amount
+      }</h3>
+
+      <p style="font-size: 18px; margin-bottom: 5px;">The status of this order is currently <span style="font-weight: bold;">${
+        newOrder.orderStatus
+      }</span>.</p>
+    `,
+  };
+
+  let emailUser = {
     from: 'customercare@loveisincyprus.com',
     to: user.email,
     subject: 'Order confirmation from Love is in Cyprus',
@@ -299,13 +342,18 @@ exports.createOrder = async (req, res) => {
     `,
   };
 
-  transporter.sendMail(mailOptions, (err, response) => {
-    if (err) {
-      res.send(err);
-    } else {
-      res.send('Success');
-    }
-  });
+  const emails = [emailAdmin, emailUser];
+
+  for (let i = 0; i < emails.length; i++) {
+    transporter.sendMail(emails[i], (err, response) => {
+      if (err) {
+        res.send(err);
+      } else {
+        res.send('Success');
+      }
+    });
+  }
+
   transporter.close();
 
   let bulkOption = products.map((item) => {

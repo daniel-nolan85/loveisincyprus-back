@@ -96,7 +96,33 @@ exports.requestRefund = async (req, res) => {
       secure: true,
     });
 
-    let mailOptions = {
+    let emailAdmin = {
+      from: 'customercare@loveisincyprus.com',
+      to: 'william.wolf@mac.com',
+      subject: 'New refund was requested on Love Is In Cyprus',
+      html: `
+    <h3 style="margin-bottom: 5px;">You have received a new refund request</h3>
+    <p style="margin-bottom: 5px;">Order ID: <span style="font-weight: bold">${paymentIntent.id}</span></p>
+    <p style="margin-bottom: 5px;">User has requested a refund for the following items:</p>
+    <table style="border-spacing: 20px; border-collapse: separate; margin-bottom: 5px;">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${listItems}
+      </tbody>
+    </table>
+    <p style="margin-bottom: 5px;">User has given the following reason for the return:</p>
+    <p style="margin-bottom: 5px; margin-left: 10px; font-weight: bold;">${reason}</p>
+    <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${amountRequested} after reduction of handling charges.</p>
+    `,
+    };
+
+    let emailUser = {
       from: 'customercare@loveisincyprus.com',
       to: user.email,
       subject: 'Refund request from Love Is In Cyprus',
@@ -116,7 +142,7 @@ exports.requestRefund = async (req, res) => {
         ${listItems}
       </tbody>
     </table>
-    <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${amountRequested} after reduction handling charges.</p>
+    <p style="margin-bottom: 5px;">These items have an accumulated refund value of €${amountRequested} after reduction of handling charges.</p>
     <p style="margin-bottom: 5px;">Please return your unwanted items to our goods department at the following address:</p>
     <br/>
     <p>WOLF</p>
@@ -130,13 +156,18 @@ exports.requestRefund = async (req, res) => {
     `,
     };
 
-    transporter.sendMail(mailOptions, (err, response) => {
-      if (err) {
-        res.send(err);
-      } else {
-        res.send('Success');
-      }
-    });
+    const emails = [emailAdmin, emailUser];
+
+    for (let i = 0; i < emails.length; i++) {
+      transporter.sendMail(emails[i], (err, response) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send('Success');
+        }
+      });
+    }
+
     transporter.close();
   } catch (err) {
     console.log(err);
