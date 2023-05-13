@@ -18,6 +18,7 @@ const {
   fetchReportedMessages,
   deleteMessage,
   fetchAllChats,
+  fetchMassMessages,
 } = require('../controllers/chat');
 
 // routes
@@ -38,5 +39,6 @@ router.put(
   deleteMessage
 );
 router.post('/fetch-all-chats', authCheck, adminCheck, fetchAllChats);
+router.post('/fetch-mass-messages', authCheck, adminCheck, fetchMassMessages);
 
 module.exports = router;

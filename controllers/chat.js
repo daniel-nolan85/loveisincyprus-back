@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
+const MassMessage = require('../models/massMessages');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
 
@@ -217,6 +218,8 @@ exports.massMail = async (req, res) => {
     });
   }
 
+  const massMessage = await MassMessage.create({ content, image });
+
   for (const email of userEmails) {
     let mailOptions = {
       from: 'customercare@loveisincyprus.com',
@@ -343,6 +346,15 @@ exports.fetchAllChats = async (req, res) => {
       .populate('users', '_id username name email profileImage')
       .populate('latestMessage');
     res.json(chats);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchMassMessages = async (req, res) => {
+  try {
+    const massMessages = await MassMessage.find({}).sort({ createdAt: -1 });
+    res.json(massMessages);
   } catch (err) {
     console.log(err);
   }

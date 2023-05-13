@@ -435,7 +435,7 @@ exports.handlePending = async (req, res) => {
 };
 
 exports.handleAdPending = async (req, res) => {
-  console.log('handlePending => ', req.body);
+  console.log('handleAdPending => ', req.body);
   let finalize_obj = null;
   if (req.body.PaRes) {
     finalize_obj = new Finalize({

@@ -10,11 +10,12 @@ const { authCheck, adminCheck } = require('../middleware/auth');
 const {
   submitAd,
   fetchAds,
-  fetchApprovedAds,
+  fetchPaidAds,
   disapproveAd,
   approveAd,
   handleExpiredAds,
   removeAd,
+  checkAd,
 } = require('../controllers/ad');
 
 const { uploadImage } = require('../controllers/post');
@@ -27,10 +28,11 @@ router.post(
   uploadImage
 );
 router.post('/fetch-ads', fetchAds);
-router.get('/fetch-approved-ads', fetchApprovedAds);
+router.get('/fetch-paid-ads', fetchPaidAds);
 router.put('/disapprove-ad', authCheck, adminCheck, disapproveAd);
 router.put('/approve-ad', authCheck, adminCheck, approveAd);
 router.put('/expired-ad', handleExpiredAds);
 router.delete('/remove-ad/:adId', removeAd);
+router.post('/check-ad', checkAd);
 
 module.exports = router;

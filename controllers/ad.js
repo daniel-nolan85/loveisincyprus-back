@@ -2,15 +2,8 @@ const Ad = require('../models/ad');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  const {
-    hyperlink,
-    content,
-    image,
-    duration,
-    demographic,
-    contactInfo,
-    accountInfo,
-  } = req.body;
+  const { hyperlink, content, image, duration, demographic, contactInfo } =
+    req.body;
   if (demographic.length === 0) {
     demographic.push('everyone');
   }
@@ -24,11 +17,6 @@ exports.submitAd = async (req, res) => {
       res.json({
         error: 'Contact info is required',
       });
-    }
-    if (!accountInfo) {
-      res.json({
-        error: 'Account info is required',
-      });
     } else {
       const ad = new Ad({
         hyperlink,
@@ -37,10 +25,39 @@ exports.submitAd = async (req, res) => {
         duration,
         demographic,
         contactInfo,
-        accountInfo,
         status: 'pending',
       });
       ad.save();
+
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'customercare@loveisincyprus.com',
+          pass: process.env.GMAIL_AUTHORIZATION,
+        },
+        secure: true,
+      });
+
+      let mailOptions = {
+        from: 'customercare@loveisincyprus.com',
+        to: contactInfo.email,
+        subject:
+          'Confirmation of your recent ad submission to Love is in Cyprus',
+        html: `
+        <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
+        <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
+      `,
+      };
+
+      transporter.sendMail(mailOptions, (err, response) => {
+        if (err) {
+          res.send(err);
+        } else {
+          res.send('Success');
+        }
+      });
+      transporter.close();
+
       res.json(ad);
     }
   } catch (err) {
@@ -58,12 +75,12 @@ exports.fetchAds = async (req, res) => {
   }
 };
 
-exports.fetchApprovedAds = async (req, res) => {
+exports.fetchPaidAds = async (req, res) => {
   try {
-    const approved = await Ad.find({ status: 'approved' }).sort({
+    const paid = await Ad.find({ status: 'paid' }).sort({
       createdAt: -1,
     });
-    res.json(approved);
+    res.json(paid);
   } catch (err) {
     console.log(err);
   }
@@ -87,22 +104,17 @@ exports.disapproveAd = async (req, res) => {
   });
 
   const content = reason
-    ? `Your recent advertisement submission has been rejected for the following reason: ${reason}. You have not been charged. Feel free to re-try any time.`
-    : 'Your recent advertisement submission has been rejected.  You have not been charged. Feel free to re-try any time.';
+    ? `<p>Your recent advertisement submission has been rejected for the following reason:</p>
+    <p>${reason}</p>
+    <p>You have not been charged. Feel free to re-try any time.</p>`
+    : 'Your recent advertisement submission has been rejected. You have not been charged. Feel free to re-try any time.';
 
   let mailOptions = {
     from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
-      <h3>Information</h3>
-      <ul>
-      <li>Name: ${ad.contactInfo.name}</li>
-      <li>Email: ${ad.contactInfo.email}</li>
-      </ul>
-
-      <h3>Message</h3>
-      <p>${content}</p>
+      ${content}
       `,
   };
 
@@ -133,21 +145,16 @@ exports.approveAd = async (req, res) => {
     secure: true,
   });
 
-  const content = `Your recent advertisement submission has been approved and will now be displayed to all members for ${ad.duration}.`;
-
   let mailOptions = {
     from: 'customercare@loveisincyprus.com',
     to: ad.contactInfo.email,
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
-      <h3>Information</h3>
-      <ul>
-      <li>Name: ${ad.contactInfo.name}</li>
-      <li>Email: ${ad.contactInfo.email}</li>
-      </ul>
-
-      <h3>Message</h3>
-      <p>${content}</p>
+      <h3 style="margin-bottom: 5px;">Congratulations! Your recent advertisement submission has been approved.</h3>
+      <p>To see your ad displayed on our site, first click the button below to submit your payment details and finalize your submission.</p>
+      <a href="${process.env.REDIRECT}/ad-finalize?ad=${encodeURIComponent(
+      JSON.stringify(ad)
+    )}" style="text-decoration: none;"><button style="width: 140px; padding: 10px 30px; cursor: pointer; display: block; margin: 20px auto; background: #ef5b85; border: 0; outline: none; border-radius: 30px; color: #fff;">Finalize</button></a>
       `,
   };
 
@@ -165,7 +172,7 @@ exports.handleExpiredAds = async (req, res) => {
   const ids = [];
   const expiredOneDay = await Ad.find({
     $and: [
-      { status: 'approved' },
+      { status: 'paid' },
       { duration: 'one day' },
       {
         updatedAt: {
@@ -179,7 +186,7 @@ exports.handleExpiredAds = async (req, res) => {
   });
   const expiredOneWeek = await Ad.find({
     $and: [
-      { status: 'approved' },
+      { status: 'paid' },
       { duration: 'one week' },
       {
         updatedAt: {
@@ -193,7 +200,7 @@ exports.handleExpiredAds = async (req, res) => {
   });
   const expiredTwoWeeks = await Ad.find({
     $and: [
-      { status: 'approved' },
+      { status: 'paid' },
       { duration: 'two weeks' },
       {
         updatedAt: {
@@ -207,7 +214,7 @@ exports.handleExpiredAds = async (req, res) => {
   });
   const expiredOneMonth = await Ad.find({
     $and: [
-      { status: 'approved' },
+      { status: 'paid' },
       { duration: 'one month' },
       {
         updatedAt: {
@@ -239,4 +246,10 @@ exports.removeAd = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.checkAd = async (req, res) => {
+  console.log('checkAd => ', req.body);
+  const ad = await Ad.findById(req.body.ad._id).select('status');
+  res.json(ad);
 };

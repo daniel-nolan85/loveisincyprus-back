@@ -26,7 +26,7 @@ const {
 // routes
 router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-payment', authCheck, createPayment);
-router.post('/create-ad-payment', authCheck, adminCheck, createAdPayment);
+router.post('/create-ad-payment', createAdPayment);
 router.post('/create-gc-payment', authCheck, createGCPayment);
 router.post('/create-membership-payment', authCheck, createMembershipPayment);
 router.post(
