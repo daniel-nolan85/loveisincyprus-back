@@ -4,6 +4,12 @@ const Message = require('../models/message');
 const MassMessage = require('../models/massMessages');
 const nodemailer = require('nodemailer');
 const axios = require('axios');
+const mailchimp = require('@mailchimp/mailchimp_marketing');
+
+mailchimp.setConfig({
+  apiKey: 'b361b87bb09f27dc804a28f39380cbe0-us4',
+  server: 'us4',
+});
 
 exports.accessChat = async (req, res) => {
   const { _id, u } = req.body;

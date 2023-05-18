@@ -87,8 +87,9 @@ exports.createPayment = async (req, res) => {
 };
 
 exports.createAdPayment = async (req, res) => {
+  console.log('createAdPayment => ', req.body);
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
-  const { payable, userAgent, _id } = req.body;
+  const { payable, userAgent, _id, demographic } = req.body;
 
   const purchase = new Payment({
     amount: payable,
@@ -103,7 +104,11 @@ exports.createAdPayment = async (req, res) => {
       holder: cardHolder,
     },
     threeds2_data: {
-      notification_url: `${process.env.NOTIFICATION_URL}/api/cardinity/ad/3d/callback`,
+      notification_url: `${
+        process.env.NOTIFICATION_URL
+      }/api/cardinity/ad/3d/callback?demographic=${encodeURIComponent(
+        JSON.stringify(demographic)
+      )}`,
       browser_info: {
         accept_header: 'application/json',
         browser_language: 'en-US',
@@ -435,7 +440,8 @@ exports.handlePending = async (req, res) => {
 };
 
 exports.handleAdPending = async (req, res) => {
-  console.log('handleAdPending => ', req.body);
+  const { demographic } = req.query;
+  console.log('demographic => ', demographic);
   let finalize_obj = null;
   if (req.body.PaRes) {
     finalize_obj = new Finalize({
@@ -466,7 +472,7 @@ exports.handleAdPending = async (req, res) => {
             process.env.REDIRECT
           }/finalizing-ad-payment?status=approved&response=${encodeURIComponent(
             JSON.stringify(response)
-          )}`
+          )}&demographic=${demographic}`
         );
       }
     })

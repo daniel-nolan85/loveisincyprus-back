@@ -2,6 +2,7 @@ const Ad = require('../models/ad');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
+  console.log('submitAd => ', req.body);
   const { hyperlink, content, image, duration, demographic, contactInfo } =
     req.body;
   if (demographic.length === 0) {
@@ -38,7 +39,16 @@ exports.submitAd = async (req, res) => {
         secure: true,
       });
 
-      let mailOptions = {
+      let emailAdmin = {
+        from: 'customercare@loveisincyprus.com',
+        to: 'william.wolf@mac.com',
+        subject: 'New ad submission was placed on Love is in Cyprus',
+        html: `
+        <h3 style="margin-bottom: 5px;">You have received a new ad submission to review</h3>
+      `,
+      };
+
+      let emailUser = {
         from: 'customercare@loveisincyprus.com',
         to: contactInfo.email,
         subject:
@@ -49,13 +59,18 @@ exports.submitAd = async (req, res) => {
       `,
       };
 
-      transporter.sendMail(mailOptions, (err, response) => {
-        if (err) {
-          res.send(err);
-        } else {
-          res.send('Success');
-        }
-      });
+      const emails = [emailAdmin, emailUser];
+
+      for (let i = 0; i < emails.length; i++) {
+        transporter.sendMail(emails[i], (err, response) => {
+          if (err) {
+            res.send(err);
+          } else {
+            res.send('Success');
+          }
+        });
+      }
+
       transporter.close();
 
       res.json(ad);

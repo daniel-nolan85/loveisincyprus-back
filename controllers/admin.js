@@ -172,7 +172,38 @@ exports.incomeTaken = async (req, res) => {
     sumOfSubscriptions += amount;
   });
 
-  const income = parseFloat(sumOfOrders) + parseFloat(sumOfSubscriptions);
+  const ads = await Ad.find({
+    status: 'paid',
+  });
+
+  let sumOfAds = 0;
+  ads.map((ad) => {
+    if (ad.duration === 'one day') {
+      sumOfAds += 5;
+    } else if (ad.duration === 'one week') {
+      sumOfAds += 20;
+    } else if (ad.duration === 'two weeks') {
+      sumOfAds += 30;
+    } else if (ad.duration === 'one month') {
+      sumOfAds += 50;
+    }
+  });
+
+  const giftCards = await GiftCard.find({});
+
+  let sumOfGiftCards = 0;
+  giftCards.map((gc) => {
+    let amount = parseFloat(gc.amount);
+    sumOfGiftCards += amount;
+  });
+
+  const income =
+    parseFloat(sumOfOrders) +
+    parseFloat(sumOfSubscriptions) +
+    parseFloat(sumOfAds) +
+    parseFloat(sumOfGiftCards);
+
+  console.log('ads => ', ads);
 
   res.json(income);
 };
