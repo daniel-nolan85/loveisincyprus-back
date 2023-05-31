@@ -263,8 +263,38 @@ exports.disapproveProduct = async (req, res) => {
       slug: req.params.slug,
     }).exec();
     res.json(product);
-  } catch {
+  } catch (err) {
     console.log(err);
     return res.status(400).send('Delete product failed');
+  }
+};
+
+exports.incrementViews = async (req, res) => {
+  try {
+    console.log('incrementViews => ', req.body);
+    const { _id, product } = req.body;
+    let user = await User.findOneAndUpdate(
+      {
+        _id,
+        'productsViewed.item': product._id,
+      },
+      { $inc: { 'productsViewed.$.amount': 1 } },
+      { new: true }
+    ).exec();
+
+    if (!user) {
+      if (product._id) {
+        user = await User.findByIdAndUpdate(
+          _id,
+          { $push: { productsViewed: { item: product._id, amount: 1 } } },
+          { new: true }
+        ).exec();
+      } else {
+        return res.json({ error: 'No product loaded' });
+      }
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.log(err);
   }
 };

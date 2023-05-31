@@ -188,7 +188,7 @@ exports.createGCPayment = async (req, res) => {
 
 exports.createMembershipPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;
-  const { payable, userAgent, user } = req.body;
+  const { payable, userAgent, user, daysLeft } = req.body;
 
   const purchase = new Payment({
     amount: payable,
@@ -226,11 +226,11 @@ exports.createMembershipPayment = async (req, res) => {
         if (response.status == 'approved') {
           let days = 0;
           if (payable === '10.00') {
-            days = 30;
+            days = 30 + daysLeft;
           } else if (payable === '50.00') {
-            days = 180;
+            days = 180 + daysLeft;
           } else {
-            days = 365;
+            days = 365 + daysLeft;
           }
           const existingBank = await User.findOne({
             _id: user._id,
@@ -276,7 +276,8 @@ exports.createMembershipPayment = async (req, res) => {
               <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
               <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
                 amendMembership.membership.expiry
-              ).format('MMMM Do YYYY')}</p>
+              )
+                .format('MMMM Do YYYY')}</p>
               <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
                 fortnight
               ).format(
@@ -339,7 +340,8 @@ exports.createMembershipPayment = async (req, res) => {
               <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
               <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
                 amendMembership.membership.expiry
-              ).format('MMMM Do YYYY')}</p>
+              )
+                .format('MMMM Do YYYY')}</p>
               <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
                 fortnight
               ).format(
@@ -385,6 +387,7 @@ exports.refundSubscription = async (req, res) => {
         {
           'membership.paid': false,
           'membership.trialPeriod': false,
+          'membership.cost': '0.00',
         },
         { new: true }
       )

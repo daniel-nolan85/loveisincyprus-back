@@ -227,6 +227,12 @@ const userSchema = new mongoose.Schema(
     droppers: Number,
     perfumes: Number,
     visits: [{ type: Date }],
+    productsViewed: [
+      {
+        item: { type: ObjectId, ref: 'Product' },
+        amount: Number,
+      },
+    ],
     canVerify: {
       type: Boolean,
       default: false,

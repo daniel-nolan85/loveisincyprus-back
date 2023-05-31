@@ -20,6 +20,7 @@ const {
   fetchProductsToReview,
   disapproveProduct,
   approveProduct,
+  incrementViews,
 } = require('../controllers/product');
 
 // routes
@@ -41,5 +42,6 @@ router.delete(
   disapproveProduct
 );
 router.put('/approve-product', authCheck, adminCheck, approveProduct);
+router.put('/increment-views', authCheck, incrementViews);
 
 module.exports = router;

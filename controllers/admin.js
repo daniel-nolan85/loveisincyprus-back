@@ -1096,11 +1096,13 @@ exports.gcReceivedData = async (req, res) => {
 };
 
 exports.usersForAnalytics = async (req, res) => {
-  const users = await User.find({}).select(
-    `gender birthday age location genderWanted relWanted language createdAt visits lastLogin maritalStatus numOfChildren
+  const users = await User.find({})
+    .select(
+      `gender birthday age location genderWanted relWanted language createdAt visits lastLogin maritalStatus numOfChildren
     drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation
-    religion music foods hobbies books films sports livesWith ageOfPartner treatSelf`
-  );
+    religion music foods hobbies books films sports livesWith ageOfPartner treatSelf productsViewed`
+    )
+    .populate('productsViewed.item', 'title');
   const removeAdmin = users.filter((u) => u._id != '63dc1d2a8eb01e4110743044');
   res.json(removeAdmin);
 };

@@ -19,6 +19,7 @@ const {
   deleteMessage,
   fetchAllChats,
   fetchMassMessages,
+  fetchMailchimpData,
 } = require('../controllers/chat');
 
 // routes
@@ -40,5 +41,6 @@ router.put(
 );
 router.post('/fetch-all-chats', authCheck, adminCheck, fetchAllChats);
 router.post('/fetch-mass-messages', authCheck, adminCheck, fetchMassMessages);
+router.post('/fetch-mailchimp-data', authCheck, adminCheck, fetchMailchimpData);
 
 module.exports = router;

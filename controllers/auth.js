@@ -289,6 +289,7 @@ exports.loginUser = async (req, res) => {
           {
             'membership.paid': false,
             'membership.trialPeriod': false,
+            'membership.cost': '0.00',
           },
           { new: true }
         )

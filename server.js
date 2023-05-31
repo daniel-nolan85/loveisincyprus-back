@@ -5,8 +5,14 @@ const cors = require('cors');
 const { readdirSync } = require('fs');
 require('dotenv').config();
 const rateLimit = require('express-rate-limit');
+const schedule = require('node-schedule');
 
 const User = require('./models/user');
+
+const {
+  deleteOldLists,
+  emailUpcomingExpiries,
+} = require('./controllers/scheduling');
 
 // app
 const app = express();
@@ -45,6 +51,19 @@ const limiter = rateLimit({
   max: 200, // Limit each IP to 200 requests per `window` (here, per 15 minutes)
   message: 'Too many requests', // message to send
 });
+
+// scheduler
+const dailyTasks = schedule.scheduleJob('0 0 * * *', function () {
+  deleteOldLists();
+});
+
+// const biDailyTasks = schedule.scheduleJob('0 0 */2 * *', function () {
+//   emailUpcomingExpiries();
+// });
+
+// const biDailyTasks = schedule.scheduleJob('* * * * *', function () {
+//   emailUpcomingExpiries();
+// });
 
 // middleware
 app.use(morgan('dev'));

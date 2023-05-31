@@ -2,8 +2,6 @@ const User = require('../models/user');
 const Chat = require('../models/chat');
 const Message = require('../models/message');
 const MassMessage = require('../models/massMessages');
-const nodemailer = require('nodemailer');
-const axios = require('axios');
 const mailchimp = require('@mailchimp/mailchimp_marketing');
 const moment = require('moment');
 
@@ -11,9 +9,6 @@ mailchimp.setConfig({
   apiKey: process.env.MAILCHIMP_KEY,
   server: 'us4',
 });
-
-// const list_id = process.env.MAILCHIMP_LIST_ID;
-// const tag_name = 'tagged';
 
 exports.accessChat = async (req, res) => {
   const { _id, u } = req.body;
@@ -217,63 +212,9 @@ exports.massMail = async (req, res) => {
 
     const massMessage = await MassMessage.create({ content, image });
 
-    const currentDate = new Date();
     const timestamp = new Date().getTime();
-    const daysThreshold = 7;
-    const listsToDelete = [];
-
-    const getLists = async () => {
-      const response = await mailchimp.lists.getAllLists();
-      return response.lists;
-    };
-
-    const getDaysSinceDate = (date) => {
-      const timeDiff = Math.abs(currentDate.getTime() - date.getTime());
-      return Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-    };
-
-    const checkListForDeletion = async (list) => {
-      const campaignsResponse = await mailchimp.campaigns.list({
-        list_id: list.id,
-        count: 1,
-        sort_field: 'send_time',
-        sort_dir: 'DESC',
-      });
-
-      if (campaignsResponse.campaigns.length === 0) {
-        const listCreatedDate = new Date(list.date_created);
-        const daysSinceCreation = getDaysSinceDate(listCreatedDate);
-
-        if (daysSinceCreation > daysThreshold) {
-          listsToDelete.push(list);
-        }
-      } else {
-        const lastCampaignDate = new Date(
-          campaignsResponse.campaigns[0].send_time
-        );
-        const daysSinceLastCampaign = getDaysSinceDate(lastCampaignDate);
-
-        if (daysSinceLastCampaign > daysThreshold) {
-          listsToDelete.push(list);
-        }
-      }
-    };
-
-    const deleteLists = async () => {
-      const allLists = await getLists();
-
-      for (const list of allLists) {
-        await checkListForDeletion(list);
-      }
-
-      for (const listToDelete of listsToDelete) {
-        await mailchimp.lists.deleteList(listToDelete.id);
-      }
-    };
 
     const createAndPopulateList = async () => {
-      await deleteLists();
-
       const newListResponse = await mailchimp.lists.createList({
         name: `Love is in Cyprus - ${timestamp}`,
         contact: {
@@ -434,6 +375,7 @@ exports.fetchAllChats = async (req, res) => {
     })
       .populate('users', '_id username name email profileImage')
       .populate('latestMessage');
+    console.log('chats => ', chats);
     res.json(chats);
   } catch (err) {
     console.log(err);
@@ -444,6 +386,49 @@ exports.fetchMassMessages = async (req, res) => {
   try {
     const massMessages = await MassMessage.find({}).sort({ createdAt: -1 });
     res.json(massMessages);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchMailchimpData = async (req, res) => {
+  try {
+    const lists = await mailchimp.lists.getAllLists();
+    const listsNum = lists.lists.length;
+    let nextAutomation;
+    const nextExpiry = await User.aggregate([
+      {
+        $match: {
+          'membership.expiry': { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          closestExpiryDate: { $min: '$membership.expiry' },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+    ]);
+    if (nextExpiry.length > 0 && nextExpiry[0].closestExpiryDate) {
+      const closestExpiryDate = new Date(nextExpiry[0].closestExpiryDate);
+      const timeDiff = Math.ceil(
+        (closestExpiryDate - new Date()) / (1000 * 60 * 60 * 24)
+      );
+      if (timeDiff > 7) {
+        closestExpiryDate.setDate(closestExpiryDate.getDate() - 7);
+      } else if (timeDiff >= 1) {
+        closestExpiryDate.setDate(closestExpiryDate.getDate() - timeDiff);
+      }
+      const today = new Date();
+      const modifiedExpiryDate = new Date(Math.max(closestExpiryDate, today));
+      nextAutomation = moment(modifiedExpiryDate).format('dddd, D MMMM YYYY');
+    }
+    res.json({ listsNum, nextAutomation });
   } catch (err) {
     console.log(err);
   }
