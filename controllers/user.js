@@ -395,6 +395,7 @@ exports.createOrder = async (req, res) => {
     user._id,
     {
       $inc: {
+        orders: 1,
         itemsOrdered,
         itemsOrderedValue,
         tShirts,

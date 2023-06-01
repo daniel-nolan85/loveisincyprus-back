@@ -216,6 +216,7 @@ const userSchema = new mongoose.Schema(
         sender: { type: ObjectId, ref: 'User' },
       },
     ],
+    orders: Number,
     itemsOrdered: Number,
     itemsOrderedValue: Number,
     giftCardsSent: Number,
