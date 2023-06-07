@@ -6,6 +6,7 @@ const Post = require('../models/post');
 const Product = require('../models/product');
 const Refund = require('../models/refund');
 const GiftCard = require('../models/giftCard');
+const Blocked = require('../models/blocked');
 const nodemailer = require('nodemailer');
 const Cardinity = require('cardinity-nodejs');
 
@@ -1105,4 +1106,30 @@ exports.usersForAnalytics = async (req, res) => {
     .populate('productsViewed.item', 'title');
   const removeAdmin = users.filter((u) => u._id != '63dc1d2a8eb01e4110743044');
   res.json(removeAdmin);
+};
+
+exports.fetchBlockedNumbers = async (req, res) => {
+  res.json(await Blocked.find({}).exec());
+};
+
+exports.removeNumber = async (req, res) => {
+  try {
+    res.json(await Blocked.findByIdAndDelete(req.params.numId).exec());
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.blockNumber = async (req, res) => {
+  const mobile = req.body.numberToBlock;
+  try {
+    res.json(
+      await new Blocked({
+        mobile,
+      }).save()
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(400).send('Block number failed');
+  }
 };

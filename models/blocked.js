@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const blockedSchema = new mongoose.Schema(
   {
-    mobile: [String],
+    mobile: String,
   },
   { timestamps: true }
 );

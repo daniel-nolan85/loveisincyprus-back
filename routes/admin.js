@@ -32,6 +32,9 @@ const {
   gcSentData,
   gcReceivedData,
   usersForAnalytics,
+  fetchBlockedNumbers,
+  removeNumber,
+  blockNumber,
 } = require('../controllers/admin');
 
 // routes
@@ -71,5 +74,13 @@ router.get(
   adminCheck,
   usersForAnalytics
 );
+router.get('/fetch-blocked-numbers', fetchBlockedNumbers);
+router.delete(
+  '/remove-blocked-num/:numId',
+  authCheck,
+  adminCheck,
+  removeNumber
+);
+router.post('/block-number', authCheck, adminCheck, blockNumber);
 
 module.exports = router;
