@@ -271,7 +271,6 @@ exports.disapproveProduct = async (req, res) => {
 
 exports.incrementViews = async (req, res) => {
   try {
-    console.log('incrementViews => ', req.body);
     const { _id, product } = req.body;
     let user = await User.findOneAndUpdate(
       {

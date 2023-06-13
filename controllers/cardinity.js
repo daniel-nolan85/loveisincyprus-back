@@ -276,8 +276,7 @@ exports.createMembershipPayment = async (req, res) => {
               <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
               <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
                 amendMembership.membership.expiry
-              )
-                .format('MMMM Do YYYY')}</p>
+              ).format('MMMM Do YYYY')}</p>
               <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
                 fortnight
               ).format(
@@ -340,8 +339,7 @@ exports.createMembershipPayment = async (req, res) => {
               <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
               <p style="margin-bottom: 5px;">Your payment has been successfully authorised and you will now receive full access to all areas of the site until ${moment(
                 amendMembership.membership.expiry
-              )
-                .format('MMMM Do YYYY')}</p>
+              ).format('MMMM Do YYYY')}</p>
               <p>Should you decide you'd like to cancel, please contact us anytime between now and ${moment(
                 fortnight
               ).format(
@@ -401,7 +399,6 @@ exports.refundSubscription = async (req, res) => {
 };
 
 exports.handlePending = async (req, res) => {
-  console.log('handlePending => ', req.body);
   let finalize_obj = null;
   if (req.body.PaRes) {
     finalize_obj = new Finalize({
@@ -409,16 +406,13 @@ exports.handlePending = async (req, res) => {
       authorize_data: req.body.PaRes,
     });
   } else if (req.body.cres) {
-    console.log('cres');
     finalize_obj = new Finalize({
       id: req.body.threeDSSessionData,
       cres: req.body.cres,
       threedsv2: true,
     });
-    console.log('finalize_obj => ', finalize_obj);
   }
   if (!finalize_obj) {
-    console.log('!finalize_obj');
     res.end('Invalid request');
     return;
   }
@@ -444,7 +438,6 @@ exports.handlePending = async (req, res) => {
 
 exports.handleAdPending = async (req, res) => {
   const { demographic } = req.query;
-  console.log('demographic => ', demographic);
   let finalize_obj = null;
   if (req.body.PaRes) {
     finalize_obj = new Finalize({
@@ -452,16 +445,13 @@ exports.handleAdPending = async (req, res) => {
       authorize_data: req.body.PaRes,
     });
   } else if (req.body.cres) {
-    console.log('cres');
     finalize_obj = new Finalize({
       id: req.body.threeDSSessionData,
       cres: req.body.cres,
       threedsv2: true,
     });
-    console.log('finalize_obj => ', finalize_obj);
   }
   if (!finalize_obj) {
-    console.log('!finalize_obj');
     res.end('Invalid request');
     return;
   }
@@ -486,7 +476,6 @@ exports.handleAdPending = async (req, res) => {
 };
 
 exports.handleGCPending = async (req, res) => {
-  console.log('handlePending => ', req.body);
   let finalize_obj = null;
   if (req.body.PaRes) {
     finalize_obj = new Finalize({
@@ -494,16 +483,13 @@ exports.handleGCPending = async (req, res) => {
       authorize_data: req.body.PaRes,
     });
   } else if (req.body.cres) {
-    console.log('cres');
     finalize_obj = new Finalize({
       id: req.body.threeDSSessionData,
       cres: req.body.cres,
       threedsv2: true,
     });
-    console.log('finalize_obj => ', finalize_obj);
   }
   if (!finalize_obj) {
-    console.log('!finalize_obj');
     res.end('Invalid request');
     return;
   }
@@ -533,23 +519,18 @@ exports.handleMembershipPending = async (req, res) => {
 
   let finalize_obj = null;
   if (req.body.PaRes) {
-    console.log('PaRes');
     finalize_obj = new Finalize({
       id: req.body.MD,
       authorize_data: req.body.PaRes,
     });
-    console.log('finalize_obj => ', finalize_obj);
   } else if (req.body.cres) {
-    console.log('cres');
     finalize_obj = new Finalize({
       id: req.body.threeDSSessionData,
       cres: req.body.cres,
       threedsv2: true,
     });
-    console.log('finalize_obj => ', finalize_obj);
   }
   if (!finalize_obj) {
-    console.log('!finalize_obj');
     res.end('Invalid request');
     return;
   }
@@ -559,7 +540,6 @@ exports.handleMembershipPending = async (req, res) => {
     .then(async (response) => {
       if (response.status == 'approved') {
         const { amount } = response;
-        console.log('response => ', response);
         let days = 0;
         if (amount === '10.00') {
           days = 30;

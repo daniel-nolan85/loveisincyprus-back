@@ -27,21 +27,6 @@ mongoose
   })
   .then(async () => {
     console.log('DB CONNECTED');
-    // await User.collection.dropIndexes({
-    //   name: 'text',
-    //   email: 'text',
-    //   username: 'text',
-    // });
-    // User.schema.index({ name: 'text', email: 'text', username: 'text' });
-    // console.log('TEXT INDEX UPDATED');
-    // const users = await User.find();
-    // users.forEach(async (user) => {
-    //   user.name = user.name || '';
-    //   user.email = user.email || '';
-    //   user.username = user.username || '';
-    //   await user.save();
-    // });
-    // console.log('ALL USERS UPDATED');
   })
   .catch((err) => console.log(`DB CONNECTION ERR ${err}`));
 
@@ -57,9 +42,9 @@ const dailyTasks = schedule.scheduleJob('0 0 * * *', function () {
   deleteOldLists();
 });
 
-// const biDailyTasks = schedule.scheduleJob('0 0 */2 * *', function () {
-//   emailUpcomingExpiries();
-// });
+const biDailyTasks = schedule.scheduleJob('0 0 */2 * *', function () {
+  emailUpcomingExpiries();
+});
 
 // const biDailyTasks = schedule.scheduleJob('* * * * *', function () {
 //   emailUpcomingExpiries();
@@ -69,8 +54,6 @@ const dailyTasks = schedule.scheduleJob('0 0 * * *', function () {
 app.use(morgan('dev'));
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
-// app.use(express.json({ limit: '50mb' }));
-// app.use(express.urlencoded({ limit: '50mb' }));
 app.use(cors());
 // app.use(limiter);
 

@@ -48,7 +48,6 @@ exports.update = async (req, res) => {
 };
 
 exports.handleAfterUse = async (req, res) => {
-  console.log('handleAfterUse => ', req.body);
   const { cartTotal } = req.body;
   try {
     const coupon = await Coupon.findById(req.params.couponId);

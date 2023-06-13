@@ -13,7 +13,6 @@ cloudinary.config({
 
 exports.submitVerif = async (req, res) => {
   const { verifImg, user } = req.body;
-  console.log('user => ', user);
 
   try {
     if (!verifImg) {

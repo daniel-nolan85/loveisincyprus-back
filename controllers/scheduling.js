@@ -113,7 +113,6 @@ exports.emailUpcomingExpiries = async (req, res) => {
             date_format: 'dddd, Do MMMM YYYY',
           },
         });
-        console.log('addMerge => ', addMerge);
       } catch (error) {
         console.error('Error adding merge field:', error);
       }
@@ -168,7 +167,6 @@ exports.emailUpcomingExpiries = async (req, res) => {
       );
 
       const sendCampaign = await mailchimp.campaigns.send(campaign.id);
-      console.log('campaign => ', campaign);
     };
 
     if (users.length > 0) {

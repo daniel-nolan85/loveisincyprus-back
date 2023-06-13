@@ -163,7 +163,6 @@ exports.saveAddress = async (req, res) => {
 exports.applyCouponToUserCart = async (req, res) => {
   const { coupon } = req.body;
   const validCoupon = await Coupon.findOne({ name: coupon }).exec();
-  console.log('validCoupon => ', validCoupon);
   if (validCoupon === null) {
     return res.json({
       err: 'Invalid coupon',
@@ -1638,22 +1637,6 @@ exports.progressCompletion = async (req, res) => {
   }
 
   res.json(completion);
-
-  // const updateProgress = await User.findByIdAndUpdate(
-  //   user._id,
-  //   {
-  //     $set: { profilePercentage: completion.percentage },
-  //   },
-  //   { new: true }
-  // );
-
-  // if (completion.percentage == 100) {
-  //   const complete = await User.findByIdAndUpdate(
-  //     user._id,
-  //     { profileComplete: true },
-  //     { new: true }
-  //   );
-  // }
 };
 
 exports.optInOrOut = async (req, res) => {

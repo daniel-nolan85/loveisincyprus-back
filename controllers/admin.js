@@ -203,9 +203,6 @@ exports.incomeTaken = async (req, res) => {
     parseFloat(sumOfSubscriptions) +
     parseFloat(sumOfAds) +
     parseFloat(sumOfGiftCards);
-
-  console.log('ads => ', ads);
-
   res.json(income);
 };
 

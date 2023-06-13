@@ -375,7 +375,6 @@ exports.fetchAllChats = async (req, res) => {
     })
       .populate('users', '_id username name email profileImage')
       .populate('latestMessage');
-    console.log('chats => ', chats);
     res.json(chats);
   } catch (err) {
     console.log(err);
