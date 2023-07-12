@@ -139,6 +139,7 @@ const userSchema = new mongoose.Schema(
     treatSelf: [{ type: String, trim: true, lowercase: true }],
     sexLikes: String,
     sexFrequency: String,
+    vaccinated: String,
     profileComplete: {
       type: Boolean,
       default: false,

@@ -242,7 +242,7 @@ exports.createUser = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    `
+    vaccinated`
     );
     res.json(notifyReceiver);
   } catch (err) {
@@ -266,7 +266,7 @@ exports.loginUser = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    `
+    vaccinated`
   );
 
   if (
@@ -299,7 +299,7 @@ exports.loginUser = async (req, res) => {
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-            `
+            vaccinated`
           )
           .exec();
 
@@ -325,7 +325,7 @@ exports.loginUser = async (req, res) => {
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
         hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
         roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-        `
+        vaccinated`
       )
       .exec();
     res.json(trialEnded);
@@ -347,7 +347,7 @@ exports.loginUserWithSecret = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    `
+    vaccinated`
   );
 
   if (
@@ -379,7 +379,7 @@ exports.loginUserWithSecret = async (req, res) => {
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-            `
+            vaccinated`
           )
           .exec();
 
@@ -405,7 +405,7 @@ exports.loginUserWithSecret = async (req, res) => {
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
         hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
         roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-        `
+        vaccinated`
       )
       .exec();
     res.json(trialEnded);
@@ -690,6 +690,9 @@ exports.profileUpdate = async (req, res) => {
     if (req.body.sexFrequency) {
       data.sexFrequency = req.body.sexFrequency;
     }
+    if (req.body.vaccinated) {
+      data.vaccinated = req.body.vaccinated;
+    }
 
     if (req.body.newProfileImages.length > 0) {
       user = await User.findByIdAndUpdate(
@@ -722,7 +725,7 @@ exports.profileUpdate = async (req, res) => {
       new: true,
     }).select(
       `username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language
-       maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity
+       maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity vaccinated
        feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
        roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos`
     );
@@ -1002,7 +1005,7 @@ exports.userProfile = async (req, res) => {
 
   try {
     const thisUser = await User.findById(userId).select(
-      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt verified clearPhoto membership lastLogin coverPhotos profilePhotos'
+      '_id username about name email mobile secondMobile statement answer profileImage coverImage gender birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency createdAt verified clearPhoto membership lastLogin coverPhotos profilePhotos vaccinated'
     );
     res.json(thisUser);
   } catch (err) {
