@@ -490,7 +490,7 @@ exports.usersData = async (req, res) => {
 
 exports.progressCompletionData = async (req, res) => {
   const user = await User.findById(req.body.id).select(
-    'coverImage profileImage username name gender about birthday location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation politics religion foods livesWith roleInLife managesEdu marriage income ageOfPartner changes relocate sexLikes sexFrequency loves hates pets interests music books films sports hobbies traits treatSelf'
+    'coverImage profileImage username name gender about birthday location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation politics religion foods livesWith roleInLife managesEdu marriage income ageOfPartner changes relocate sexLikes sexFrequency vaccinated loves hates pets interests music books films sports hobbies traits treatSelf'
   );
   let completion = {
     percentage: 0,
@@ -499,12 +499,12 @@ exports.progressCompletionData = async (req, res) => {
     completion.username = user.username;
   }
   if (user.coverImage !== null && user.coverImage !== undefined) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.coverImage = true;
   }
   if (user.profileImage !== null && user.profileImage !== undefined) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.profileImage = true;
   }
@@ -687,6 +687,11 @@ exports.progressCompletionData = async (req, res) => {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.sexFrequency = true;
+  }
+  if (user.vaccinated !== null && user.vaccinated !== undefined) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.vaccinated = true;
   }
   if (user && user.loves.length > 0) {
     completion.percentage = completion.percentage + 2;
@@ -773,7 +778,7 @@ exports.pointsData = async (req, res) => {
 
 exports.updateUserProgress = async (req, res) => {
   const user = await User.findById(req.body._id).select(
-    'coverImage profileImage username name gender about birthday location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation politics religion foods livesWith roleInLife managesEdu marriage income ageOfPartner changes relocate sexLikes sexFrequency loves hates pets interests music books films sports hobbies traits treatSelf'
+    'coverImage profileImage username name gender about birthday location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle hairLength eyeColor ethnicity feetType education occupation politics religion foods livesWith roleInLife managesEdu marriage income ageOfPartner changes relocate sexLikes sexFrequency vaccinated loves hates pets interests music books films sports hobbies traits treatSelf'
   );
 
   let completion = {
@@ -969,6 +974,11 @@ exports.updateUserProgress = async (req, res) => {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.sexFrequency = true;
+  }
+  if (user.vaccinated !== null && user.vaccinated !== undefined) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.vaccinated = true;
   }
   if (user && user.loves.length > 0) {
     completion.percentage = completion.percentage + 2;

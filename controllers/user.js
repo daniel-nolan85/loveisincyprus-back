@@ -1282,6 +1282,10 @@ exports.analyseUsers = async (req, res) => {
     compatibility.sexFrequency = true;
     compatibility.points = compatibility.points + 5;
   }
+  if (u.vaccinated && user.vaccinated && u.vaccinated == user.vaccinated) {
+    compatibility.vaccinated = true;
+    compatibility.points = compatibility.points + 5;
+  }
   if (u.loves && user.loves) {
     let commonLoves = u.loves.filter((x) => user.loves.includes(x));
     compatibility.loves = commonLoves;
@@ -1391,12 +1395,12 @@ exports.progressCompletion = async (req, res) => {
   };
 
   if (Object.keys(user).includes('coverImage')) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.coverImage = true;
   }
   if (Object.keys(user).includes('profileImage')) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.profileImage = true;
   }
@@ -1579,6 +1583,11 @@ exports.progressCompletion = async (req, res) => {
     completion.percentage = completion.percentage + 2;
   } else {
     completion.sexFrequency = true;
+  }
+  if (Object.keys(user).includes('vaccinated')) {
+    completion.percentage = completion.percentage + 2;
+  } else {
+    completion.vaccinated = true;
   }
   if (user && user.loves.length > 0) {
     completion.percentage = completion.percentage + 2;
@@ -1911,6 +1920,10 @@ exports.highCompats = async (req, res) => {
       u.sexFrequency == user.sexFrequency
     ) {
       compatibility.sexFrequency = true;
+      compatibility.points = compatibility.points + 5;
+    }
+    if (u.vaccinated && user.vaccinated && u.vaccinated == user.vaccinated) {
+      compatibility.vaccinated = true;
       compatibility.points = compatibility.points + 5;
     }
     if (u.loves && user.loves) {
