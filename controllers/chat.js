@@ -218,12 +218,11 @@ exports.massMail = async (req, res) => {
       const newListResponse = await mailchimp.lists.createList({
         name: `Love is in Cyprus - ${timestamp}`,
         contact: {
-          company: 'Aquilion Limited',
-          address1: 'Carewatch Barnet, Apex House',
-          city: 'Grand Arcade',
-          state: 'London',
-          zip: 'N12 0EH',
-          country: 'United Kingdom',
+          company: 'Ex Florum Limited',
+          address1: 'Agiou Athanasiou 16-2',
+          city: 'Peyia',
+          zip: '8560 ',
+          country: 'Cyprus',
         },
         permission_reminder:
           'You are receiving this email because you have opted in to receive occasional updates from www.loveisincyprus.com',

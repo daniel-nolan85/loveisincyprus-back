@@ -786,12 +786,12 @@ exports.updateUserProgress = async (req, res) => {
   };
 
   if (user.coverImage !== null && user.coverImage !== undefined) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.coverImage = true;
   }
   if (user.profileImage !== null && user.profileImage !== undefined) {
-    completion.percentage = completion.percentage + 3;
+    completion.percentage = completion.percentage + 2;
   } else {
     completion.profileImage = true;
   }
