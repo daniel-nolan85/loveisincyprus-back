@@ -11,7 +11,7 @@ const {
 
 // controllers
 const {
-  calculateFinalAmount,
+  // calculateFinalAmount,
   createPayment,
   createAdPayment,
   createGCPayment,
@@ -24,7 +24,7 @@ const {
 } = require('../controllers/cardinity');
 
 // routes
-router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
+// router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-payment', authCheck, createPayment);
 router.post('/create-ad-payment', createAdPayment);
 router.post('/create-gc-payment', authCheck, createGCPayment);

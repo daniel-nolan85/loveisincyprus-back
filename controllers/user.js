@@ -216,7 +216,7 @@ exports.applyCouponToUserCart = async (req, res) => {
 };
 
 exports.createOrder = async (req, res) => {
-  const paymentIntent = req.body.cardinityResponse;
+  const paymentIntent = req.body.paypalResponse;
   const { deliverTo, deliveryAddress, discount, deliveryFee } = req.body;
   const user = await User.findOne({ mobile: req.user.phone_number })
     .select('_id email')
@@ -341,7 +341,8 @@ exports.createOrder = async (req, res) => {
     `,
   };
 
-  const emails = [emailAdmin, emailUser];
+  // const emails = [emailAdmin, emailUser];
+  const emails = [emailUser];
 
   for (let i = 0; i < emails.length; i++) {
     transporter.sendMail(emails[i], (err, response) => {

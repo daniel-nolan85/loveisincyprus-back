@@ -164,7 +164,7 @@ const userSchema = new mongoose.Schema(
       startDate: { type: Date },
       expiry: { type: Date },
       trialPeriod: Boolean,
-      cardinityId: String,
+      captureId: String,
       cost: String,
     },
     bankDetails: [

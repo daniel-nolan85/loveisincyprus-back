@@ -15,28 +15,28 @@ const client = new Client(
   process.env.CARDINITY_SECRET
 );
 
-exports.calculateFinalAmount = async (req, res) => {
-  const { coupon } = req.body;
-  const user = await User.findOne({ mobile: req.user.phone_number })
-    .select('_id')
-    .exec();
-  const { cartTotal, totalAfterDiscount } = await Cart.findOne({
-    orderedBy: user._id,
-  }).exec();
+// exports.calculateFinalAmount = async (req, res) => {
+//   const { coupon } = req.body;
+//   const user = await User.findOne({ mobile: req.user.phone_number })
+//     .select('_id')
+//     .exec();
+//   const { cartTotal, totalAfterDiscount } = await Cart.findOne({
+//     orderedBy: user._id,
+//   }).exec();
 
-  let finalAmount = 0;
-  if (coupon && totalAfterDiscount) {
-    finalAmount = totalAfterDiscount * 100;
-  } else {
-    finalAmount = cartTotal * 100;
-  }
+//   let finalAmount = 0;
+//   if (coupon && totalAfterDiscount) {
+//     finalAmount = totalAfterDiscount * 100;
+//   } else {
+//     finalAmount = cartTotal * 100;
+//   }
 
-  res.send({
-    cartTotal,
-    totalAfterDiscount,
-    payable: finalAmount,
-  });
-};
+//   res.send({
+//     cartTotal,
+//     totalAfterDiscount,
+//     payable: finalAmount,
+//   });
+// };
 
 exports.createPayment = async (req, res) => {
   const { cardHolder, cardNumber, expiry, cvc } = req.body.values;

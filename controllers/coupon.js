@@ -56,6 +56,11 @@ exports.handleAfterUse = async (req, res) => {
         $inc: { discount: -cartTotal },
       });
       res.json(coupon);
+    } else if (
+      coupon.name.slice(0, 5) === 'GIFT-' &&
+      coupon.discount < cartTotal
+    ) {
+      res.json(await Coupon.findByIdAndDelete(req.params.couponId).exec());
     } else {
       res.json(await Coupon.findByIdAndDelete(req.params.couponId).exec());
     }

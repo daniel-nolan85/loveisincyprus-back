@@ -16,6 +16,7 @@ const adSchema = new mongoose.Schema(
     demographic: [{ type: String }],
     contactInfo: Object,
     accountInfo: Object,
+    authId: String,
   },
   { timestamps: true }
 );

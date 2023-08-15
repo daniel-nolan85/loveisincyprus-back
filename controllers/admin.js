@@ -154,12 +154,14 @@ exports.totalMessages = async (req, res) => {
 
 exports.incomeTaken = async (req, res) => {
   const orders = await Order.find({
-    'paymentIntent.status': { $regex: 'approved' },
+    'paymentIntent.status': { $regex: 'COMPLETED' },
   });
 
   let sumOfOrders = 0;
   orders.map((order) => {
-    let amount = parseFloat(order.paymentIntent.amount);
+    let amount = parseFloat(
+      order.paymentIntent.purchase_units[0].payments.captures[0].amount.value
+    );
     sumOfOrders += amount;
   });
 

@@ -104,13 +104,7 @@ router.post('/current-admin', authCheck, adminCheck, currentUser);
 router.post('/current-subscriber', authCheck, subscriberCheck, currentUser);
 router.post('/find-users', authCheck, findUsers);
 router.put('/user-follow', authCheck, subscriberCheck, addFollower, userFollow);
-router.put(
-  '/user-unfollow',
-  authCheck,
-  subscriberCheck,
-  removeFollower,
-  userUnfollow
-);
+router.put('/user-unfollow', authCheck, removeFollower, userUnfollow);
 router.post('/liked-users', authCheck, userFollowing);
 router.post('/users-who-like-me', authCheck, userFollowers);
 router.post('/my-matches', authCheck, userMatches);

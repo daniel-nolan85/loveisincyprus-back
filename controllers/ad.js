@@ -2,8 +2,16 @@ const Ad = require('../models/ad');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  const { hyperlink, content, image, duration, demographic, contactInfo } =
-    req.body;
+  console.log('submitAd => ', req.body);
+  const {
+    hyperlink,
+    content,
+    image,
+    duration,
+    demographic,
+    contactInfo,
+    authId,
+  } = req.body;
   if (demographic.length === 0) {
     demographic.push('everyone');
   }
@@ -17,6 +25,11 @@ exports.submitAd = async (req, res) => {
       res.json({
         error: 'Contact info is required',
       });
+    }
+    if (!authId) {
+      res.json({
+        error: 'Payment details are required',
+      });
     } else {
       const ad = new Ad({
         hyperlink,
@@ -26,51 +39,52 @@ exports.submitAd = async (req, res) => {
         demographic,
         contactInfo,
         status: 'pending',
+        authId,
       });
       ad.save();
 
-      let transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: 'customercare@loveisincyprus.com',
-          pass: process.env.GMAIL_AUTHORIZATION,
-        },
-        secure: true,
-      });
+      // let transporter = nodemailer.createTransport({
+      //   service: 'gmail',
+      //   auth: {
+      //     user: 'customercare@loveisincyprus.com',
+      //     pass: process.env.GMAIL_AUTHORIZATION,
+      //   },
+      //   secure: true,
+      // });
 
-      let emailAdmin = {
-        from: 'customercare@loveisincyprus.com',
-        to: 'william.wolf@mac.com',
-        subject: 'New ad submission was placed on Love is in Cyprus',
-        html: `
-        <h3 style="margin-bottom: 5px;">You have received a new ad submission to review</h3>
-      `,
-      };
+      // let emailAdmin = {
+      //   from: 'customercare@loveisincyprus.com',
+      //   to: 'william.wolf@mac.com',
+      //   subject: 'New ad submission was placed on Love is in Cyprus',
+      //   html: `
+      //   <h3 style="margin-bottom: 5px;">You have received a new ad submission to review</h3>
+      // `,
+      // };
 
-      let emailUser = {
-        from: 'customercare@loveisincyprus.com',
-        to: contactInfo.email,
-        subject:
-          'Confirmation of your recent ad submission to Love is in Cyprus',
-        html: `
-        <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
-        <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
-      `,
-      };
+      // let emailUser = {
+      //   from: 'customercare@loveisincyprus.com',
+      //   to: contactInfo.email,
+      //   subject:
+      //     'Confirmation of your recent ad submission to Love is in Cyprus',
+      //   html: `
+      //   <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
+      //   <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
+      // `,
+      // };
 
-      const emails = [emailAdmin, emailUser];
+      // const emails = [emailAdmin, emailUser];
 
-      for (let i = 0; i < emails.length; i++) {
-        transporter.sendMail(emails[i], (err, response) => {
-          if (err) {
-            res.send(err);
-          } else {
-            res.send('Success');
-          }
-        });
-      }
+      // for (let i = 0; i < emails.length; i++) {
+      //   transporter.sendMail(emails[i], (err, response) => {
+      //     if (err) {
+      //       res.send(err);
+      //     } else {
+      //       res.send('Success');
+      //     }
+      //   });
+      // }
 
-      transporter.close();
+      // transporter.close();
 
       res.json(ad);
     }
@@ -102,11 +116,7 @@ exports.fetchPaidAds = async (req, res) => {
 
 exports.disapproveAd = async (req, res) => {
   const { ad, reason } = req.body;
-  const rejectAd = await Ad.findByIdAndUpdate(
-    ad._id,
-    { status: 'rejected' },
-    { new: true }
-  ).exec();
+  res.json(await Ad.findByIdAndDelete(ad._id).exec());
 
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -120,8 +130,11 @@ exports.disapproveAd = async (req, res) => {
   const content = reason
     ? `<p>Your recent advertisement submission has been rejected for the following reason:</p>
     <p>${reason}</p>
-    <p>You have not been charged. Feel free to re-try any time.</p>`
-    : 'Your recent advertisement submission has been rejected. You have not been charged. Feel free to re-try any time.';
+    <p>Your funds will be returned to you via PayPal. Please note that it typically takes 1-5 business days for PayPal to release funds, however it can take longer in some cases. If you have not received your funds within 30 days please contact PayPal support for assistance.</p>
+    <p>You are welcome to to re-try with a new submission at any time.</p>`
+    : `Your recent advertisement submission has been rejected.</p>
+    <p>Your funds will be returned to you via PayPal. Please note that it typically takes 1-5 business days for PayPal to release funds, however it can take longer in some cases. If you have not received your funds within 30 days please contact PayPal support for assistance.</p>
+    <p>You are welcome to to re-try with a new submission at any time.</p>`;
 
   let mailOptions = {
     from: 'customercare@loveisincyprus.com',
@@ -146,7 +159,7 @@ exports.approveAd = async (req, res) => {
   const { ad } = req.body;
   const approveAd = await Ad.findByIdAndUpdate(
     ad._id,
-    { status: 'approved' },
+    { status: 'paid' },
     { new: true }
   ).exec();
 
@@ -165,10 +178,7 @@ exports.approveAd = async (req, res) => {
     subject: 'Results of your recent ad submission to Love is in Cyprus',
     html: `
       <h3 style="margin-bottom: 5px;">Congratulations! Your recent advertisement submission has been approved.</h3>
-      <p>To see your ad displayed on our site, first click the button below to submit your payment details and finalize your submission.</p>
-      <a href="${process.env.REDIRECT}/ad-finalize?ad=${encodeURIComponent(
-      JSON.stringify(ad)
-    )}" style="text-decoration: none;"><button style="width: 140px; padding: 10px 30px; cursor: pointer; display: block; margin: 20px auto; background: #ef5b85; border: 0; outline: none; border-radius: 30px; color: #fff;">Finalize</button></a>
+      <p>Your payment has been successfully completed and your ad will now be displayed on our site to your chose demographic for ${ad.duration}.
       `,
   };
 
