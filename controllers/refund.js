@@ -156,7 +156,8 @@ exports.requestRefund = async (req, res) => {
     `,
     };
 
-    const emails = [emailAdmin, emailUser];
+    // const emails = [emailAdmin, emailUser];
+    const emails = [emailUser];
 
     for (let i = 0; i < emails.length; i++) {
       transporter.sendMail(emails[i], (err, response) => {
@@ -314,6 +315,7 @@ exports.rejectRefund = async (req, res) => {
 exports.processRefund = async (req, res) => {
   const { refund, message, refundAmount, products } = req.body;
   const messageToBuyer = message || 'No message was sent';
+  console.log('processRefund => ', req.body);
   try {
     const returned = await Refund.findByIdAndUpdate(
       refund._id,
@@ -409,21 +411,21 @@ exports.processRefund = async (req, res) => {
     });
     transporter.close();
 
-    const refundMember = new RefundMember({
-      amount: refundAmount,
-      description:
-        'User has requested a refund on their transaction and has been approved by admin',
-      id: refund.paymentIntent.id,
-    });
+    //   const refundMember = new RefundMember({
+    //     amount: refundAmount,
+    //     description:
+    //       'User has requested a refund on their transaction and has been approved by admin',
+    //     id: refund.paymentIntent.id,
+    //   });
 
-    client
-      .call(refundMember)
-      .then(async (response) => {
-        console.log('response => ', response);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    //   client
+    //     .call(refundMember)
+    //     .then(async (response) => {
+    //       console.log('response => ', response);
+    //     })
+    //     .catch((err) => {
+    //       console.log(err);
+    //     });
   } catch (err) {
     console.log(err);
   }

@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const moment = require('moment');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-const base = 'https://api-m.sandbox.paypal.com';
+const base = 'https://api.paypal.com';
 
 exports.calculateFinalAmount = async (req, res) => {
   const { coupon } = req.body;
@@ -126,6 +126,35 @@ exports.capturePayPalShopOrder = async (req, res) => {
     // Handle any errors from the request or DB updates
     console.log('Error capturing PayPal shop order:', err);
     throw new Error('Error capturing PayPal shop order');
+  }
+};
+
+exports.refundPayPalShopOrder = async (req, res) => {
+  const { refund, refundAmount } = req.body;
+  console.log('refundPayPalShopOrder => ', req.body);
+  const accessToken = await generateAccessToken();
+  const captureId =
+    refund.paymentIntent.purchase_units[0].payments.captures[0].id;
+  const url = `${base}/v2/payments/captures/${captureId}/refund`;
+  const requestData = {
+    amount: {
+      value: refundAmount,
+      currency_code: 'EUR',
+    },
+  };
+  try {
+    const response = await axios.post(url, requestData, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    res.json(handleResponse(response));
+  } catch (err) {
+    // Handle any errors from the request or DB updates
+    console.log('Error creating PayPal subscription refund:', err);
+    throw new Error('Error creating PayPal subscription refund');
   }
 };
 

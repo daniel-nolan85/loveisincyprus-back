@@ -11,6 +11,7 @@ const {
   createPayPalOrder,
   createPayPalAuthorization,
   capturePayPalShopOrder,
+  refundPayPalShopOrder,
   capturePayPalSubOrder,
   refundPayPalSubOrder,
   capturePayPalGCOrder,
@@ -24,6 +25,7 @@ router.post('/calculate-final-amount', authCheck, calculateFinalAmount);
 router.post('/create-paypal-order', authCheck, createPayPalOrder);
 router.post('/create-ad-paypal-authorization', createPayPalAuthorization);
 router.post('/capture-paypal-shop-order', authCheck, capturePayPalShopOrder);
+router.post('/refund-paypal-shop-order', authCheck, refundPayPalShopOrder);
 router.post(
   '/capture-paypal-subscription-order',
   authCheck,
