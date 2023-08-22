@@ -341,8 +341,7 @@ exports.createOrder = async (req, res) => {
     `,
   };
 
-  // const emails = [emailAdmin, emailUser];
-  const emails = [emailUser];
+  const emails = [emailAdmin, emailUser];
 
   for (let i = 0; i < emails.length; i++) {
     transporter.sendMail(emails[i], (err, response) => {

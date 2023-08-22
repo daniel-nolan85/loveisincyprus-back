@@ -11,17 +11,11 @@ const Verif = require('../models/verif');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
-const Cardinity = require('cardinity-nodejs');
 
 const admin = require('../firebase');
 
-const Client = Cardinity.client();
-const Refund = Cardinity.refund();
-
-const client = new Client(
-  process.env.CARDINITY_KEY,
-  process.env.CARDINITY_SECRET
-);
+const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
+const base = 'https://api.paypal.com';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -275,39 +269,48 @@ exports.loginUser = async (req, res) => {
     user.membership.trialPeriod &&
     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
   ) {
-    const refund = new Refund({
-      amount: user.membership.cost,
-      description: 'User did not make use of their subscription',
-      id: user.membership.cardinityId,
-    });
+    const accessToken = await generateAccessToken();
+    const url = `${base}/v2/payments/captures/${user.membership.captureId}/refund`;
+    try {
+      const response = await axios.post(url, null, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-    client
-      .call(refund)
-      .then(async (response) => {
-        const subscriptionUnpaid = await User.findByIdAndUpdate(
-          { _id: user._id },
-          {
-            'membership.paid': false,
-            'membership.trialPeriod': false,
-            'membership.cost': '0.00',
-          },
-          { new: true }
-        )
-          .select(
-            `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+      const cancelSubscription = await User.findByIdAndUpdate(
+        {
+          _id: user._id,
+        },
+        {
+          'membership.paid': false,
+          'membership.trialPeriod': false,
+          'membership.cost': '0.00',
+          'membership.captureId': '',
+          'membership.expiry': new Date(Date.now()),
+        },
+        { new: true }
+      )
+        .select(
+          `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
             canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
             vaccinated`
-          )
-          .exec();
+        )
+        .exec();
 
-        res.json(subscriptionUnpaid);
-      })
-      .catch((err) => {
-        console.log(err);
+      res.json({
+        cancelSubscription,
+        responseData: handleResponse(response),
       });
+    } catch (err) {
+      // Handle any errors from the request or DB updates
+      console.log('Error creating PayPal subscription refund:', err);
+      throw new Error('Error creating PayPal subscription refund');
+    }
   } else if (
     user &&
     user.membership.paid &&
@@ -356,38 +359,48 @@ exports.loginUserWithSecret = async (req, res) => {
     user.membership.trialPeriod &&
     user.membership.startDate.getTime() + 14 * 24 * 3600 * 1000 < Date.now()
   ) {
-    const refund = new Refund({
-      amount: user.membership.cost,
-      description: 'User did not make use of their subscription',
-      id: user.membership.cardinityId,
-    });
+    const accessToken = await generateAccessToken();
+    const url = `${base}/v2/payments/captures/${user.membership.captureId}/refund`;
+    try {
+      const response = await axios.post(url, null, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-    client
-      .call(refund)
-      .then(async (response) => {
-        const subscriptionUnpaid = await User.findByIdAndUpdate(
-          { _id: user._id },
-          {
-            'membership.paid': false,
-            'membership.trialPeriod': false,
-          },
-          { new: true }
-        )
-          .select(
-            `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
+      const cancelSubscription = await User.findByIdAndUpdate(
+        {
+          _id: user._id,
+        },
+        {
+          'membership.paid': false,
+          'membership.trialPeriod': false,
+          'membership.cost': '0.00',
+          'membership.captureId': '',
+          'membership.expiry': new Date(Date.now()),
+        },
+        { new: true }
+      )
+        .select(
+          `_id membership messages newNotifs name email mobile secondMobile statement answer following followers matches profileImage username role
             canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon about coverImage gender
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
             vaccinated`
-          )
-          .exec();
+        )
+        .exec();
 
-        res.json(subscriptionUnpaid);
-      })
-      .catch((err) => {
-        console.log(err);
+      res.json({
+        cancelSubscription,
+        responseData: handleResponse(response),
       });
+    } catch (err) {
+      // Handle any errors from the request or DB updates
+      console.log('Error creating PayPal subscription refund:', err);
+      throw new Error('Error creating PayPal subscription refund');
+    }
   } else if (
     user &&
     user.membership.paid &&
@@ -1626,4 +1639,37 @@ exports.dailySignups = async (req, res) => {
   const numDailySignups = Math.ceil(signups / differenceDays);
 
   res.json(numDailySignups);
+};
+
+const generateAccessToken = async () => {
+  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString(
+    'base64'
+  );
+  try {
+    const response = await axios.post(
+      `${base}/v1/oauth2/token`,
+      'grant_type=client_credentials',
+      {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      }
+    );
+
+    const jsonData = await handleResponse(response);
+    return jsonData.access_token;
+  } catch (err) {
+    // Handle any errors from the request
+    // console.log('Error generating access token:', err);
+    throw new Error('Error generating access token');
+  }
+};
+
+const handleResponse = (response) => {
+  if (response.status === 200 || response.status === 201) {
+    return response.data;
+  } else {
+    console.log('Response status:', response.status);
+    throw new Error('Invalid response status');
+  }
 };

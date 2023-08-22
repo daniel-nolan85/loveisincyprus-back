@@ -43,48 +43,48 @@ exports.submitAd = async (req, res) => {
       });
       ad.save();
 
-      // let transporter = nodemailer.createTransport({
-      //   service: 'gmail',
-      //   auth: {
-      //     user: 'customercare@loveisincyprus.com',
-      //     pass: process.env.GMAIL_AUTHORIZATION,
-      //   },
-      //   secure: true,
-      // });
+      let transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'customercare@loveisincyprus.com',
+          pass: process.env.GMAIL_AUTHORIZATION,
+        },
+        secure: true,
+      });
 
-      // let emailAdmin = {
-      //   from: 'customercare@loveisincyprus.com',
-      //   to: 'william.wolf@mac.com',
-      //   subject: 'New ad submission was placed on Love is in Cyprus',
-      //   html: `
-      //   <h3 style="margin-bottom: 5px;">You have received a new ad submission to review</h3>
-      // `,
-      // };
+      let emailAdmin = {
+        from: 'customercare@loveisincyprus.com',
+        to: 'william.wolf@mac.com',
+        subject: 'New ad submission was placed on Love is in Cyprus',
+        html: `
+        <h3 style="margin-bottom: 5px;">You have received a new ad submission to review</h3>
+      `,
+      };
 
-      // let emailUser = {
-      //   from: 'customercare@loveisincyprus.com',
-      //   to: contactInfo.email,
-      //   subject:
-      //     'Confirmation of your recent ad submission to Love is in Cyprus',
-      //   html: `
-      //   <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
-      //   <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
-      // `,
-      // };
+      let emailUser = {
+        from: 'customercare@loveisincyprus.com',
+        to: contactInfo.email,
+        subject:
+          'Confirmation of your recent ad submission to Love is in Cyprus',
+        html: `
+        <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
+        <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
+      `,
+      };
 
-      // const emails = [emailAdmin, emailUser];
+      const emails = [emailAdmin, emailUser];
 
-      // for (let i = 0; i < emails.length; i++) {
-      //   transporter.sendMail(emails[i], (err, response) => {
-      //     if (err) {
-      //       res.send(err);
-      //     } else {
-      //       res.send('Success');
-      //     }
-      //   });
-      // }
+      for (let i = 0; i < emails.length; i++) {
+        transporter.sendMail(emails[i], (err, response) => {
+          if (err) {
+            res.send(err);
+          } else {
+            res.send('Success');
+          }
+        });
+      }
 
-      // transporter.close();
+      transporter.close();
 
       res.json(ad);
     }

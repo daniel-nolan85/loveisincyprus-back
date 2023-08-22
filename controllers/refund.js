@@ -3,16 +3,7 @@ const User = require('../models/user');
 const Order = require('../models/order');
 const cloudinary = require('cloudinary');
 const nodemailer = require('nodemailer');
-const Cardinity = require('cardinity-nodejs');
 const axios = require('axios');
-
-const Client = Cardinity.client();
-const RefundMember = Cardinity.refund();
-
-const client = new Client(
-  process.env.CARDINITY_KEY,
-  process.env.CARDINITY_SECRET
-);
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -156,8 +147,7 @@ exports.requestRefund = async (req, res) => {
     `,
     };
 
-    // const emails = [emailAdmin, emailUser];
-    const emails = [emailUser];
+    const emails = [emailAdmin, emailUser];
 
     for (let i = 0; i < emails.length; i++) {
       transporter.sendMail(emails[i], (err, response) => {

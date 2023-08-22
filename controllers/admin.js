@@ -8,15 +8,9 @@ const Refund = require('../models/refund');
 const GiftCard = require('../models/giftCard');
 const Blocked = require('../models/blocked');
 const nodemailer = require('nodemailer');
-const Cardinity = require('cardinity-nodejs');
 
-const Client = Cardinity.client();
-const RefundMember = Cardinity.refund();
-
-const client = new Client(
-  process.env.CARDINITY_KEY,
-  process.env.CARDINITY_SECRET
-);
+const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
+const base = 'https://api.paypal.com';
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -34,7 +28,7 @@ exports.orderStatus = async (req, res) => {
     { orderStatus },
     { new: true }
   )
-    .populate('products.product', 'title')
+    .populate('products.product', 'title price')
     .exec();
 
   res.json(updated);
@@ -44,7 +38,7 @@ exports.orderStatus = async (req, res) => {
   const listItems = updated.products.map((p) => {
     return `<tr>
         <td>${p.product.title}</td>
-        <td>€${p.price}</td>
+        <td>€${p.product.price}</td>
         <td>${p.count}</td>
       </tr>`;
   });
@@ -91,7 +85,9 @@ exports.orderStatus = async (req, res) => {
         'Delivery fee: €' + updated.deliveryFee.toFixed(2)
       }</p>
       <h3 style="margin-bottom: 5px;">${
-        'Total: €' + updated.paymentIntent.amount
+        'Total: €' +
+        updated.paymentIntent.purchase_units[0].payments.captures[0].amount
+          .value
       }</h3>
 
       <p style="font-size: 18px; margin-bottom: 5px;">The status of your order is currently <span style="font-weight: bold;">${
@@ -116,20 +112,32 @@ exports.orderStatus = async (req, res) => {
   transporter.close();
 
   if (updated.orderStatus === 'Cancelled') {
-    const refundMember = new RefundMember({
-      amount: updated.paymentIntent.amount,
-      description: 'Admin has cancelled this transaction',
-      id: updated.paymentIntent.id,
-    });
-
-    client
-      .call(refundMember)
-      .then(async (response) => {
-        console.log('response => ', response);
-      })
-      .catch((err) => {
-        console.log(err);
+    const accessToken = await generateAccessToken();
+    const captureId =
+      updated.paymentIntent.purchase_units[0].payments.captures[0].id;
+    const url = `${base}/v2/payments/captures/${captureId}/refund`;
+    // const requestData = {
+    //   amount: {
+    //     value:
+    //       updated.paymentIntent.purchase_units[0].payments.captures[0].amount
+    //         .value,
+    //     currency_code: 'EUR',
+    //   },
+    // };
+    try {
+      const response = await axios.post(url, null, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
+
+      res.json(handleResponse(response));
+    } catch (err) {
+      // Handle any errors from the request or DB updates
+      console.log('Error creating PayPal subscription refund:', err);
+      throw new Error('Error creating PayPal subscription refund');
+    }
   }
 };
 
@@ -1140,5 +1148,38 @@ exports.blockNumber = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(400).send('Block number failed');
+  }
+};
+
+const generateAccessToken = async () => {
+  const auth = Buffer.from(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`).toString(
+    'base64'
+  );
+  try {
+    const response = await axios.post(
+      `${base}/v1/oauth2/token`,
+      'grant_type=client_credentials',
+      {
+        headers: {
+          Authorization: `Basic ${auth}`,
+        },
+      }
+    );
+
+    const jsonData = await handleResponse(response);
+    return jsonData.access_token;
+  } catch (err) {
+    // Handle any errors from the request
+    // console.log('Error generating access token:', err);
+    throw new Error('Error generating access token');
+  }
+};
+
+const handleResponse = (response) => {
+  if (response.status === 200 || response.status === 201) {
+    return response.data;
+  } else {
+    console.log('Response status:', response.status);
+    throw new Error('Invalid response status');
   }
 };
