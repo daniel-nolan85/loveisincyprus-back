@@ -11,6 +11,7 @@ const Verif = require('../models/verif');
 const { nanoid } = require('nanoid');
 const { json } = require('express');
 const cloudinary = require('cloudinary');
+const axios = require('axios');
 
 const admin = require('../firebase');
 
@@ -1660,7 +1661,7 @@ const generateAccessToken = async () => {
     return jsonData.access_token;
   } catch (err) {
     // Handle any errors from the request
-    // console.log('Error generating access token:', err);
+    console.log('Error generating access token:', err);
     throw new Error('Error generating access token');
   }
 };

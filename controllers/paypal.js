@@ -173,7 +173,7 @@ exports.capturePayPalSubOrder = async (req, res) => {
     const captureId = response.data.purchase_units[0].payments.captures[0].id;
 
     let days = 0;
-    if (payable === '10.00') {
+    if (payable === '5.00' || payable === '10.00') {
       days = 30;
     } else if (payable === '50.00') {
       days = 180;
