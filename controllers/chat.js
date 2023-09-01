@@ -221,6 +221,7 @@ exports.massMail = async (req, res) => {
           company: 'Ex Florum Limited',
           address1: 'Agiou Athanasiou 16-2',
           city: 'Peyia',
+          state: 'Paphos',
           zip: '8560 ',
           country: 'Cyprus',
         },
@@ -237,7 +238,24 @@ exports.massMail = async (req, res) => {
 
       const newListId = newListResponse.id;
 
-      for (const email of userEmails) {
+      const isValidEmail = (email) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+      };
+
+      const { validEmails, invalidEmails } = userEmails.reduce(
+        (acc, email) => {
+          if (isValidEmail(email)) {
+            acc.validEmails.push(email);
+          } else {
+            acc.invalidEmails.push(email);
+          }
+          return acc;
+        },
+        { validEmails: [], invalidEmails: [] }
+      );
+
+      for (const email of validEmails) {
         await mailchimp.lists.addListMember(newListId, {
           email_address: email,
           status: 'subscribed',

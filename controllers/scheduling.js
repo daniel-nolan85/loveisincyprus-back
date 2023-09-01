@@ -88,6 +88,7 @@ exports.emailUpcomingExpiries = async (req, res) => {
           company: 'Ex Florum Limited',
           address1: 'Agiou Athanasiou 16-2',
           city: 'Peyia',
+          state: 'Paphos',
           zip: '8560 ',
           country: 'Cyprus',
         },
@@ -116,20 +117,30 @@ exports.emailUpcomingExpiries = async (req, res) => {
         console.error('Error adding merge field:', error);
       }
 
+      const isValidEmail = (emailObj) => {
+        const email = emailObj.email;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        return emailRegex.test(email);
+      };
+
       for (const user of users) {
-        try {
-          const expiryDate = moment(user.membership.expiry).format(
-            'dddd, Do MMMM YYYY'
-          );
-          await mailchimp.lists.addListMember(newListId, {
-            email_address: user.email,
-            status: 'subscribed',
-            merge_fields: {
-              MMERGE5: expiryDate,
-            },
-          });
-        } catch (error) {
-          console.error('Error adding list member:', error);
+        if (isValidEmail(user)) {
+          try {
+            const expiryDate = moment(user.membership.expiry).format(
+              'dddd, Do MMMM YYYY'
+            );
+            await mailchimp.lists.addListMember(newListId, {
+              email_address: user.email,
+              status: 'subscribed',
+              merge_fields: {
+                MMERGE5: expiryDate,
+              },
+            });
+          } catch (error) {
+            console.error('Error adding list member:', error);
+          }
+        } else {
+          console.error('Invalid email address:', user.email);
         }
       }
       await createCampaign(newListId);

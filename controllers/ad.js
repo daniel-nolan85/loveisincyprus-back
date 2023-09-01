@@ -68,7 +68,7 @@ exports.submitAd = async (req, res) => {
           'Confirmation of your recent ad submission to Love is in Cyprus',
         html: `
         <h3 style="margin-bottom: 5px;">Thank you for submitting your recent advertisement submission.</h3>
-        <p>Your content will shortly be reviewed by our admin team and, if approved, you will then receive another email asking you to submit your payment information. Your advertisement will be then displayed on our site as soon as your payment has cleared.</p>
+        <p>Your content will shortly be reviewed by our admin team and, if approved, we will then run your payment. Your advertisement will be then displayed on our site to your chosen demographic as soon as your payment has cleared.</p>
       `,
       };
 
