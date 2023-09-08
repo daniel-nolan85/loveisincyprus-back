@@ -8,6 +8,7 @@ const { authCheck, adminCheck } = require('../middleware/auth');
 const {
   orders,
   orderStatus,
+  subscriptions,
   fetchOptIns,
   totalMessages,
   incomeTaken,
@@ -40,6 +41,7 @@ const {
 // routes
 router.get('/admin/orders', authCheck, adminCheck, orders);
 router.put('/admin/order-status', authCheck, adminCheck, orderStatus);
+router.get('/admin/subscriptions', authCheck, adminCheck, subscriptions);
 router.post('/fetch-optins', authCheck, adminCheck, fetchOptIns);
 router.get('/total-messages', totalMessages);
 router.get('/income-taken', incomeTaken);

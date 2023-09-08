@@ -52,6 +52,7 @@ const {
   ninePhotos,
   usersNinePhotos,
   fetchWhitelist,
+  createSubscription,
   // admin
   users,
   suspendUser,
@@ -123,6 +124,7 @@ router.post('/nine-visitors', authCheck, nineVisitors);
 router.post('/nine-photos', authCheck, ninePhotos);
 router.post('/users-nine-photos', authCheck, usersNinePhotos);
 router.get('/fetch-whitelist', fetchWhitelist);
+router.post('/create-subscription', authCheck, createSubscription);
 
 // admin
 router.post('/users/:page', authCheck, adminCheck, users);

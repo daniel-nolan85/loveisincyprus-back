@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Subscription = require('../models/subscription');
 const Post = require('../models/post');
 const Location = require('../models/location');
 const CallingCode = require('../models/callingCode');
@@ -16,7 +17,8 @@ const axios = require('axios');
 const admin = require('../firebase');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-const base = 'https://api.paypal.com';
+// const base = 'https://api.paypal.com';
+const base = 'https://api.sandbox.paypal.com';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -169,7 +171,7 @@ exports.createUser = async (req, res) => {
     secondMobile,
     statement,
     answer,
-    membership: { paid: true, expiry: new Date('August 31, 2023 23:59:59') },
+    // membership: { paid: true, expiry: new Date('August 31, 2023 23:59:59') },
   }).save();
 
   const addUserToMainMatches = await User.findByIdAndUpdate(
@@ -1439,6 +1441,39 @@ exports.fetchWhitelist = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.createSubscription = async (req, res) => {
+  const accessToken = await generateAccessToken();
+  const url = `${base}/v2/checkout/orders/${req.body.paymentId}`;
+  const response = await axios.get(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  console.log('response => ', response.data.payment_source.paypal);
+  let paymentType;
+  let duration;
+  if (response.data.payment_source.paypal.account_status === 'VERIFIED') {
+    paymentType = 'account';
+  } else paymentType = 'card';
+  if (
+    req.body.membership.cost === '5.00' ||
+    req.body.membership.cost === '10.00'
+  ) {
+    duration = 30;
+  } else if (req.body.membership.cost === '50.00') {
+    duration = 180;
+  } else duration = 365;
+  const newSubscription = await new Subscription({
+    paymentType,
+    startDate: req.body.membership.startDate,
+    expiryDate: req.body.membership.expiry,
+    duration,
+    userInfo: req.body._id,
+  }).save();
+  res.json(newSubscription);
 };
 
 exports.fetchCodes = async (req, res) => {

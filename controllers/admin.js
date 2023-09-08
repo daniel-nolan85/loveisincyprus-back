@@ -1,4 +1,5 @@
 const Order = require('../models/order');
+const Subscription = require('../models/subscription');
 const User = require('../models/user');
 const Message = require('../models/message');
 const Ad = require('../models/ad');
@@ -11,7 +12,8 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-const base = 'https://api.paypal.com';
+// const base = 'https://api.paypal.com';
+const base = 'https://api.sandbox.paypal.com';
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -140,6 +142,14 @@ exports.orderStatus = async (req, res) => {
       throw new Error('Error creating PayPal subscription refund');
     }
   }
+};
+
+exports.subscriptions = async (req, res) => {
+  let allSubscriptions = await Subscription.find({})
+    .sort('-createdAt')
+    .populate('userInfo', '_id name username email profileImage ipAddresses')
+    .exec();
+  res.json(allSubscriptions);
 };
 
 exports.fetchOptIns = async (req, res) => {

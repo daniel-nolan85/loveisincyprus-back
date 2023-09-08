@@ -5,7 +5,8 @@ const nodemailer = require('nodemailer');
 const moment = require('moment');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-const base = 'https://api.paypal.com';
+// const base = 'https://api.paypal.com';
+const base = 'https://api.sandbox.paypal.com';
 
 exports.calculateFinalAmount = async (req, res) => {
   const { coupon } = req.body;
@@ -35,7 +36,6 @@ exports.calculateFinalAmount = async (req, res) => {
 };
 
 exports.createPayPalOrder = async (req, res) => {
-  console.log('createPayPalOrder => ', req.body);
   const { product } = req.body;
   const { description, value } = product;
   const accessToken = await generateAccessToken();
@@ -73,7 +73,6 @@ exports.createPayPalOrder = async (req, res) => {
 };
 
 exports.createPayPalAuthorization = async (req, res) => {
-  console.log('createPayPalAuthorization => ', req.body);
   const { product } = req.body;
   const { description, value } = product;
   const accessToken = await generateAccessToken();
@@ -100,8 +99,6 @@ exports.createPayPalAuthorization = async (req, res) => {
         },
       }
     );
-    console.log('response => ', response);
-
     return res.json(handleResponse(response));
   } catch (err) {
     // Handle any errors from the request or DB updates
@@ -131,7 +128,6 @@ exports.capturePayPalShopOrder = async (req, res) => {
 
 exports.refundPayPalShopOrder = async (req, res) => {
   const { refund, refundAmount } = req.body;
-  console.log('refundPayPalShopOrder => ', req.body);
   const accessToken = await generateAccessToken();
   const captureId =
     refund.paymentIntent.purchase_units[0].payments.captures[0].id;
@@ -379,7 +375,6 @@ exports.voidPayPalAdAuthorization = async (req, res) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log('voidPayPalAdAuthorization => ', response);
     res.json(response.data);
   } catch (err) {
     console.error('Error voiding PayPal ad authorization:', err);
