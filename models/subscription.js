@@ -7,9 +7,18 @@ const subscriptionSchema = new mongoose.Schema(
     startDate: { type: Date },
     expiryDate: { type: Date },
     duration: Number,
+    cost: String,
     userInfo: {
       type: ObjectId,
       ref: 'User',
+    },
+    trialPeriod: {
+      type: Boolean,
+      default: true,
+    },
+    new: {
+      type: Boolean,
+      default: true,
     },
   },
   { timestamps: true }

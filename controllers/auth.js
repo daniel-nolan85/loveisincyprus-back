@@ -17,8 +17,8 @@ const axios = require('axios');
 const admin = require('../firebase');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-// const base = 'https://api.paypal.com';
-const base = 'https://api.sandbox.paypal.com';
+const base = 'https://api.paypal.com';
+// const base = 'https://api.sandbox.paypal.com';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -1471,6 +1471,7 @@ exports.createSubscription = async (req, res) => {
     startDate: req.body.membership.startDate,
     expiryDate: req.body.membership.expiry,
     duration,
+    cost: req.body.membership.cost,
     userInfo: req.body._id,
   }).save();
   res.json(newSubscription);

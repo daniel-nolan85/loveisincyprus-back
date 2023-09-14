@@ -5,8 +5,8 @@ const nodemailer = require('nodemailer');
 const moment = require('moment');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-// const base = 'https://api.paypal.com';
-const base = 'https://api.sandbox.paypal.com';
+const base = 'https://api.paypal.com';
+// const base = 'https://api.sandbox.paypal.com';
 
 exports.calculateFinalAmount = async (req, res) => {
   const { coupon } = req.body;

@@ -21,11 +21,14 @@ const {
   setPreferences,
   fetchProductsForReview,
   fetchNewOrders,
+  fetchNewSubscriptions,
+  seenSubs,
   fetchNewRefunds,
   usersData,
   progressCompletionData,
   pointsData,
   updateUserProgress,
+  cancelTrials,
   followingData,
   followersData,
   visitorsData,
@@ -59,11 +62,14 @@ router.put(
 router.put('/set-preferences', authCheck, adminCheck, setPreferences);
 router.get('/fetch-products-for-review', fetchProductsForReview);
 router.get('/fetch-new-orders', fetchNewOrders);
+router.get('/fetch-new-subscriptions', fetchNewSubscriptions);
+router.put('/seen-subs', authCheck, adminCheck, seenSubs);
 router.get('/fetch-new-refunds', fetchNewRefunds);
 router.post('/users-data', authCheck, adminCheck, usersData);
 router.post('/progress-completion-data', authCheck, progressCompletionData);
 router.post('/points-data', authCheck, pointsData);
 router.put('/update-user-progress', updateUserProgress);
+router.put('/cancel-trial-periods', cancelTrials);
 router.post('/following-data', authCheck, followingData);
 router.post('/followers-data', authCheck, followersData);
 router.post('/visitors-data', authCheck, visitorsData);

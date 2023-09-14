@@ -12,8 +12,8 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 
 const { PAYPAL_CLIENT_ID, PAYPAL_SECRET } = process.env;
-// const base = 'https://api.paypal.com';
-const base = 'https://api.sandbox.paypal.com';
+const base = 'https://api.paypal.com';
+// const base = 'https://api.sandbox.paypal.com';
 
 exports.orders = async (req, res) => {
   let allOrders = await Order.find({})
@@ -173,7 +173,7 @@ exports.totalMessages = async (req, res) => {
 
 exports.incomeTaken = async (req, res) => {
   const orders = await Order.find({
-    'paymentIntent.status': { $regex: 'COMPLETED' },
+    orderStatus: { $regex: 'COMPLETED' },
   });
 
   let sumOfOrders = 0;
@@ -184,13 +184,13 @@ exports.incomeTaken = async (req, res) => {
     sumOfOrders += amount;
   });
 
-  const subscriptions = await User.find({
-    'membership.trialPeriod': false,
-  }).select('membership');
+  const subscriptions = await Subscription.find({
+    trialPeriod: false,
+  });
 
   let sumOfSubscriptions = 0;
   subscriptions.map((subscription) => {
-    let amount = parseFloat(subscription.membership.cost);
+    let amount = parseFloat(subscription.cost);
     sumOfSubscriptions += amount;
   });
 
@@ -475,6 +475,27 @@ exports.fetchNewOrders = async (req, res) => {
       '_id'
     );
     res.json(orders);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.fetchNewSubscriptions = async (req, res) => {
+  try {
+    const subscriptions = await Subscription.find({ new: true }).select('_id');
+    res.json(subscriptions);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.seenSubs = async (req, res) => {
+  try {
+    const subscriptions = await Subscription.updateMany(
+      { new: true },
+      { new: false }
+    );
+    res.json(subscriptions);
   } catch (err) {
     console.log(err);
   }
@@ -1066,6 +1087,17 @@ exports.updateUserProgress = async (req, res) => {
       profileComplete: true,
     });
   }
+};
+
+exports.cancelTrials = async (req, res) => {
+  const subscription = await Subscription.updateMany(
+    {
+      startDate: { $lt: new Date(Date.now() - 12096e5) },
+      trialPeriod: true,
+    },
+    { $set: { trialPeriod: false } }
+  );
+  res.json(subscription);
 };
 
 exports.followingData = async (req, res) => {
