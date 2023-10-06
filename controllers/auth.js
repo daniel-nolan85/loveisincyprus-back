@@ -1124,7 +1124,7 @@ exports.users = async (req, res) => {
   try {
     const users = await User.find({})
       .select(
-        '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon'
+        '_id name email profileImage featuredMember role pointsGained pointsLost pointsSpent username userStatus mobile eventsEligible canVerify canReported canPosts canUsers canMassMail canEvents canOrders canProducts canCategories canSubs canCoupon membership'
       )
       .limit(currentPage * perPage);
     res.json(users);
@@ -1143,6 +1143,52 @@ exports.suspendUser = async (req, res) => {
       },
       { new: true }
     ).select('userStatus');
+    res.json(user);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+exports.updateSubStatus = async (req, res) => {
+  const { _id, selectedStatus, expiry, partner } = req.body;
+  console.log('updateSubStatus => ', _id, selectedStatus, expiry, partner);
+  try {
+    const updateData = () => {
+      if (selectedStatus === 'Unpaid') {
+        return {
+          'membership.paid': false,
+          'membership.free': undefined,
+          'membership.cost': undefined,
+          'membership.expiry': undefined,
+          'membership.startDate': undefined,
+          'membership.trialPeriod': false,
+          'membership.captureId': undefined,
+        };
+      } else if (selectedStatus === 'Paid') {
+        return {
+          'membership.paid': true,
+          'membership.free': undefined,
+          'membership.cost': undefined,
+          'membership.expiry': expiry,
+          'membership.startDate': undefined,
+          'membership.trialPeriod': false,
+          'membership.captureId': undefined,
+        };
+      } else {
+        return {
+          'membership.paid': true,
+          'membership.free': partner,
+          'membership.cost': undefined,
+          'membership.expiry': '2123-09-01T06:59:59.000+00:00',
+          'membership.startDate': undefined,
+          'membership.trialPeriod': false,
+          'membership.captureId': undefined,
+        };
+      }
+    };
+    const user = await User.findByIdAndUpdate(_id, updateData(), {
+      new: true,
+    }).select('membership');
     res.json(user);
   } catch (err) {
     console.log(err);

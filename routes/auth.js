@@ -56,6 +56,7 @@ const {
   // admin
   users,
   suspendUser,
+  updateSubStatus,
   revokeUser,
   deleteUser,
   deleteSelf,
@@ -129,6 +130,12 @@ router.post('/create-subscription', authCheck, createSubscription);
 // admin
 router.post('/users/:page', authCheck, adminCheck, users);
 router.put('/admin/suspend-user/:userId', authCheck, adminCheck, suspendUser);
+router.put(
+  '/admin/update-status/:userId',
+  authCheck,
+  adminCheck,
+  updateSubStatus
+);
 router.put(
   '/admin/revoke-suspension/:userId',
   authCheck,

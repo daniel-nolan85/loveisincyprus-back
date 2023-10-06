@@ -161,6 +161,7 @@ const userSchema = new mongoose.Schema(
     newNotifs: [{ action: String, id: String }],
     membership: {
       paid: { type: Boolean, default: false },
+      free: String,
       startDate: { type: Date },
       expiry: { type: Date },
       trialPeriod: Boolean,
