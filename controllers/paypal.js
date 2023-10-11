@@ -313,7 +313,6 @@ exports.authorizePayPalAdOrder = async (req, res) => {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    console.log('authorizePayPalAdOrder => ', response);
     res.json(handleResponse(response));
   } catch (err) {
     console.log('Error authorizing PayPal ad order:', err);
@@ -400,8 +399,6 @@ const generateAccessToken = async () => {
     const jsonData = await handleResponse(response);
     return jsonData.access_token;
   } catch (err) {
-    // Handle any errors from the request
-    // console.log('Error generating access token:', err);
     throw new Error('Error generating access token');
   }
 };
@@ -410,7 +407,6 @@ const handleResponse = (response) => {
   if (response.status === 200 || response.status === 201) {
     return response.data;
   } else {
-    console.log('Response status:', response.status);
     throw new Error('Invalid response status');
   }
 };

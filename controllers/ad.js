@@ -2,7 +2,6 @@ const Ad = require('../models/ad');
 const nodemailer = require('nodemailer');
 
 exports.submitAd = async (req, res) => {
-  console.log('submitAd => ', req.body);
   const {
     hyperlink,
     content,
@@ -273,7 +272,6 @@ exports.removeAd = async (req, res) => {
 };
 
 exports.checkAd = async (req, res) => {
-  console.log('checkAd => ', req.body);
   const ad = await Ad.findById(req.body.ad._id).select('status');
   res.json(ad);
 };

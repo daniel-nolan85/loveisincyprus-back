@@ -1151,7 +1151,6 @@ exports.suspendUser = async (req, res) => {
 
 exports.updateSubStatus = async (req, res) => {
   const { _id, selectedStatus, expiry, partner } = req.body;
-  console.log('updateSubStatus => ', _id, selectedStatus, expiry, partner);
   try {
     const updateData = () => {
       if (selectedStatus === 'Unpaid') {
@@ -1498,7 +1497,6 @@ exports.createSubscription = async (req, res) => {
       Authorization: `Bearer ${accessToken}`,
     },
   });
-  console.log('response => ', response.data.payment_source.paypal);
   let paymentType;
   let duration;
   if (response.data.payment_source.paypal.account_status === 'VERIFIED') {
@@ -1725,7 +1723,6 @@ exports.dailySignups = async (req, res) => {
 };
 
 exports.notifPermission = async (req, res) => {
-  console.log('notifPermission => ', req.body);
   const { _id, permission, endpoint } = req.body;
 
   const updateFields = { notifSubscription: { permission } };
@@ -1759,7 +1756,6 @@ const generateAccessToken = async () => {
     const jsonData = await handleResponse(response);
     return jsonData.access_token;
   } catch (err) {
-    // Handle any errors from the request
     console.log('Error generating access token:', err);
     throw new Error('Error generating access token');
   }
@@ -1769,7 +1765,6 @@ const handleResponse = (response) => {
   if (response.status === 200 || response.status === 201) {
     return response.data;
   } else {
-    console.log('Response status:', response.status);
     throw new Error('Invalid response status');
   }
 };

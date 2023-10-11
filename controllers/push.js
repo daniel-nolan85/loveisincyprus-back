@@ -7,7 +7,6 @@ webpush.setVapidDetails(
 );
 
 exports.sendPushNotification = async (req, res) => {
-  console.log('sendPushNotification => ', req.body);
   const { endpoint, payload } = req.body;
 
   webpush

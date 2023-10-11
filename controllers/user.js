@@ -1667,18 +1667,23 @@ exports.optInOrOut = async (req, res) => {
 };
 
 exports.optInOrOutNotifs = async (req, res) => {
-  console.log('optInOrOutNotifs => ', req.body);
-  if (req.body.user.notifPermission === 'granted') {
+  if (req.body.permission === 'granted') {
     const optOut = await User.findByIdAndUpdate(
-      req.body.user._id,
-      { notifPermission: 'denied' },
+      req.body._id,
+      {
+        'notifSubscription.permission': 'granted',
+        'notifSubscription.endpoint': req.body.endpoint,
+      },
       { new: true }
     ).select('notifPermission');
     res.json(optOut);
   } else {
     const optIn = await User.findByIdAndUpdate(
-      req.body.user._id,
-      { notifPermission: 'granted' },
+      req.body._id,
+      {
+        'notifSubscription.permission': 'denied',
+        'notifSubscription.endpoint': '',
+      },
       { new: true }
     ).select('notifPermission');
     res.json(optIn);
