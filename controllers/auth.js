@@ -239,7 +239,7 @@ exports.createUser = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    vaccinated`
+    vaccinated notifPermission`
     );
     res.json(notifyReceiver);
   } catch (err) {
@@ -263,7 +263,7 @@ exports.loginUser = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    vaccinated`
+    vaccinated notifPermission`
   );
 
   if (
@@ -301,7 +301,7 @@ exports.loginUser = async (req, res) => {
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-            vaccinated`
+            vaccinated notifPermission`
         )
         .exec();
 
@@ -331,7 +331,7 @@ exports.loginUser = async (req, res) => {
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
         hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
         roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-        vaccinated`
+        vaccinated notifPermission`
       )
       .exec();
     res.json(trialEnded);
@@ -353,7 +353,7 @@ exports.loginUserWithSecret = async (req, res) => {
     birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
     hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
     roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-    vaccinated`
+    vaccinated notifPermission`
   );
 
   if (
@@ -391,7 +391,7 @@ exports.loginUserWithSecret = async (req, res) => {
             birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
             hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
             roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-            vaccinated`
+            vaccinated notifPermission`
         )
         .exec();
 
@@ -421,7 +421,7 @@ exports.loginUserWithSecret = async (req, res) => {
         birthday age location genderWanted relWanted language maritalStatus numOfChildren drinks smokes nationality height build hairColor hairStyle
         hairLength eyeColor ethnicity feetType loves hates education occupation politics religion pets interests music foods books films sports livesWith
         roleInLife managesEdu hobbies marriage income ageOfPartner traits changes relocate treatSelf sexLikes sexFrequency profilePhotos coverPhotos
-        vaccinated`
+        vaccinated notifPermission`
       )
       .exec();
     res.json(trialEnded);
@@ -1722,6 +1722,23 @@ exports.dailySignups = async (req, res) => {
   const numDailySignups = Math.ceil(signups / differenceDays);
 
   res.json(numDailySignups);
+};
+
+exports.notifPermission = async (req, res) => {
+  console.log('notifPermission => ', req.body);
+  const { _id, permission, endpoint } = req.body;
+
+  const updateFields = { notifSubscription: { permission } };
+
+  if (endpoint) {
+    updateFields.notifSubscription.endpoint = endpoint;
+  }
+
+  const updatePermission = await User.findByIdAndUpdate({ _id }, updateFields, {
+    new: true,
+  }).select('notifSubscription');
+
+  res.json(updatePermission);
 };
 
 const generateAccessToken = async () => {

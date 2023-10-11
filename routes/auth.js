@@ -78,6 +78,7 @@ const {
   removeExpiredFeatures,
   dailyMatches,
   dailySignups,
+  notifPermission,
 } = require('../controllers/auth');
 
 // routes
@@ -188,5 +189,6 @@ router.get('/fetch-featured-members', fetchFeaturedMembers);
 router.put('/remove-expired-features', removeExpiredFeatures);
 router.get('/daily-matches', dailyMatches);
 router.get('/daily-signups', dailySignups);
+router.put('/notif-permission', authCheck, notifPermission);
 
 module.exports = router;
