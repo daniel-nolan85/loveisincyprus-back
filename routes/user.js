@@ -43,7 +43,7 @@ const {
   analyseUsers,
   progressCompletion,
   optInOrOut,
-  optInOrOutNotifs,
+  // optInOrOutNotifs,
   newMessageCount,
   newNotificationCount,
   resetNotificationCount,
@@ -101,7 +101,7 @@ router.post('/save-search', authCheck, adminCheck, saveSearch);
 router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
-router.put('/user-opt-in-or-out-notifs', authCheck, optInOrOutNotifs);
+// router.put('/user-opt-in-or-out-notifs', authCheck, optInOrOutNotifs);
 router.put('/new-message-count', newMessageCount);
 router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
