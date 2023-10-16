@@ -218,7 +218,7 @@ const userSchema = new mongoose.Schema(
         sender: { type: ObjectId, ref: 'User' },
       },
     ],
-    notifSubscription: { permission: String, endpoint: String },
+    notifSubscription: { permission: String, endpoint: String, keys: {} },
     orders: Number,
     itemsOrdered: Number,
     itemsOrderedValue: Number,

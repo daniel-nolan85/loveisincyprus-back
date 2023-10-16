@@ -1723,33 +1723,28 @@ exports.dailySignups = async (req, res) => {
 };
 
 exports.notifPermission = async (req, res) => {
-  const { _id, permission, subscription } = req.body;
+  const { _id, subscription } = req.body;
 
-  if (permission) {
-    const updatePermission = await User.findByIdAndUpdate(
-      { _id },
-      {
-        'notifSubscription.permission': 'granted',
-        'notifSubscription.endpoint': subscription.endpoint,
-      },
-      {
-        new: true,
-      }
-    ).select('notifSubscription');
-    res.json(updatePermission);
+  const update = {
+    'notifSubscription.permission':
+      subscription === 'blocked' ? 'denied' : 'granted',
+  };
+
+  if (subscription !== 'blocked') {
+    update['notifSubscription.endpoint'] = subscription.endpoint;
+    update['notifSubscription.keys'] = subscription.keys;
   } else {
-    const updatePermission = await User.findByIdAndUpdate(
-      { _id },
-      {
-        'notifSubscription.permission': 'denied',
-        'notifSubscription.endpoint': '',
-      },
-      {
-        new: true,
-      }
-    ).select('notifSubscription');
-    res.json(updatePermission);
+    update.$unset = {
+      'notifSubscription.endpoint': 1,
+      'notifSubscription.keys': 1,
+    };
   }
+
+  const updatePermission = await User.findByIdAndUpdate({ _id }, update, {
+    new: true,
+  }).select('notifSubscription');
+
+  res.json(updatePermission);
 };
 
 const generateAccessToken = async () => {

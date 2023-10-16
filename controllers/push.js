@@ -7,10 +7,12 @@ webpush.setVapidDetails(
 );
 
 exports.sendPushNotification = async (req, res) => {
-  const { endpoint, payload } = req.body;
+  const { endpoint, keys } = req.body;
+  const subscription = { endpoint, keys };
+  const payload = JSON.stringify(req.body.payload);
 
   webpush
-    .sendNotification(endpoint, payload)
+    .sendNotification(subscription, payload)
     .then(() => {
       res.status(200).send('Push notification sent');
     })
