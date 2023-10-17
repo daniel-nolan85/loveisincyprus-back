@@ -1725,22 +1725,17 @@ exports.dailySignups = async (req, res) => {
 exports.notifPermission = async (req, res) => {
   const { _id, subscription } = req.body;
 
-  const update = {
-    'notifSubscription.permission':
-      subscription === 'blocked' ? 'denied' : 'granted',
-  };
+  const updateFields = {};
 
-  if (subscription !== 'blocked') {
-    update['notifSubscription.endpoint'] = subscription.endpoint;
-    update['notifSubscription.keys'] = subscription.keys;
+  if (subscription) {
+    updateFields['notifSubscription.permission'] = 'granted';
+    updateFields['notifSubscription.subscription'] = subscription;
   } else {
-    update.$unset = {
-      'notifSubscription.endpoint': 1,
-      'notifSubscription.keys': 1,
-    };
+    updateFields['notifSubscription.permission'] = 'denied';
+    updateFields['notifSubscription.subscription'] = undefined;
   }
 
-  const updatePermission = await User.findByIdAndUpdate({ _id }, update, {
+  const updatePermission = await User.findByIdAndUpdate({ _id }, updateFields, {
     new: true,
   }).select('notifSubscription');
 
