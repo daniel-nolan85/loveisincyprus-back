@@ -1723,23 +1723,50 @@ exports.dailySignups = async (req, res) => {
 };
 
 exports.notifPermission = async (req, res) => {
+  // const { _id, subscription } = req.body;
+
+  // const updateFields = {};
+
+  // if (subscription) {
+  //   updateFields['notifSubscription.permission'] = 'granted';
+  //   updateFields['notifSubscription.subscription'] = subscription;
+  // } else {
+  //   updateFields['notifSubscription.permission'] = 'denied';
+  //   updateFields['notifSubscription.subscription'] = undefined;
+  // }
+
+  // const updatePermission = await User.findByIdAndUpdate({ _id }, updateFields, {
+  //   new: true,
+  // }).select('notifSubscription');
+
+  // res.json(updatePermission);
   const { _id, subscription } = req.body;
 
-  const updateFields = {};
+  try {
+    let updateFields = {};
 
-  if (subscription) {
-    updateFields['notifSubscription.permission'] = 'granted';
-    updateFields['notifSubscription.subscription'] = subscription;
-  } else {
-    updateFields['notifSubscription.permission'] = 'denied';
-    updateFields['notifSubscription.subscription'] = undefined;
+    if (subscription) {
+      const newSubscription = {
+        permission: 'granted',
+        subscription: subscription,
+      };
+
+      updateFields = {
+        $push: {
+          notifSubscriptions: newSubscription,
+        },
+      };
+    }
+
+    const updatedUser = await User.findByIdAndUpdate({ _id }, updateFields, {
+      new: true,
+    });
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error('Error updating user subscription:', error);
+    res.status(500).send('Error updating user subscription');
   }
-
-  const updatePermission = await User.findByIdAndUpdate({ _id }, updateFields, {
-    new: true,
-  }).select('notifSubscription');
-
-  res.json(updatePermission);
 };
 
 const generateAccessToken = async () => {
