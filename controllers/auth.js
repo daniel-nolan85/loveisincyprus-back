@@ -1748,34 +1748,6 @@ exports.notifPermission = async (req, res) => {
     console.error('Error updating user subscription:', error);
     res.status(500).send('Error updating user subscription');
   }
-
-  // const { _id, subscription } = req.body;
-
-  // try {
-  //   let updateFields = {};
-
-  //   if (subscription) {
-  //     const newSubscription = {
-  //       permission: 'granted',
-  //       subscription: subscription,
-  //     };
-
-  //     updateFields = {
-  //       $push: {
-  //         notifSubscriptions: newSubscription,
-  //       },
-  //     };
-  //   }
-
-  //   const updatedUser = await User.findByIdAndUpdate({ _id }, updateFields, {
-  //     new: true,
-  //   });
-
-  //   res.json(updatedUser);
-  // } catch (error) {
-  //   console.error('Error updating user subscription:', error);
-  //   res.status(500).send('Error updating user subscription');
-  // }
 };
 
 const generateAccessToken = async () => {

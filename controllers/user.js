@@ -1666,30 +1666,6 @@ exports.optInOrOut = async (req, res) => {
   }
 };
 
-// exports.optInOrOutNotifs = async (req, res) => {
-//   if (req.body.permission === 'granted') {
-//     const optOut = await User.findByIdAndUpdate(
-//       req.body._id,
-//       {
-//         'notifSubscription.permission': 'granted',
-//         'notifSubscription.endpoint': req.body.endpoint,
-//       },
-//       { new: true }
-//     ).select('notifPermission');
-//     res.json(optOut);
-//   } else {
-//     const optIn = await User.findByIdAndUpdate(
-//       req.body._id,
-//       {
-//         'notifSubscription.permission': 'denied',
-//         'notifSubscription.endpoint': '',
-//       },
-//       { new: true }
-//     ).select('notifPermission');
-//     res.json(optIn);
-//   }
-// };
-
 exports.newMessageCount = async (req, res) => {
   const user = await User.findByIdAndUpdate(req.body._id, { new: true }).select(
     'messages'
