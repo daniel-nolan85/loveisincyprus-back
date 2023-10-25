@@ -10,6 +10,7 @@ webpush.setVapidDetails(
 exports.sendPushNotification = async (req, res) => {
   const { _id } = req.body;
   const user = await User.findById(_id).select('notifSubscription');
+  console.log('user => ', user);
 
   if (user.notifSubscription && user.notifSubscription.subscription) {
     const subscription = user.notifSubscription.subscription;
