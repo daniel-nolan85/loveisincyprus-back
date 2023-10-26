@@ -1178,7 +1178,7 @@ exports.updateSubStatus = async (req, res) => {
           'membership.paid': true,
           'membership.free': partner,
           'membership.cost': undefined,
-          'membership.expiry': '2123-09-01T06:59:59.000+00:00',
+          'membership.expiry': expiry,
           'membership.startDate': undefined,
           'membership.trialPeriod': false,
           'membership.captureId': undefined,

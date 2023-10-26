@@ -1,12 +1,16 @@
 const Coupon = require('../models/coupon');
 
 exports.create = async (req, res) => {
+  console.log('create => ', req.body);
   try {
-    const { name, selectedProducts, expiry, discount } = req.body.coupon;
+    const { name, selectedProducts, subscription, partner, expiry, discount } =
+      req.body.coupon;
     res.json(
       await new Coupon({
         name,
         products: selectedProducts,
+        subscription,
+        partner,
         expiry,
         discount,
       }).save()
@@ -35,11 +39,19 @@ exports.remove = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { name, selectedProducts, discount, expiry } = req.body.coupon;
+    const { name, selectedProducts, subscription, partner, discount, expiry } =
+      req.body.coupon;
     res.json(
       await Coupon.findByIdAndUpdate(
         { _id: req.params.couponId },
-        { name, products: selectedProducts, discount, expiry }
+        {
+          name,
+          products: selectedProducts,
+          subscription,
+          partner,
+          discount,
+          expiry,
+        }
       ).exec()
     );
   } catch (err) {
@@ -77,4 +89,16 @@ exports.deleteExpiredCoupon = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
+};
+
+exports.validateSubCoupon = async (req, res) => {
+  console.log('validateSubCoupon => ', req.body);
+  const { coupon } = req.body;
+  const validCoupon = await Coupon.findOne({ name: coupon }).exec();
+  if (validCoupon === null || !validCoupon.subscription) {
+    return res.json({
+      err: 'Invalid coupon',
+    });
+  }
+  res.json(validCoupon);
 };

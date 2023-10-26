@@ -11,6 +11,7 @@ const Message = require('../models/message');
 const UserSearch = require('../models/userSearch');
 const axios = require('axios');
 const cloudinary = require('cloudinary');
+const moment = require('moment');
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -163,7 +164,7 @@ exports.saveAddress = async (req, res) => {
 exports.applyCouponToUserCart = async (req, res) => {
   const { coupon } = req.body;
   const validCoupon = await Coupon.findOne({ name: coupon }).exec();
-  if (validCoupon === null) {
+  if (validCoupon === null || validCoupon.subscription) {
     return res.json({
       err: 'Invalid coupon',
     });
@@ -2459,4 +2460,60 @@ exports.calcPoints = async (req, res) => {
     { new: true }
   );
   res.json(updatePointsTotal);
+};
+
+exports.updateFreeMembership = async (req, res) => {
+  console.log('updateFreeMembership => ', req.body);
+  const { _id, coupon } = req.body;
+  const validCoupon = await Coupon.findOne({ name: coupon }).select(
+    'partner expiry'
+  );
+  const user = await User.findByIdAndUpdate(
+    _id,
+    {
+      'membership.paid': true,
+      'membership.free': validCoupon.partner,
+      'membership.cost': undefined,
+      'membership.expiry': validCoupon.expiry,
+      'membership.startDate': undefined,
+      'membership.trialPeriod': false,
+      'membership.captureId': undefined,
+    },
+    { new: true }
+  ).select('membership email');
+  res.json(user);
+
+  console.log(user);
+
+  let transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'customercare@loveisincyprus.com',
+      pass: process.env.GMAIL_AUTHORIZATION,
+    },
+    secure: true,
+  });
+
+  let mailOptions = {
+    from: 'customercare@loveisincyprus.com',
+    to: user.email,
+    subject: 'Thanks for subscribing',
+    html: `
+              <h3 style="margin-bottom: 5px;">Thank you for becoming a subscribed member of Love Is In Cyprus</h3>
+              <p style="margin-bottom: 5px;">Your membership has been successfully approved courtesy of ${
+                user.membership.free
+              } and you will now receive full access to all areas of the site until ${moment(
+      user.membership.expiry
+    ).format('MMMM Do YYYY')}</p>
+            `,
+  };
+
+  transporter.sendMail(mailOptions, (err, response) => {
+    if (err) {
+      res.send(err);
+    } else {
+      res.send('Success');
+    }
+  });
+  transporter.close();
 };

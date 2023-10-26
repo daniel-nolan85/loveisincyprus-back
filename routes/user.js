@@ -43,7 +43,6 @@ const {
   analyseUsers,
   progressCompletion,
   optInOrOut,
-  // optInOrOutNotifs,
   newMessageCount,
   newNotificationCount,
   resetNotificationCount,
@@ -65,6 +64,7 @@ const {
   uploadPicDelete,
   catchIp,
   calcPoints,
+  updateFreeMembership,
 } = require('../controllers/user');
 
 // routes
@@ -101,7 +101,6 @@ router.post('/save-search', authCheck, adminCheck, saveSearch);
 router.post('/analyse-users', authCheck, analyseUsers);
 router.post('/progress-completion', authCheck, progressCompletion);
 router.put('/user-opt-in-or-out', authCheck, optInOrOut);
-// router.put('/user-opt-in-or-out-notifs', authCheck, optInOrOutNotifs);
 router.put('/new-message-count', newMessageCount);
 router.put('/new-notification-count', newNotificationCount);
 router.put('/reset-notification-count', authCheck, resetNotificationCount);
@@ -123,5 +122,6 @@ router.put('/upload-new-images', authCheck, uploadNewImages);
 router.put('/upload-picture-delete', authCheck, uploadPicDelete);
 router.put('/catch-ip', catchIp);
 router.put('/calc-points', calcPoints);
+router.put('/update-free-membership', authCheck, updateFreeMembership);
 
 module.exports = router;

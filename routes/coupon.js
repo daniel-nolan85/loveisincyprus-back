@@ -13,6 +13,7 @@ const {
   update,
   handleAfterUse,
   deleteExpiredCoupon,
+  validateSubCoupon,
 } = require('../controllers/coupon');
 
 // routes
@@ -22,5 +23,6 @@ router.delete('/coupon/:couponId', authCheck, adminCheck, remove);
 router.put('/coupon/:couponId', authCheck, adminCheck, update);
 router.put('/handle-coupon/:couponId', authCheck, handleAfterUse);
 router.delete('/delete-expired-coupon', deleteExpiredCoupon);
+router.post('/validate-sub-coupon', authCheck, validateSubCoupon);
 
 module.exports = router;
